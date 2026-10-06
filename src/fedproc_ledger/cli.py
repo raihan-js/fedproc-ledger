@@ -7,6 +7,7 @@ import json
 import typer
 
 from fedproc_ledger import __version__
+from fedproc_ledger.acquire.commands import acquire_app
 from fedproc_ledger.envinfo import environment, gpu_line
 
 app = typer.Typer(
@@ -71,8 +72,12 @@ def _register(name: str, phase: int, desc: str) -> None:
     app.command(name)(command)
 
 
+app.add_typer(acquire_app, name="acquire", help="Phase 1: GovCon search, notice pool, attachment download.")
+_IMPLEMENTED = {"acquire"}
+
 for _name, _phase, _desc in PHASES:
-    _register(_name, _phase, _desc)
+    if _name not in _IMPLEMENTED:
+        _register(_name, _phase, _desc)
 
 
 if __name__ == "__main__":

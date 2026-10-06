@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 from collections.abc import Callable
 
@@ -21,6 +22,7 @@ class TokenBucket:
         self._clock, self._sleep = clock, sleep
         self._tokens = self.capacity
         self._last = clock()
+        self._lock = threading.Lock()
 
     def _refill(self) -> None:
         now = self._clock()
@@ -28,12 +30,13 @@ class TokenBucket:
         self._last = now
 
     def acquire(self, n: float = 1.0) -> float:
-        """Block until n tokens are available; returns the seconds waited."""
-        self._refill()
-        waited = 0.0
-        if self._tokens < n:
-            waited = (n - self._tokens) / self.rate
-            self._sleep(waited)
+        """Block until n tokens are available; returns the seconds waited. Thread-safe."""
+        with self._lock:
             self._refill()
-        self._tokens -= n
-        return waited
+            waited = 0.0
+            if self._tokens < n:
+                waited = (n - self._tokens) / self.rate
+                self._sleep(waited)
+                self._refill()
+            self._tokens -= n
+            return waited

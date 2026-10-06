@@ -27,5 +27,10 @@ def test_env_json_is_valid():
 
 
 def test_unbuilt_steps_exit_nonzero_with_a_pointer_to_the_plan():
-    r = runner.invoke(app, ["acquire"])
+    r = runner.invoke(app, ["registry"])
     assert r.exit_code == 2
+
+
+def test_acquire_is_a_command_group():
+    r = runner.invoke(app, ["acquire", "--help"])
+    assert r.exit_code == 0 and "probe" in r.output

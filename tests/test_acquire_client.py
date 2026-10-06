@@ -140,3 +140,12 @@ def test_env_parsing_handles_comments_quotes_and_blank_values(tmp_path):
     with pytest.raises(MissingSecret) as e:
         require("NOPE", env)
     assert "abc" not in str(e.value)
+
+
+def test_refresh_quota_works_at_the_reserve_and_updates_remaining():
+    c, _ = make(lambda req: ok(remaining=777), budget=CallBudget(reserve=1000, remaining=5))
+    with pytest.raises(BudgetStop):
+        c.search(q="x")
+    assert c.refresh_quota() == 777
+    c.budget.reserve = 100
+    assert c.budget.stop_reason() is None

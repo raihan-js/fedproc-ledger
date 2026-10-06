@@ -17,3 +17,33 @@ timeout_s = 60
 min_seconds_between_downloads = 1.0
 max_file_mb = 50
 keep_extensions = [".pdf", ".docx", ".doc", ".txt"]
+
+[api]
+base_url = "https://govconapi.com/api/v1"
+calls_per_second = 0.8
+# The key may be shared with the live VETR application (decisions.md D-009): keep a reserve for it and a local ceiling.
+min_reserve = 200            # stop while this many calls remain, at least
+reserve_fraction = 0.25      # ... or this share of the quota limit, if the vendor reports one
+max_calls_per_run = 8000
+
+[search.fields]
+# Contact fields (contact_*, secondary_contact_*) are deliberately not requested: they are personal data and never needed.
+list = [
+  "notice_id", "solicitation_number", "title", "notice_type", "notice_base_type", "posted_date", "response_deadline",
+  "naics", "psc", "set_aside_type", "set_aside_description", "agency", "agency_path_code", "organization_type",
+  "sam_url", "ui_link", "additional_info_link", "description_url", "description_text", "resource_links_array",
+]
+
+[sampling]
+months_from = "2024-10"                # GovCon holds almost no solicitations before 2024-10 (decisions.md D-015)
+months_to = "2026-09"                 # last full month at the time of writing
+days_per_month = 6                    # random weekdays, one per roughly equal slice of the month
+per_day_limit = 1000
+seed = 20261006
+candidate_target = 4800               # unique solicitations to download (about 3,000 are expected to be clause-bearing)
+max_department_share = 0.25
+
+[files]
+max_per_notice = 6
+max_bytes_per_notice_mb = 80
+max_total_gb = 38                     # owner approved 40 GB; stop below it

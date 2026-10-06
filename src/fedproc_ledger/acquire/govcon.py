@@ -92,13 +92,13 @@ class GovConClient:
             return min(exc.retry_after, 300.0)
         return min(2.0 * 2.0 ** (state.attempt_number - 1), 60.0) * (0.75 + 0.5 * random.random())
 
-    def _get(self, path: str, params: dict[str, Any] | None = None) -> httpx.Response:
+    def _get(self, path: str, params: dict[str, Any] | None = None, *, check_budget: bool = True) -> httpx.Response:
         url = f"{self.base_url}{path}"
         attempt = {"n": 0}
 
         def once() -> httpx.Response:
             attempt["n"] += 1
-            reason = self.budget.stop_reason()
+            reason = self.budget.stop_reason() if check_budget else None
             if reason:
                 raise BudgetStop(reason)
             if self.bucket:
@@ -140,6 +140,7 @@ class GovConClient:
                     "attempt": attempt["n"],
                     "remaining": remaining,
                     "bytes": len(resp.content),
+                    **({"rate_headers": self.last_rate_headers, "body": _short(resp)} if status >= 400 else {}),
                 }
             )
             if status == 402:
@@ -166,6 +167,11 @@ class GovConClient:
     # -- endpoints ----------------------------------------------------------------------------------------------------
     def me(self) -> dict[str, Any]:
         return self._get("/me").json()  # type: ignore[no-any-return]
+
+    def refresh_quota(self) -> int | None:
+        """Read the remaining-calls figure (one call, allowed at the reserve). Returns it, or None if unreported."""
+        self._get("/me", check_budget=False)
+        return self.budget.remaining
 
     def search(self, **params: Any) -> dict[str, Any]:
         clean = {k: (str(v).lower() if isinstance(v, bool) else v) for k, v in params.items() if v is not None}

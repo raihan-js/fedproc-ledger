@@ -80,23 +80,23 @@ Arithmetic to expect (verify at the probe): about 33 monthly windows; roughly 3,
 4. Candidate recall is measured later on gold; here I report counts per pool document.
 **Checkpoint 4:** B1 output on 5 documents as an HTML table.
 
-### Phase 5: schema, guidelines, tool, pilot
-1. Fetch the current text of 52.212-5, 52.212-4, 52.252-2 and any RFO changes from eCFR and agency pages (URL and date recorded) and write `docs/annotation_guidelines.md` from them, with 2 to 3 real examples per role, edge cases and a decision tree.
-2. Streamlit annotation tool (`fl annotate`) as in plan 9.4 (keyboard shortcuts, bulk apply with logging, computed ledger with override, time per document, save after every action).
-3. Pilot document selection (20: about 8 checklist, 6 IBR, 6 other), stratified and recorded. Raihan annotates.
-4. `fl pilot`: B0 binding-set precision/recall, B1 mention macro-F1 and binding-set F1, share of non-binding mentions, checkbox recovery by source, minutes per document. Go if B0 precision is under 0.85 or B1 binding-set F1 is under 0.90; otherwise pivot (plan 9.5).
-**Checkpoint 5 (decision):** pilot report, `results/pilot.json`, the time estimate for the full gold set, a recommendation. I stop and wait.
-**Needs:** about 8 hours of Raihan's time in a block; Dr. Smith's review of the guidelines.
+### Phase 5: schema, guidelines, panel labeler, pilot (revised by D-019: no human annotators)
+1. Fetch the current text of 52.212-5, 52.212-4, 52.252-2 and the RFO changes from eCFR and agency pages (URL and date recorded) and write `docs/annotation_guidelines.md` from them; the same file is the labeler's instruction text.
+2. `fl label`: panel labeler over Ollama (qwen3.5:9b two prompt variants, qwen3.5:4b) with JSON-schema output, candidate ids given, B1 as the third voter; caches every call; reports tiers and kappa. Streamlit review tool is optional (audit pack).
+3. Pilot: 20 documents (about 8 checklist, 6 IBR, 6 other, including RFO-era), stratified and recorded; label with the panel.
+4. `fl pilot`: B0 and B1 against the panel and against slice A (objective checkbox truth): binding-set precision/recall, mention macro-F1, panel kappa, split share, seconds per document. Go/no-go as plan 9.5.
+**Checkpoint 5 (decision, no human time):** `results/pilot.json` and a recommendation. I continue unless a stop condition triggers (panel kappa below 0.6, or slice A contradicts the panel).
 
-### Phase 6: gold, splits, pre-registration
-1. Gold annotation to 150 documents (the pilot counts if the guidelines did not change). I prepare batches and track progress and agreement drift.
-2. Splits by `solicitation_number` group (45/25/50/15/15); **the two out-of-distribution departments are chosen and recorded before any modelling**; `test_recent` is the last 3 months.
-3. IAA: a second annotator labels 30 documents; Cohen's kappa on role and Jaccard on binding sets; below 0.75 revise the guidelines and re-annotate the affected cases.
-4. Fill `docs/preregistration.md` (hypotheses with numeric thresholds, tests, baselines), commit it, record the hash; hash every split file; test files are then read only by `fl evaluate --final`.
-**Checkpoint 6:** IAA report, split sizes, frozen hashes, the pre-registration commit.
+### Phase 6: reference set, splits, pre-registration
+1. Panel-label up to 150 documents (the pilot counts); build slice A (widget/typed-box documents) and slice B (synthetic generator, exact labels).
+2. Splits by `solicitation_number` group (45/25/50/15/15); out-of-distribution departments and `test_recent` chosen and recorded before any modelling; hash every split file.
+3. Reliability instead of IAA: kappa between panel members, self-consistency, split share per role; revise prompts and guidelines if kappa is under 0.75 on role.
+4. Fill `docs/preregistration.md` (hypotheses, thresholds, tests, baselines; uses `docs/EVALUATION_DESIGN.md`), commit it, record the hash. Test files are read only by `fl evaluate --final`.
+**Checkpoint 6:** reliability report, split sizes, frozen hashes, pre-registration commit.
 
-### Phase 7: silver labels (cost gate)
-Rules (B1) on every clause-bearing pool document outside dev/test solicitations; an LLM labeler (model pinned in config, temperature 0, JSON validated against the schema) on chunks with candidates listed by id; keep agreement, send disagreements to a second pass or drop; agreement per role; silver accuracy measured against gold dev. **Ask before running**: a dry run first prints the number of chunks, tokens and estimated cost; I proceed only with Raihan's OK (the plan expects $20 to 60; zero-cost alternative: a local Qwen2.5-7B-Instruct through vLLM).
+### Phase 7: silver labels (budget-gated, local first)
+Same panel on every clause-bearing pool document outside dev/test solicitations; keep unanimous and majority labels with weights; split mentions optionally go to one paid pass (budget USD 10 to 15 in total, dry-run estimate printed, spend log). Silver quality is measured on slices A and B, and on the panel-labeled dev set.
+
 
 ### Phase 8: the model
 1. `data/` builder: windows of W tokens with stride W/2, markers added as new special tokens, candidate-to-window assignment, **9 trainable roles** (see section 3, item 2).

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from datetime import date
 from typing import Any
@@ -107,10 +108,9 @@ def build_part(
     return rows, stats
 
 
-def _sort_key(number: str) -> tuple[Any, ...]:
-    import re
-
-    return tuple(int(x) if x.isdigit() else x for x in re.split(r"[.\-]", number))
+def _sort_key(number: str) -> tuple[tuple[int, int, str], ...]:
+    """Natural order of section numbers: 52.219-9 before 52.219-14; numeric and text pieces never compared directly."""
+    return tuple((0, int(x), "") if x.isdigit() else (1, 0, x) for x in re.split(r"[.\-]", number))
 
 
 def to_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:

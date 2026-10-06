@@ -3,8 +3,8 @@
 ## Checkpoint 1: acquisition
 
 - Pool: 35396 unique solicitations found in 189 sampled weekdays; 4800 selected (200 per month, 2024-10 to 2026-09); max department share 14.1%.
-- Downloaded so far: 662 of 4800 notices; files by status {'ok': 2040, 'skipped': 1574, 'failed': 91}; not stored by reason {'skipped:over_file_cap': 1095, 'skipped:extension': 325, 'skipped:too_slow': 110, 'failed:http_400': 91, 'skipped:too_large': 16, 'skipped:empty': 15, 'skipped:over_notice_bytes': 13}.
-- Unique documents 2019, 1.34 GB; by type {'pdf': 1642, 'docx': 354, 'txt': 6, 'doc': 17}; API calls {'total': 933, 'by_path': {'/me': 7, 'opportunities': 926}, 'by_status': {'200': 930, '429': 3}}.
+- Downloaded so far: 665 of 4800 notices; files by status {'ok': 2048, 'skipped': 1581, 'failed': 91}; not stored by reason {'skipped:over_file_cap': 1098, 'skipped:extension': 326, 'skipped:too_slow': 113, 'failed:http_400': 91, 'skipped:too_large': 16, 'skipped:empty': 15, 'skipped:over_notice_bytes': 13}.
+- Unique documents 2027, 1.35 GB; by type {'pdf': 1649, 'docx': 355, 'txt': 6, 'doc': 17}; API calls {'total': 936, 'by_path': {'/me': 7, 'opportunities': 929}, 'by_status': {'200': 933, '429': 3}}.
 - Disk now: data/raw/files 1.3G, whole data/ 1.7G.
 
 10 random documents:

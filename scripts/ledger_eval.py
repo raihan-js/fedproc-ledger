@@ -6,6 +6,7 @@ class, specificity (share of N numbers correctly left out), accuracy; cluster bo
 """
 
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -19,7 +20,9 @@ from fedproc_ledger.paths import PROCESSED, RESULTS
 from fedproc_ledger.rules import baseline as B
 from fedproc_ledger.rules.commands import load_registry
 
-gold = json.loads(Path("results/ledger_gold_agent_v0.json").read_text())["gold"]
+GOLD = sys.argv[1] if len(sys.argv) > 1 else "results/ledger_gold_agent_v0.json"
+TAG = Path(GOLD).stem.replace("ledger_gold_", "")
+gold = json.loads(Path(GOLD).read_text())["gold"]
 registry = load_registry()
 systems: dict[str, dict[str, set[str]]] = {k: {} for k in ["all-candidates", "B0 (VETR)", "B1 rules"]}
 probs: dict[str, dict[str, dict[str, float]]] = {"noisy_or": {}, "max": {}}
@@ -59,15 +62,17 @@ def summarize(name: str, c: np.ndarray) -> dict[str, float]:
     tp, fp, fn, tn, nneg = c.sum(axis=0)
     r = M.prf(tp, fp, fn)
     ci = M.cluster_bootstrap(c[:, :3], n_boot=4000)
+    f2 = M.prf(tp, fp, fn, beta=2.0)["f"]
     out = {
         **r,
+        "f2": f2,
         "specificity": float(tn / nneg),
         "accuracy": float((tp + tn) / (tp + fp + fn + tn)),
         "f1_lo": ci["lo"],
         "f1_hi": ci["hi"],
     }
     print(
-        f"{name:28s} P {r['precision']:.3f} R {r['recall']:.3f} F1 {r['f']:.3f} [{ci['lo']:.3f},{ci['hi']:.3f}]  specificity {out['specificity']:.3f}  acc {out['accuracy']:.3f}"
+        f"{name:28s} P {r['precision']:.3f} R {r['recall']:.3f} F1 {r['f']:.3f} [{ci['lo']:.3f},{ci['hi']:.3f}] F2 {f2:.3f}  specificity {out['specificity']:.3f}  acc {out['accuracy']:.3f}"
     )
     return out
 
@@ -94,7 +99,7 @@ for base in ("B1 rules", "B0 (VETR)", "all-candidates"):
     print(f"  {best} - {base}: dF1 {d['diff']:+.3f} [{d['lo']:+.3f},{d['hi']:+.3f}]")
     res[f"paired {best} vs {base}"] = d
 RESULTS.mkdir(exist_ok=True)
-(RESULTS / "ledger_eval.json").write_text(json.dumps(res, indent=1, default=float) + "\n")
+(RESULTS / f"ledger_eval_{TAG}.json").write_text(json.dumps(res, indent=1, default=float) + "\n")
 log_run(
     RESULTS / "leaderboard.jsonl",
     "ledger " + best,

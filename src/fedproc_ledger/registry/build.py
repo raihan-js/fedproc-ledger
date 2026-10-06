@@ -59,6 +59,8 @@ def _row(
         "versions": versions,
         "status": status,
         "removed": status != "active",
+        "has_prescription": sec.prescription is not None,
+        "source_range": None,
     }
 
 
@@ -130,6 +132,24 @@ def build_part(
 def _sort_key(number: str) -> tuple[tuple[int, int, str], ...]:
     """Natural order of section numbers: 52.219-9 before 52.219-14; numeric and text pieces never compared directly."""
     return tuple((0, int(x), "") if x.isdigit() else (1, 0, x) for x in re.split(r"[.\-]", number))
+
+
+_RANGE_ID = re.compile(r"^(?P<a>\d{2,4}\.\d{3})-(?P<lo>\d{1,4})\s*[-–]\s*(?P<b>\d{2,4}\.\d{3})-(?P<hi>\d{1,4})$")
+
+
+def expand_ranges(rows: list[dict[str, Any]], max_span: int = 200) -> list[dict[str, Any]]:
+    """eCFR files many removed or reserved sections under a range id ("52.208-1 - 52.208-3"). Give every number in the
+    range its own row (same status and versions, `source_range` set) so a lookup of 52.208-2 resolves. Ranges that do
+    not stay inside one section, or are longer than `max_span`, are kept as they are."""
+    out: list[dict[str, Any]] = []
+    for r in rows:
+        m = _RANGE_ID.match(r["number"])
+        if not m or m.group("a") != m.group("b") or not 0 < int(m.group("hi")) - int(m.group("lo")) < max_span:
+            out.append(r)
+            continue
+        for k in range(int(m.group("lo")), int(m.group("hi")) + 1):
+            out.append({**r, "number": f"{m.group('a')}-{k}", "source_range": r["number"]})
+    return out
 
 
 def to_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:

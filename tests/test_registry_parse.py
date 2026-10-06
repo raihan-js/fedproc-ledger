@@ -76,3 +76,16 @@ def test_end_marker_is_used_only_when_the_prescription_is_silent():
     )
     s = parse_part_xml(xml)["9.9"]
     assert s.kind == "clause" and s.kind_source == "end_marker" and s.clause_date == "2021-03"
+
+
+def test_dfars_style_section_without_an_extract_wrapper_gets_its_date_from_the_title_paragraph():
+    xml = (
+        '<ECFR><DIV8 N="252.204-7021" TYPE="SECTION"><HEAD>252.204-7021 Contractor Compliance With the CMMC Requirements.</HEAD>'
+        "<P>As prescribed in 204.7504(a), use the following clause:</P>"
+        "<P>CONTRACTOR COMPLIANCE WITH THE CMMC REQUIREMENTS (NOV 2025)</P><P>(a) Definitions. As used in this clause-</P>"
+        "<HD3>(End of clause)</HD3></DIV8></ECFR>"
+    )
+    s = parse_part_xml(xml)["252.204-7021"]
+    assert (
+        s.kind == "clause" and s.clause_date == "2025-11" and s.clause_title.endswith("(NOV 2025)") and s.prescription
+    )

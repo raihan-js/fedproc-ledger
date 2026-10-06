@@ -74,6 +74,22 @@ def parse_section(el: ET.Element) -> ParsedSection:
             sec.clause_date = trailing_paren_date(sec.clause_title)
         if sec.clause_date is None:
             sec.clause_date = normalize_clause_date(_text(extract)[:200])
+    if sec.clause_date is None and sec.prescription is not None:
+        # DFARS style: no EXTRACT; the dated title is a plain paragraph after the prescription, e.g.
+        # "CONTRACTOR COMPLIANCE WITH ... REQUIREMENTS (NOV 2025)"
+        seen_prescription = False
+        for child in el:
+            if child.tag == "HEAD":
+                continue
+            t = _text(child)
+            if not seen_prescription:
+                seen_prescription = child.tag == "P" and t.startswith(sec.prescription[:30])
+                continue
+            if len(t) <= 250 and not t.startswith("(") and (d := trailing_paren_date(t)):
+                sec.clause_title, sec.clause_date = t, d
+                break
+            if len(t) > 250:
+                break
     seen: dict[str, str | None] = {}
     for p in el.iter("P"):
         m = _ALT.match(_text(p))

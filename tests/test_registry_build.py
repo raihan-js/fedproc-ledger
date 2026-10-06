@@ -1,4 +1,4 @@
-from fedproc_ledger.registry.build import REG_CODE, _sort_key, x52_parts
+from fedproc_ledger.registry.build import REG_CODE, _sort_key, expand_ranges, x52_parts
 
 
 def test_natural_section_order_with_mixed_pieces():
@@ -105,4 +105,25 @@ def test_build_part_end_to_end_with_a_prehistory_snapshot_and_a_removed_section(
         and beta["removed"] is True
         and beta["current_date"] is None
         and beta["kind"] == "provision"
+    )
+
+
+def test_range_identified_sections_are_expanded_into_single_numbers():
+    base = {"status": "removed", "versions": [], "title": "[Reserved]", "source_range": None}
+    rows = [{**base, "number": "52.208-1 - 52.208-3"}, {**base, "number": "52.212-4"}, {**base, "number": "52.203-4 - 52.204-2"},
+            {**base, "number": "252.212-7000 - 252.212-7001"}]  # fmt: skip
+    got = expand_ranges(rows)
+    assert [r["number"] for r in got] == [
+        "52.208-1",
+        "52.208-2",
+        "52.208-3",
+        "52.212-4",
+        "52.203-4 - 52.204-2",
+        "252.212-7000",
+        "252.212-7001",
+    ]
+    assert (
+        got[1]["source_range"] == "52.208-1 - 52.208-3"
+        and got[3]["source_range"] is None
+        and got[0]["status"] == "removed"
     )

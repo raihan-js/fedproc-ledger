@@ -1,0 +1,37 @@
+{
+ "H1": {
+  "claim": "model - B1 >= +0.10 and interval excludes 0",
+  "diff": 0.35135302956919146,
+  "ci": [
+   0.2160913596238144,
+   0.5369063072242669
+  ],
+  "holds": true
+ },
+ "H2": {
+  "claim": "model specificity >= 0.60 with recall >= 0.90; B0 specificity < 0.20",
+  "model_specificity": 0.3793103448275862,
+  "model_recall": 0.9449378330373002,
+  "b0_specificity": 0.04310344827586207,
+  "holds": false
+ },
+ "H3": {
+  "claim": "non-inferiority: lower interval bound of model - B0 above -0.03 (superiority only if above 0)",
+  "diff": 0.020292134578090426,
+  "ci": [
+   -0.005257109316188789,
+   0.045768467377072235
+  ],
+  "non_inferior": true,
+  "superior": false
+ },
+ "H4": {
+  "claim": "dev-chosen threshold: coverage >= 0.85 and accuracy >= 0.90 on test",
+  "t_from_dev": 0.9672840163418589,
+  "dev_coverage": 0.48596112311015116,
+  "dev_accuracy": 0.9511111111111111,
+  "test_coverage": 0.422680412371134,
+  "test_accuracy": 0.9128919860627178,
+  "holds": false
+ }
+}

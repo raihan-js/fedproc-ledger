@@ -15,6 +15,7 @@ from fedproc_ledger.paths import RESULTS
 GUIDE = """You decide, for each clause number in a US federal solicitation or contract, whether the document BINDS it.
 B = binds: listed as incorporated by reference, its full text is included, it is a selected/checked item, or the text states that it applies/is included in this contract.
 N = does not bind: only cited or explained inside other clause text or narrative ("in accordance with FAR x"), a table of contents entry, an unselected/unchecked item, "not applicable", or not a real clause number (a fragment).
+R = referenced requirement: the narrative states the clause or provision applies or must be followed (for example "in accordance with FAR 52.204-7, registration is required") without listing or incorporating it.
 U = you cannot decide from the evidence shown.
 Each number comes with up to three contexts (H = nearest heading; the number is marked >>> <<<). Answer with JSON only."""
 SCHEMA = {
@@ -24,7 +25,7 @@ SCHEMA = {
             "type": "array",
             "items": {
                 "type": "object",
-                "properties": {"k": {"type": "string"}, "v": {"type": "string", "enum": ["B", "N", "U"]}},
+                "properties": {"k": {"type": "string"}, "v": {"type": "string", "enum": ["B", "N", "R", "U"]}},
                 "required": ["k", "v"],
             },
         }
@@ -50,8 +51,8 @@ def sheet(doc: str) -> dict[str, str]:
     return out
 
 
-def main(model: str) -> None:
-    gold = json.loads(Path("results/ledger_gold_agent_v0.json").read_text())["gold"]
+def main(model: str, gold_file: str, tag: str) -> None:
+    gold = json.loads(Path(gold_file).read_text())["gold"]
     chat = make_openai_chat(SCHEMA)
     cache = P.Cache(Path("data/interim/judge_cache.jsonl"))
     pairs = []
@@ -64,7 +65,7 @@ def main(model: str) -> None:
             body = "\n\n".join(f"[{n}]\n{sh[n]}" for n in chunk)
             msgs = [
                 {"role": "system", "content": GUIDE},
-                {"role": "user", "content": body + '\n\nReturn {"verdicts":[{"k":<number>,"v":"B|N|U"}]}'},
+                {"role": "user", "content": body + '\n\nReturn {"verdicts":[{"k":<number>,"v":"B|N|R|U"}]}'},
             ]
             key = P.Cache.key(model, msgs)
             text = cache.get(key)
@@ -96,15 +97,15 @@ def main(model: str) -> None:
         "| spent est $",
         round(spent(), 3),
     )
-    Path(f"results/ledger_gold_judge_{model}.json").write_text(json.dumps({"annotator": model, "gold": judged}))
+    Path(f"results/ledger_gold_{tag}_judge_{model}.json").write_text(json.dumps({"annotator": model, "gold": judged}))
     log_run(
         RESULTS / "leaderboard.jsonl",
-        f"ledger-label-check {model}",
+        f"ledger-label-check {tag} {model}",
         {"model": model},
         res,
-        split="ledger-gold-v0-reliability",
+        split=f"ledger-gold-{tag}-reliability",
     )
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2], sys.argv[3])

@@ -21,8 +21,15 @@ from fedproc_ledger.rules import baseline as B
 from fedproc_ledger.rules.commands import load_registry
 
 GOLD = sys.argv[1] if len(sys.argv) > 1 else "results/ledger_gold_agent_v0.json"
-TAG = Path(GOLD).stem.replace("ledger_gold_", "")
+MODE = (
+    sys.argv[2] if len(sys.argv) > 2 else "binding"
+)  # binding: B positive, N and R negative; applicable: B and R positive
+TAG = Path(GOLD).stem.replace("ledger_gold_", "") + ("" if MODE == "binding" else "_" + MODE)
 gold = json.loads(Path(GOLD).read_text())["gold"]
+_MAP = {"binding": {"B": "B", "N": "N", "R": "N", "U": "U"}, "applicable": {"B": "B", "R": "B", "N": "N", "U": "U"}}[
+    MODE
+]
+gold = {d: {n: _MAP[v] for n, v in labels.items()} for d, labels in gold.items()}
 registry = load_registry()
 systems: dict[str, dict[str, set[str]]] = {k: {} for k in ["all-candidates", "B0 (VETR)", "B1 rules"]}
 probs: dict[str, dict[str, dict[str, float]]] = {"noisy_or": {}, "max": {}}

@@ -9,6 +9,7 @@ import typer
 from fedproc_ledger import __version__
 from fedproc_ledger.acquire.commands import acquire_app
 from fedproc_ledger.envinfo import environment, gpu_line
+from fedproc_ledger.extract.commands import extract_app
 from fedproc_ledger.registry.commands import registry_app
 
 app = typer.Typer(
@@ -75,7 +76,8 @@ def _register(name: str, phase: int, desc: str) -> None:
 
 app.add_typer(acquire_app, name="acquire", help="Phase 1: GovCon search, notice pool, attachment download.")
 app.add_typer(registry_app, name="registry", help="Phase 2: the eCFR clause registry with version history.")
-_IMPLEMENTED = {"acquire", "registry"}
+app.add_typer(extract_app, name="extract", help="Phase 3: layout-aware text extraction with checkbox markers.")
+_IMPLEMENTED = {"acquire", "registry", "extract"}
 
 for _name, _phase, _desc in PHASES:
     if _name not in _IMPLEMENTED:

@@ -65,3 +65,28 @@ def test_whole_document_with_a_table(tmp_path):
     assert f"{CHECKED_M} (1) 52.203-6" in page.text_layout
     assert f"{UNCHECKED_M} | 52.204-10" in page.text_layout
     assert page.box_counts == {"glyph:X": 1, "glyph: ": 1}
+
+
+def test_batch_runner_writes_a_shard_and_reports_errors_without_raising(tmp_path):
+    import pandas as pd
+
+    from fedproc_ledger.extract.run import process_document
+
+    d = docx.Document()
+    d.add_paragraph("☒ (1) 52.203-6 Restrictions. This document is marked CUI.")
+    src = tmp_path / "a.docx"
+    d.save(src)
+    ok = process_document("abc123", str(src), ".docx", str(tmp_path / "pages"), str(tmp_path / "work"))
+    assert (
+        ok["error"] is None and ok["n_pages"] == 1 and ok["box_counts"] == {"glyph:X": 1} and ok["markings"] == ["CUI"]
+    )
+    shard = pd.read_parquet(tmp_path / "pages" / "abc123.parquet")
+    assert shard.iloc[0]["text_layout"].startswith(CHECKED_M)
+    bad = process_document(
+        "zzz", str(tmp_path / "missing.pdf"), ".pdf", str(tmp_path / "pages"), str(tmp_path / "work")
+    )
+    assert bad["error"] and "FileNotFound" in bad["error"] or "Error" in bad["error"]
+    txt = tmp_path / "t.txt"
+    txt.write_text("☐ 52.204-10 Reporting\nplain line\n")
+    t = process_document("txt1", str(txt), ".txt", str(tmp_path / "pages"), str(tmp_path / "work"))
+    assert t["box_counts"] == {"glyph: ": 1} and t["n_pages"] == 1

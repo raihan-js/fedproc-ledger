@@ -1,38 +1,52 @@
 {
- "documents": 300,
- "extracted": 300,
- "errors": {},
- "pages": 5747,
- "scanned_documents": 12,
- "documents_with_any_box": 101,
- "documents_with_widgets": 31,
+ "documents": 1737,
+ "extracted": 1736,
+ "errors": {
+  "RuntimeError:.doc": 1
+ },
+ "pages": 33793,
+ "scanned_documents": 53,
+ "documents_with_any_box": 737,
+ "documents_with_widgets": 192,
  "box_counts_by_source_and_state": {
-  "drawing: ": 610,
-  "drawing:X": 187,
-  "glyph: ": 1784,
-  "glyph:?": 45,
-  "glyph:X": 192,
-  "lost:?": 632,
-  "widget: ": 327,
-  "widget:X": 124
+  "drawing: ": 3659,
+  "drawing:X": 1216,
+  "glyph: ": 15085,
+  "glyph:?": 169,
+  "glyph:X": 3064,
+  "lost:?": 2601,
+  "widget: ": 5340,
+  "widget:X": 772
  },
  "unverified_private_use_codepoints": {
-  "U+F06F": 39,
-  "U+F072": 24,
-  "U+F0FC": 18,
-  "U+F05F Symbol": 5,
-  "U+F020 Symbol": 1
+  "U+F0FC": 121,
+  "U+F06F": 101,
+  "U+F072": 44,
+  "U+F0A8": 20,
+  "U+F05F Symbol": 15,
+  "U+F0A3 Wingdings 2": 12,
+  "U+F072 Wingdings": 9,
+  "U+F0DC Symbol": 4,
+  "U+F0FE": 4,
+  "U+F020 Symbol": 3,
+  "U+F075 Wingdings 3": 1
  },
  "documents_with_a_banner_marking": {
-  "CUI": 5,
-  "export_control": 11
+  "CUI": 27,
+  "FOUO": 2,
+  "distribution_statement": 4,
+  "export_control": 34,
+  "proprietary": 5,
+  "source_selection": 3
  },
- "documents_with_any_banner_marking": 16,
+ "documents_with_any_banner_marking": 69,
  "documents_mentioning_a_marking_keyword": {
-  "CUI": 35,
-  "export_control": 42,
-  "proprietary": 31,
-  "source_selection": 9
+  "CUI": 201,
+  "FOUO": 11,
+  "distribution_statement": 4,
+  "export_control": 211,
+  "proprietary": 196,
+  "source_selection": 42
  },
- "seconds_total": 321.8
+ "seconds_total": 1690.4
 }

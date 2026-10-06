@@ -1,19 +1,19 @@
 {
- "documents": 300,
+ "documents": 1736,
  "registry_used": true,
- "candidates": 15934,
+ "candidates": 84307,
  "b1_roles": {
-  "CHECKLIST_NOT_SELECTED": 486,
-  "CHECKLIST_SELECTED": 914,
-  "EXPLICITLY_EXCLUDED": 3,
-  "FULL_TEXT": 240,
-  "INCORPORATED_BY_REFERENCE": 2496,
-  "INDEX_ENTRY": 59,
-  "INTERNAL_REFERENCE": 4394,
-  "NARRATIVE_MENTION": 6927,
-  "NOT_A_CLAUSE": 415
+  "CHECKLIST_NOT_SELECTED": 6675,
+  "CHECKLIST_SELECTED": 5510,
+  "EXPLICITLY_EXCLUDED": 7,
+  "FULL_TEXT": 2070,
+  "INCORPORATED_BY_REFERENCE": 13284,
+  "INDEX_ENTRY": 518,
+  "INTERNAL_REFERENCE": 27260,
+  "NARRATIVE_MENTION": 26963,
+  "NOT_A_CLAUSE": 2020
  },
- "documents_with_candidates": 135,
- "b0_ledger_total": 9619,
- "b1_ledger_total": 3481
+ "documents_with_candidates": 803,
+ "b0_ledger_total": 51902,
+ "b1_ledger_total": 19742
 }

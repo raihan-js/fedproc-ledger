@@ -106,6 +106,12 @@ def fetch_to_store(
                 if resp.status_code == 429 or resp.status_code >= 500:
                     raise _Transient(str(resp.status_code))
                 if resp.status_code >= 400:
+                    resp.read()
+                    if resp.status_code == 400 and b"has been deleted" in resp.content[:2000]:
+                        return {
+                            "status": "failed",
+                            "reason": "deleted_by_agency",
+                        }  # SAM.gov: "The resource has been deleted."
                     return {"status": "failed", "reason": f"http_{resp.status_code}"}
                 cl = resp.headers.get("content-length", "")
                 if cl.isdigit() and int(cl) > max_bytes:

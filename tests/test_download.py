@@ -201,3 +201,27 @@ def test_a_file_that_takes_too_long_is_skipped_not_waited_for(tmp_path):
         clock=clock,
     )
     assert res == {"status": "skipped", "reason": "too_slow"} and list(tmp_path.iterdir()) == []
+
+
+def test_a_deleted_attachment_is_recorded_as_such(tmp_path):
+    body = {"errors": {"status": "BAD_REQUEST", "message": "The resource has been deleted."}}
+    res = fetch_to_store(
+        client(lambda r: httpx.Response(400, json=body)),
+        "https://x/1",
+        tmp_path,
+        filename="a.pdf",
+        max_bytes=1000,
+        bucket=None,
+    )
+    assert res == {"status": "failed", "reason": "deleted_by_agency"}
+    assert (
+        fetch_to_store(
+            client(lambda r: httpx.Response(400, json={"error": "other"})),
+            "https://x/2",
+            tmp_path,
+            filename="a",
+            max_bytes=1000,
+            bucket=None,
+        )["reason"]
+        == "http_400"
+    )

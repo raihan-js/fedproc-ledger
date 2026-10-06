@@ -56,6 +56,9 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]  # fixtures hold literal HTML/XML lines
+
 [tool.mypy]
 python_version = "3.11"
 files = ["src"]

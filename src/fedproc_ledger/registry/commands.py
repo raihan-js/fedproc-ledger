@@ -26,6 +26,7 @@ from fedproc_ledger.registry.deviations import (
     pdf_header,
 )
 from fedproc_ledger.registry.ecfr import UA, EcfrClient
+from fedproc_ledger.registry.rfo import merge_rfo
 from fedproc_ledger.registry.versions import fetch_part_versions
 
 registry_app = typer.Typer(help="Phase 2: the eCFR clause registry with version history.", no_args_is_help=True)
@@ -74,6 +75,9 @@ def build(parts: str = typer.Option("", help="Comma-separated part numbers (defa
         rows += r
         stats.append(s)
     df = to_frame(dedupe_numbers(expand_ranges(rows)))
+    rfo_path = PROCESSED / "rfo_part52_sections.parquet"
+    if rfo_path.exists():
+        df = merge_rfo(df, pd.read_parquet(rfo_path))
     PROCESSED.mkdir(parents=True, exist_ok=True)
     out = PROCESSED / "registry.parquet"
     df.to_parquet(out, index=False)
@@ -267,6 +271,9 @@ def deviations() -> None:
     PROCESSED.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(rows).to_parquet(PROCESSED / "deviations.parquet", index=False)
     sections.to_parquet(PROCESSED / "rfo_part52_sections.parquet", index=False)
+    reg_path = PROCESSED / "registry.parquet"
+    if reg_path.exists():
+        merge_rfo(pd.read_parquet(reg_path), sections).to_parquet(reg_path, index=False)
     summary = {
         "model_deviation": dates,
         "rfo_sections": int(len(sections)),

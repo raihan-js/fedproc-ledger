@@ -28,8 +28,9 @@ def test_rfo_section_status_is_read_from_the_heading():
         "number": "52.219-14",
         "rfo_title": "Limitations on Subcontracting",
         "rfo_status": "text",
+        "rfo_kind": "clause",
     }
-    assert rows["52.204-90"]["rfo_title"] == "Offeror Identification" and rows["52.204-90"]["rfo_status"] == "text"
+    assert rows["52.204-90"]["rfo_title"] == "Offeror Identification" and rows["52.204-90"]["rfo_kind"] == "provision"
 
 
 def test_only_pdfs_that_name_part_52_are_listed():

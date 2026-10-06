@@ -75,7 +75,15 @@ def part52_sections(part52_html: str) -> list[dict[str, Any]]:
         title = first.group(1).strip() if first else ""
         title = re.split(r"(?<=\.)\s+(?=[A-Z(])", title, maxsplit=1)[0]  # a heading is one sentence; text may follow
         status = "reserved" if re.match(r"\[Reserved\]", title, re.I) else "text"
-        rows.append({"number": number, "rfo_title": title.rstrip("."), "rfo_status": status})
+        kinds = {k.lower() for k in re.findall(r"(?:insert|use) the following (provision|clause)", head, flags=re.I)}
+        rows.append(
+            {
+                "number": number,
+                "rfo_title": title.rstrip("."),
+                "rfo_status": status,
+                "rfo_kind": next(iter(kinds)) if len(kinds) == 1 else "unknown",
+            }
+        )
     return rows
 
 

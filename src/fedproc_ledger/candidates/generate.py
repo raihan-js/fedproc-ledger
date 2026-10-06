@@ -51,10 +51,30 @@ REGULATION_BY_BASE = {
 _BASES = "|".join(sorted(REGULATION_BY_BASE, key=lambda b: (-len(b), b)))
 _HYPHENS = "-‐‑‒–—−"
 _PREFIX_WORDS = "|".join(
-    (
-        "FAR DFARS DFAR GSAM GSAR HHSAR AGAR DOSAR AIDAR DEAR VAAR NFS HSAR HUDAR "
-        "AFARS DAFFARS NMCARS SOFARS DLAD Clause Provision Section"
-    ).split()
+    [
+        "FAR",
+        "DFARS",
+        "DFAR",
+        "GSAM",
+        "GSAR",
+        "HHSAR",
+        "AGAR",
+        "DOSAR",
+        "AIDAR",
+        "DEAR",
+        "VAAR",
+        "NFS",
+        "HSAR",
+        "HUDAR",
+        "AFARS",
+        "DAFFARS",
+        "NMCARS",
+        "SOFARS",
+        "DLAD",
+        "Clause",
+        "Provision",
+        "Section",
+    ]
 )
 _NUMBER = re.compile(
     rf"(?:(?P<prefix>\b(?:{_PREFIX_WORDS}))\s*)?(?<!\d)(?P<base>{_BASES})\s?\.\s?(?P<sec>\d{{3}})"
@@ -96,6 +116,7 @@ class Candidate:
     in_registry: bool | None = None
     registry_status: str | None = None
     cand_id: str = ""
+    line_no: int = 0  # index of the line in the page's text_layout.split("\\n")
 
     def as_row(self) -> dict[str, Any]:
         return asdict(self)
@@ -197,6 +218,7 @@ def generate_page_candidates(
                 deviation_marker=dev.group(0).strip() if dev else None,
                 box_marker=markers[-1].group(0) if markers else None,
                 nonclause_hints=_hints(line, start, end),
+                line_no=li,
             )
             out.append(cand)
             if m.group("suf") and m.group("suf").isdigit():

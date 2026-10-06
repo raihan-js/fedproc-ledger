@@ -19,6 +19,16 @@
   "f1_lo": 0.9479671774412912,
   "f1_hi": 0.9811903922121897
  },
+ "B0 minus empty-box clauses": {
+  "precision": 0.9679878048780488,
+  "recall": 0.9665144596651446,
+  "f": 0.9672505712109674,
+  "f2": 0.9668087697929355,
+  "specificity": 0.16,
+  "accuracy": 0.9369501466275659,
+  "f1_lo": 0.9479671774412912,
+  "f1_hi": 0.9811903922121897
+ },
  "B1 rules": {
   "precision": 0.9962264150943396,
   "recall": 0.4018264840182648,
@@ -106,5 +116,12 @@
   "lo": -0.057936310275912076,
   "hi": -0.0064743591720514545,
   "share_not_better": 0.99225
+ },
+ "_meta": {
+  "documents": 32,
+  "labelled": 682,
+  "binding": 657,
+  "gold": "results/ledger_gold_test_majority_applicable.json",
+  "mode": "applicable"
  }
 }

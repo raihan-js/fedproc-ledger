@@ -114,6 +114,13 @@ for base in ("B1 rules", "B0 (VETR)", "all-candidates"):
     print(f"  {best} - {base}: dF1 {d['diff']:+.3f} [{d['lo']:+.3f},{d['hi']:+.3f}]")
     res[f"paired {best} vs {base}"] = d
 RESULTS.mkdir(exist_ok=True)
+res["_meta"] = {
+    "documents": len(gold),
+    "labelled": n_lab,
+    "binding": sum(1 for g in gold.values() for v in g.values() if v == "B"),
+    "gold": GOLD,
+    "mode": MODE,
+}
 (RESULTS / f"ledger_eval_{TAG}.json").write_text(json.dumps(res, indent=1, default=float) + "\n")
 log_run(
     RESULTS / "leaderboard.jsonl",

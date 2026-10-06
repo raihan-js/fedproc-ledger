@@ -1,16 +1,29 @@
 # fedproc-ledger
 
-Which FAR/DFARS clauses actually bind a US federal solicitation, and how (incorporated by reference, full text, selected in a checklist), at which date and alternate, with the page and sentence that prove it.
+Which FAR/DFARS clauses actually bind a US federal solicitation, and how (incorporated by reference, full text, selected in a checklist), with a probability and the evidence lines. A mention-role classifier over regex clause candidates, validated against the eCFR registry; box states are decided by rule.
 
-**Status: Phase 0 (scaffold).** No data has been collected and there are no results yet. This README will state numbers only after they are produced by code in this repo and written to `results/`.
+**Status (2026-10-07): research prototype, nothing published.** Numbers below are generated from `results/*.json` by `scripts/make_results_md.py`; the annotators of every gold set are LLM agents, not procurement experts, and the evaluation frame under-represents checklist-heavy documents (see `docs/decisions.md`, D-028).
 
-- Plan: [`docs/PLAN.md`](docs/PLAN.md) · execution plan and phase map: [`docs/EXECUTION_PLAN.md`](docs/EXECUTION_PLAN.md) · decisions: [`docs/decisions.md`](docs/decisions.md)
-- Rules for contributors and agents: [`CLAUDE.md`](CLAUDE.md)
+## Headline
+<!-- headline:start -->
+- Frozen test (32 documents, 679 labelled numbers, LLM annotators): F1 0.912 for the model vs 0.891 for the status-quo regexes (difference +0.020, interval [-0.005, +0.046]: non-inferior, **not shown better**); specificity 38% vs 4%.
+- Objective, annotator-free: **14.6%** of status-quo ledger entries are clauses whose own checklist box is empty (327 of 388 documents with a decided checklist).
+- Pre-registered hypotheses: H1 holds, H2 FAILS, H3 holds as non-inferiority only, H4 FAILS. Full tables: [`docs/RESULTS.md`](docs/RESULTS.md).
+<!-- headline:end -->
 
+## Read next
+- Results tables: [`docs/RESULTS.md`](docs/RESULTS.md) · decisions and every correction: [`docs/decisions.md`](docs/decisions.md) · pre-registration: [`docs/preregistration.md`](docs/preregistration.md) · annotation guidelines: [`docs/annotation_guidelines.md`](docs/annotation_guidelines.md)
+- Integration proposal for VETR: [`docs/INTEGRATION_CONTRACT.md`](docs/INTEGRATION_CONTRACT.md) · plan: [`docs/PLAN.md`](docs/PLAN.md) · where we are: [`docs/STATE.md`](docs/STATE.md) · rules for contributors and agents: [`CLAUDE.md`](CLAUDE.md)
+
+## Reproduce
 ```bash
 uv sync --extra ml --group dev
-uv run fl --help
 uv run pytest -q
+uv run fl --help            # acquire, registry, extract, rules, label, model
+uv run fl model train && uv run fl model predict
+uv run python scripts/ledger_eval.py results/ledger_gold_test_majority_binding.json
+uv run python scripts/make_results_md.py
 ```
+Raw documents and the trained model are not in the repository (`data/` is git-ignored).
 
 Not legal advice and not a compliance determination. Licence: Apache-2.0.

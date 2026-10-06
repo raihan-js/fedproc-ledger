@@ -116,5 +116,12 @@
   "lo": -0.018808266338821485,
   "hi": 0.02904923384387663,
   "share_not_better": 0.33925
+ },
+ "_meta": {
+  "documents": 32,
+  "labelled": 679,
+  "binding": 563,
+  "gold": "results/ledger_gold_test_majority_binding.json",
+  "mode": "binding"
  }
 }

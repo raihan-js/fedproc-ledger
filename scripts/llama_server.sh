@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start the bundled llama.cpp server on an Ollama GGUF blob with 4 parallel slots (Ollama cannot batch qwen3.5).
+# Generic local serving helper (not used by the pipeline since D-021). Starts the bundled llama.cpp server on an Ollama GGUF blob with 4 parallel slots.
 # usage: scripts/llama_server.sh 9b|4b [port]   (stop it by PID; it prints the PID file path)
 set -euo pipefail
 size="${1:?9b or 4b}"; port="${2:-11600}"

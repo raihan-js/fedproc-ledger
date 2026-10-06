@@ -348,7 +348,7 @@ Hash every split file (sha256) into `docs/decisions.md`. From now on, test files
 Gold alone (45 training documents) is small. Add silver labels on the pool (excluding all dev/test solicitations):
 
 1. Run B1 rules on every clause-bearing pool document.
-2. Run an LLM labeler (Claude Haiku-class via API, model ID pinned in config; or local Qwen2.5-7B-Instruct via vLLM if Raihan prefers zero cost) on chunks with candidates listed by ID; JSON output validated against the schema; temperature 0.
+2. Run an LLM labeler (Claude Haiku-class via API, model ID pinned in config; ; Qwen is excluded, D-021) on chunks with candidates listed by ID; JSON output validated against the schema; temperature 0.
 3. **Keep** a candidate's silver label where rules and LLM agree. Send disagreements to a second LLM pass or drop them. Record agreement rates per role.
 4. Measure silver accuracy on `dev` (silver labeler vs gold) and report it.
 5. State in the paper that silver labels come partly from an LLM that is also a baseline. Gold test labels are purely human, so the comparison stays fair.
@@ -394,7 +394,7 @@ Output: `data/labels/silver_mentions.parquet` with `source` (`rules`, `llm`, `ag
 
 - **B0** VETR status quo (Section 8.4)
 - **B1** rules (Section 8.3)
-- **B2** LLM zero-shot, few-shot with 5 guideline examples: one strong API model and one fast API model (Claude family, IDs pinned; optional GPT-4o-class), and one local open model (Qwen2.5-7B-Instruct, AWQ, via vLLM). Same chunking and JSON schema as the silver labeler. Record cost and latency per document. **Ask Raihan before running** (expected total under $40 for 150 documents).
+- **B2** LLM zero-shot, few-shot with 5 guideline examples: one strong API model and one fast API model (Claude family, IDs pinned; optional GPT-4o-class), and one local open model (not Qwen, D-021; for example a US-origin open model, AWQ, via vLLM). Same chunking and JSON schema as the silver labeler. Record cost and latency per document. **Ask Raihan before running** (expected total under $40 for 150 documents).
 - **B3** a fine-tuned small baseline without layout or long context (DeBERTa-v3-base, window 512) to show what ModernBERT's context buys.
 
 ### 12.5 Export

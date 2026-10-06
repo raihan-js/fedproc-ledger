@@ -82,7 +82,7 @@ Arithmetic to expect (verify at the probe): about 33 monthly windows; roughly 3,
 
 ### Phase 5: schema, guidelines, panel labeler, pilot (revised by D-019: no human annotators)
 1. Fetch the current text of 52.212-5, 52.212-4, 52.252-2 and the RFO changes from eCFR and agency pages (URL and date recorded) and write `docs/annotation_guidelines.md` from them; the same file is the labeler's instruction text.
-2. `fl label`: panel labeler over Ollama (qwen3.5:9b two prompt variants, qwen3.5:4b) with JSON-schema output, candidate ids given, B1 as the third voter; caches every call; reports tiers and kappa. Streamlit review tool is optional (audit pack).
+2. `fl label`: panel labeler (OpenAI small models via `--backend openai`, USD 3.50 cap, D-021; the first pilot ran on local qwen3.5 and is history) with JSON-schema output, candidate ids given, B1 as the third voter; caches every call; reports tiers and kappa. Streamlit review tool is optional (audit pack).
 3. Pilot: 20 documents (about 8 checklist, 6 IBR, 6 other, including RFO-era), stratified and recorded; label with the panel.
 4. `fl pilot`: B0 and B1 against the panel and against slice A (objective checkbox truth): binding-set precision/recall, mention macro-F1, panel kappa, split share, seconds per document. Go/no-go as plan 9.5.
 **Checkpoint 5 (decision, no human time):** `results/pilot.json` and a recommendation. I continue unless a stop condition triggers (panel kappa below 0.6, or slice A contradicts the panel).

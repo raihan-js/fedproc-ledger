@@ -57,6 +57,15 @@ def build_items(doc_id: str) -> list[dict[str, Any]]:
     return items
 
 
+def chat_for(backend: str, base_url: str) -> P.Chat:
+    """`local` = an OpenAI-compatible server at base_url; `openai` = the OpenAI API with logging and a spend cap."""
+    if backend == "openai":
+        from fedproc_ledger.label.openai_chat import make_openai_chat
+
+        return make_openai_chat(P.schema())
+    return make_chat(base_url)
+
+
 def make_chat(base_url: str, timeout: float = 300.0) -> P.Chat:
     client = httpx.Client(base_url=base_url, timeout=timeout)
 
@@ -87,6 +96,7 @@ def run(
         ..., help="name:model:variant, for example 9b-A:qwen3.5:9b:A (model may contain a colon)"
     ),
     base_url: str = typer.Option("http://127.0.0.1:11600/v1"),
+    backend: str = typer.Option("local", help="local | openai"),
     docs: str = typer.Option("", help="file with one doc_id per line (default: every rules-stage document)"),
     limit: int = typer.Option(0),
     workers: int = typer.Option(4),
@@ -103,7 +113,7 @@ def run(
     if limit:
         ids = ids[:limit]
     (OUT / "votes").mkdir(parents=True, exist_ok=True)
-    cache, chat = P.Cache(CACHE), make_chat(base_url)
+    cache, chat = P.Cache(CACHE), chat_for(backend, base_url)
 
     def one(doc_id: str) -> tuple[str, int]:
         path = OUT / "votes" / f"{doc_id}.{v.name}.json"
@@ -254,6 +264,7 @@ def slice_a_ids(doc_id: str) -> dict[str, str]:
 def lab(
     voter: str = typer.Option(..., help="name:model:variant"),
     base_url: str = typer.Option("http://127.0.0.1:11600/v1"),
+    backend: str = typer.Option("local", help="local | openai"),
     docs: str = typer.Option("data/interim/pilot_docs.txt"),
 ) -> None:
     """Score one voter configuration on slice A only (objective checklist boxes) and log it to the leaderboard."""
@@ -263,7 +274,7 @@ def lab(
     name, rest = voter.split(":", 1)
     model, variant = rest.rsplit(":", 1)
     v = P.Voter(name, model, variant)
-    cache, chat = P.Cache(CACHE), make_chat(base_url)
+    cache, chat = P.Cache(CACHE), chat_for(backend, base_url)
     pred: list[str] = []
     truth: list[str] = []
     for doc_id in [x for x in Path(docs).read_text().split() if x]:
@@ -290,6 +301,7 @@ def lab(
 def audit(
     voter: str = typer.Option("", help="name:model:variant (empty = score B1 only)"),
     base_url: str = typer.Option("http://127.0.0.1:11600/v1"),
+    backend: str = typer.Option("local", help="local | openai"),
     labels: str = typer.Option("results/audit_claude_pilot.json"),
 ) -> None:
     """Score one voter (and B1) against the agent-labelled audit set; UNCLEAR audit labels are excluded."""
@@ -306,7 +318,7 @@ def audit(
         name, rest = voter.split(":", 1)
         model, variant = rest.rsplit(":", 1)
         v = P.Voter(name, model, variant)
-        got = P.vote(items, v, make_chat(base_url), P.Cache(CACHE))
+        got = P.vote(items, v, chat_for(backend, base_url), P.Cache(CACHE))
         out[name] = PL.role_agreement([got.get(i["id"], "UNCLEAR") for i in items], truth)
         log_run(
             RESULTS / "leaderboard.jsonl",

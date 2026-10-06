@@ -73,8 +73,7 @@ interval of the F1 difference excludes zero or the change is free (same cost, si
    52.212-5 style checklists with random boxes, full-text clauses, tables of contents, exclusions, cross-references, RFO variants,
    scanned-like noise). Pretrains layout and role behaviour with perfect labels; validated only on real gold because of the
    distribution gap.
-6. **Silver labels and distillation:** a stronger open-weight teacher (local Qwen through Ollama, or larger open-weight models on the
-   owner's NVIDIA API) labels candidate chunks as JSON; keep labels where teacher and B1 agree or the teacher is confident; train the
+6. **Silver labels and distillation:** a stronger teacher (small OpenAI models within the owner's USD 4 budget, D-021; no Qwen or other PRC-origin models) labels candidate chunks as JSON; keep labels where teacher and B1 agree or the teacher is confident; train the
    small student (ModernBERT-base, 149M, CPU-friendly; later int8 ONNX or a smaller student) with confidence-weighted loss; iterate
    with self-training. The teacher is a labeler, never a judge of results.
 7. **Training recipe:** multi-task heads (role, section, date/alternate), class-weighted or focal loss, label smoothing, layer-wise

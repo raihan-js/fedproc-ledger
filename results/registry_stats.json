@@ -1,31 +1,32 @@
 {
  "ecfr_as_of": "2026-10-02",
  "earliest_version_date": "2014-10-17",
- "sections": 2434,
+ "earliest_snapshot_with_text": "2017-01-01",
+ "sections": 2499,
  "by_status": {
   "active": 2136,
-  "reserved": 188,
-  "removed": 110
+  "reserved": 329,
+  "removed": 34
  },
  "by_regulation": {
-  "FAR": 702,
-  "DFARS": 428,
-  "GSAM": 208,
-  "VAAR": 145,
-  "NFS": 144,
-  "CH15": 91,
-  "CH13": 87,
-  "AIDAR": 84,
-  "DEAR": 77,
+  "FAR": 733,
+  "DFARS": 448,
+  "GSAM": 205,
+  "NFS": 148,
+  "VAAR": 143,
+  "CH15": 97,
+  "AIDAR": 86,
+  "CH13": 86,
+  "DEAR": 84,
   "CH12": 73,
   "HSAR": 58,
-  "HHSAR": 54,
+  "HHSAR": 56,
   "HUDAR": 51,
   "DOSAR": 42,
   "CH20": 35,
   "CH34": 33,
-  "CH14": 26,
   "CH16": 26,
+  "CH14": 25,
   "CH21": 21,
   "CH29": 15,
   "CH10": 11,
@@ -315,6 +316,6 @@
   }
  ],
  "warnings": [],
- "requests": 356,
- "cache_hits": 139
+ "requests": 24,
+ "cache_hits": 471
 }

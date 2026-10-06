@@ -152,5 +152,22 @@ def expand_ranges(rows: list[dict[str, Any]], max_span: int = 200) -> list[dict[
     return out
 
 
+_STATUS_RANK = {"active": 0, "reserved": 1, "removed": 2}
+
+
+def dedupe_numbers(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """One row per number. eCFR can list the same number under several range spellings; keep the row with the best
+    status (active, then reserved, then removed) and the union of the versions of all of them."""
+    best: dict[str, dict[str, Any]] = {}
+    versions: dict[str, dict[str, dict[str, Any]]] = {}
+    for r in rows:
+        n = r["number"]
+        for v in r["versions"]:
+            versions.setdefault(n, {}).setdefault(v["effective_from"], v)
+        if n not in best or _STATUS_RANK[r["status"]] < _STATUS_RANK[best[n]["status"]]:
+            best[n] = r
+    return [{**r, "versions": [versions[n][k] for k in sorted(versions.get(n, {}))]} for n, r in best.items()]
+
+
 def to_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
     return pd.DataFrame(rows)

@@ -1,4 +1,4 @@
-from fedproc_ledger.registry.build import REG_CODE, _sort_key, expand_ranges, x52_parts
+from fedproc_ledger.registry.build import REG_CODE, _sort_key, dedupe_numbers, expand_ranges, x52_parts
 
 
 def test_natural_section_order_with_mixed_pieces():
@@ -127,3 +127,24 @@ def test_range_identified_sections_are_expanded_into_single_numbers():
         and got[3]["source_range"] is None
         and got[0]["status"] == "removed"
     )
+
+
+def test_a_number_listed_under_two_range_spellings_becomes_one_row_with_the_best_status():
+    v = lambda d: {"effective_from": d, "effective_to": None, "removed": False}  # noqa: E731
+    rows = [
+        {"number": "52.208-2", "status": "removed", "versions": [v("2017-01-01")], "source_range": "52.208-1-52.208-3"},
+        {
+            "number": "52.208-2",
+            "status": "reserved",
+            "versions": [v("2017-01-01"), v("2020-05-05")],
+            "source_range": "52.208-1 - 52.208-3",
+        },
+        {"number": "52.212-4", "status": "active", "versions": [v("2017-01-01")], "source_range": None},
+    ]
+    got = {r["number"]: r for r in dedupe_numbers(rows)}
+    assert (
+        len(got) == 2
+        and got["52.208-2"]["status"] == "reserved"
+        and got["52.208-2"]["source_range"] == "52.208-1 - 52.208-3"
+    )
+    assert [x["effective_from"] for x in got["52.208-2"]["versions"]] == ["2017-01-01", "2020-05-05"]

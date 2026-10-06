@@ -15,7 +15,7 @@ import typer
 from fedproc_ledger.acquire.ratelimit import TokenBucket
 from fedproc_ledger.manifest import write_manifest
 from fedproc_ledger.paths import DATA, PROCESSED, RESULTS
-from fedproc_ledger.registry.build import build_part, expand_ranges, to_frame, x52_parts
+from fedproc_ledger.registry.build import build_part, dedupe_numbers, expand_ranges, to_frame, x52_parts
 from fedproc_ledger.registry.deviations import (
     GUIDE,
     PART52,
@@ -73,7 +73,7 @@ def build(parts: str = typer.Option("", help="Comma-separated part numbers (defa
         )
         rows += r
         stats.append(s)
-    df = to_frame(expand_ranges(rows))
+    df = to_frame(dedupe_numbers(expand_ranges(rows)))
     PROCESSED.mkdir(parents=True, exist_ok=True)
     out = PROCESSED / "registry.parquet"
     df.to_parquet(out, index=False)

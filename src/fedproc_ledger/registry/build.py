@@ -9,7 +9,7 @@ from typing import Any
 
 import pandas as pd
 
-from fedproc_ledger.registry.ecfr import EcfrClient
+from fedproc_ledger.registry.ecfr import EcfrClient, EcfrError
 from fedproc_ledger.registry.parse import ParsedSection, parse_part_xml
 from fedproc_ledger.registry.versions import fetch_part_versions, section_intervals
 
@@ -76,11 +76,29 @@ def build_part(
     dates = sorted({r["date"] for r in records})
     latest = parse_part_xml(client.full_xml(latest_date, part=part["part"]))
     last_seen: dict[str, ParsedSection] = {}
+    unavailable: list[str] = []
     for i, d in enumerate(dates):
-        snap = parse_part_xml(client.full_xml(d, part=part["part"]))
+        try:
+            snap = parse_part_xml(client.full_xml(d, part=part["part"]))
+        except EcfrError as e:
+            if "HTTP 404" not in str(e):
+                raise
+            snap = {}  # a change date before eCFR's point-in-time history begins: version listed, text not
+            unavailable.append(d)
         for ident, ivs in intervals.items():
             for iv in ivs:
                 if iv["effective_from"] != d:
+                    continue
+                if d in unavailable:
+                    iv.update(
+                        {
+                            "clause_date": None,
+                            "alternates": [],
+                            "reserved": False,
+                            "present": None,
+                            "snapshot_unavailable": True,
+                        }
+                    )
                     continue
                 s = snap.get(ident)
                 iv["clause_date"] = s.clause_date if s and not s.reserved else None
@@ -104,6 +122,7 @@ def build_part(
         "snapshot_dates": len(dates),
         "sections_now": len(latest),
         "rows": len(rows),
+        "snapshot_unavailable_dates": unavailable,
     }
     return rows, stats
 

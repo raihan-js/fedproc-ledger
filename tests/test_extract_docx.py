@@ -63,7 +63,7 @@ def test_whole_document_with_a_table(tmp_path):
     (page,) = extract_docx(p)
     assert page.page == 1 and page.scanned is False
     assert f"{CHECKED_M} (1) 52.203-6" in page.text_layout
-    assert f"{UNCHECKED_M} | 52.204-10" in page.text_layout
+    assert f"{UNCHECKED_M} 52.204-10" in page.text_layout and "|" not in page.text_layout
     assert page.box_counts == {"glyph:X": 1, "glyph: ": 1}
 
 
@@ -95,3 +95,23 @@ def test_batch_runner_writes_a_shard_and_reports_errors_without_raising(tmp_path
     txt.write_text("☐ 52.204-10 Reporting\nplain line\n")
     t = process_document("txt1", str(txt), ".txt", str(tmp_path / "pages"), str(tmp_path / "work"))
     assert t["box_counts"] == {"glyph: ": 1} and t["n_pages"] == 1
+
+
+def test_typed_boxes_and_a_table_row_become_separate_lines(tmp_path):
+    d = docx.Document()
+    t = d.add_table(rows=2, cols=3)
+    t.cell(0, 0).text = "[X]"
+    t.cell(0, 1).text = "52.232-33, Payment by Electronic Funds Transfer"
+    t.cell(0, 2).text = "Block 27a. unrelated text"
+    t.cell(1, 0).text = "[ ]"
+    t.cell(1, 1).text = "52.232-36, Payment by Third Party"
+    p = tmp_path / "t.docx"
+    d.save(p)
+    (page,) = extract_docx(p)
+    lines = page.text_layout.split("\n")
+    assert (
+        lines[0] == f"{CHECKED_M} 52.232-33, Payment by Electronic Funds Transfer"
+        and lines[1] == "Block 27a. unrelated text"
+    )
+    assert lines[2] == f"{UNCHECKED_M} 52.232-36, Payment by Third Party"
+    assert page.box_counts == {"glyph:X": 1, "glyph: ": 1}

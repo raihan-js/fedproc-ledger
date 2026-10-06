@@ -96,17 +96,28 @@ def extract_docx(path: Path) -> list[PageText]:
                 lines.append(ln)
         elif name == "tbl":
             for tr in child.iter(_q("w", "tr")):
-                cells = [paragraph_line(p) for tc in tr.findall("w:tc", _NS) for p in tc.findall(".//w:p", _NS)]
-                cells = [c for c in cells if c.text_plain.strip() or c.boxes]
-                if cells:
-                    lines.append(
-                        Line(
-                            " | ".join(c.text_plain for c in cells),
-                            " | ".join(c.text_layout for c in cells),
-                            [0.0, 0.0, 0.0, 0.0],
-                            [b for c in cells for b in c.boxes],
+                carry: Line | None = None  # a cell holding only a box belongs to the text of the next cell
+                for tc in tr.findall("w:tc", _NS):
+                    cell = [paragraph_line(p) for p in tc.findall(".//w:p", _NS)]
+                    cell = [c for c in cell if c.text_plain.strip() or c.boxes]
+                    for ci, c in enumerate(cell):
+                        only_box = bool(c.boxes) and not re.sub(
+                            r"[\s\u2610\u2611\u2612\u25a1\[\]()xX_]", "", c.text_plain
                         )
-                    )
+                        if only_box and ci == len(cell) - 1 and carry is None:
+                            carry = c
+                            continue
+                        if carry is not None and ci == 0:
+                            c = Line(
+                                carry.text_plain + " " + c.text_plain,
+                                carry.text_layout + " " + c.text_layout,
+                                [0.0, 0.0, 0.0, 0.0],
+                                carry.boxes + c.boxes,
+                            )
+                            carry = None
+                        lines.append(c)
+                if carry is not None:  # a trailing box with nothing after it stays a line of its own
+                    lines.append(carry)
     counts = Counter(f"{b.source}:{b.state}" for ln in lines for b in ln.boxes)
     pua: Counter[str] = Counter(b.detail for ln in lines for b in ln.boxes if b.detail.startswith("U+"))
     text_plain = "\n".join(ln.text_plain for ln in lines)

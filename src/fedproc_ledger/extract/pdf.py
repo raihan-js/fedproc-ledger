@@ -87,12 +87,30 @@ class PageText:
         return out
 
 
+_TYPED_BOX = re.compile(r"^\s*(\[\s*[xX]\s*\]|\(\s*[xX]\s*\)|_[xX]_|\[\s*\]|\(\s{1,3}\)|\[_{1,3}\])(?=\s|$)")
+
+
+def _typed_box(text: str) -> tuple[int, int, str] | None:
+    """A box typed as text at the start of a line (`[X]`, `[ ]`, `(X)`, `_X_`): (start, end, state), else None."""
+    m = _TYPED_BOX.match(text)
+    if not m:
+        return None
+    token = m.group(1)
+    return m.start(1), m.end(1), "X" if re.search(r"[xX]", token) else " "
+
+
 def _line_from_chars(chars: list[dict[str, Any]], bbox: tuple[float, ...]) -> Line:
     plain, layout, boxes, ignored = [], [], [], []
     first_text = next((i for i, c in enumerate(chars) if not c["c"].isspace()), 0)
+    typed = _typed_box("".join(c["c"] for c in chars[:12]))
     for i, ch in enumerate(chars):
         c = ch["c"]
         plain.append(c)
+        if typed and typed[0] <= i < typed[1]:
+            if i == typed[0]:
+                layout.append(MARK[typed[2]])
+                boxes.append(Box(typed[2], "glyph", [round(v, 1) for v in ch["bbox"]], "typed box", 0.8))
+            continue
         at_start = i == first_text
         state: str | None = None
         detail = c

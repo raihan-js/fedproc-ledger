@@ -149,3 +149,18 @@ def test_verified_wingdings_check_mark_and_empty_box_on_a_real_page():
     assert f"{CHECKED_M} (4) 52.203-17, Contractor Employee Whistleblower Rights" in lay
     assert f"{CHECKED_M} (5) 52.204-10, Reporting Executive Compensation" in lay
     assert all(b.state == "X" and b.source == "glyph" and b.detail == "U+F0FC" for ln in page.lines for b in ln.boxes)
+
+
+def test_boxes_typed_as_text_at_the_start_of_a_line(tmp_path):
+    p = make_pdf(
+        tmp_path / "typed.pdf",
+        ["[X] 52.203-6 Restrictions", "[ ] 52.204-10 Reporting", "(X) 52.209-5 Certification", "text [X] inside"],
+    )
+    lay = layout_lines(p)
+    assert (
+        lay[0].startswith(f"{CHECKED_M} 52.203-6")
+        and lay[1].startswith(f"{UNCHECKED_M} 52.204-10")
+        and lay[2].startswith(f"{CHECKED_M} 52.209-5")
+    )
+    assert lay[3] == "text [X] inside"  # only at the start of a line
+    assert p.box_counts == {"glyph:X": 2, "glyph: ": 1}

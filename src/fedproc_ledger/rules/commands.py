@@ -9,7 +9,7 @@ from typing import Any
 import pandas as pd
 import typer
 
-from fedproc_ledger.candidates.generate import generate_page_candidates
+from fedproc_ledger.candidates.generate import Candidate, generate_page_candidates
 from fedproc_ledger.candidates.patterns import extract_clause_numbers
 from fedproc_ledger.paths import DATA, PROCESSED, RESULTS
 from fedproc_ledger.rules import baseline as B
@@ -49,7 +49,8 @@ def run_document(doc_id: str, registry: dict[str, str] | None) -> dict[str, Any]
     b0 = B.b0_ledger(extract_clause_numbers(plain), registry) if registry else set(extract_clause_numbers(plain))
     mention_numbers = {c.number for c in cands if not c.from_range}
     OUT.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(rows).to_parquet(OUT / f"{doc_id}.parquet", index=False)
+    cols = [*Candidate.__dataclass_fields__, "role", "confidence", "reason", "section"]
+    pd.DataFrame(rows, columns=cols).to_parquet(OUT / f"{doc_id}.parquet", index=False)  # columns even when empty
     return {
         "doc_id": doc_id,
         "pages": len(pages),
@@ -109,10 +110,9 @@ def report(docs: int = typer.Option(5, help="Number of documents to show")) -> N
     docinfo = pd.read_parquet(DATA / "interim" / "documents.parquet").drop_duplicates("doc_id").set_index("doc_id")
     summary = pd.read_parquet(OUT / "_summary.parquet")
     # a spread: documents with the most candidates, a checklist-heavy one, and a middle one
-    big = summary.sort_values("candidates", ascending=False)
-    pick = list(
-        dict.fromkeys(list(big.head(2)["doc_id"]) + list(big.iloc[len(big) // 2 : len(big) // 2 + 3]["doc_id"]))
-    )[:docs]
+    big = summary[summary["candidates"] >= 20].sort_values("candidates", ascending=False).reset_index(drop=True)
+    spread = [int(i * (len(big) - 1) / max(1, docs - 1)) for i in range(docs)]  # evenly spaced by candidate count
+    pick = list(dict.fromkeys(big.iloc[spread]["doc_id"]))[:docs]
     parts = [
         "<!doctype html><meta charset='utf-8'><style>body{font:13px system-ui;margin:20px}table{border-collapse:collapse;margin:8px 0 28px}td,th{border:1px solid #ddd;padding:3px 7px;vertical-align:top}"
         ".ok{background:#e4f6e8}.no{background:#f3f3f3}.low{color:#b45f00}code{font-size:12px}</style><h1>Rules baseline B1 on real documents</h1>"

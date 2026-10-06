@@ -141,3 +141,11 @@ def test_real_checklist_page_from_a_solicitation():
     assert f"{CHECKED_M} FAR 52.243-5, Changes and Changed Conditions" in lay
     assert f"{UNCHECKED_M} FAR 52.243-4, Changes" in lay
     assert pages[0].box_counts.get("glyph:X") == 1 and pages[0].box_counts.get("glyph: ", 0) >= 5
+
+
+def test_verified_wingdings_check_mark_and_empty_box_on_a_real_page():
+    page = extract_pdf(Path(__file__).parent / "fixtures" / "real_pua_check_page.pdf")[0]
+    lay = page.text_layout
+    assert f"{CHECKED_M} (4) 52.203-17, Contractor Employee Whistleblower Rights" in lay
+    assert f"{CHECKED_M} (5) 52.204-10, Reporting Executive Compensation" in lay
+    assert all(b.state == "X" and b.source == "glyph" and b.detail == "U+F0FC" for ln in page.lines for b in ln.boxes)

@@ -30,7 +30,11 @@ FILLED_SQUARE = "■"  # ■ checked at the start of a clause line, otherwise a 
 # Private-use code points (Wingdings and friends). Only box-shaped ones can be a checkbox, and their meaning (checked or
 # not) has not been verified on rendered pages, so their state is unknown. Bullets such as U+F0B7 and U+F0A7 are ignored
 # as boxes and logged. Built with chr() so no invisible private-use character sits in the source.
-BOX_LIKE_PUA = {chr(c) for c in (0xF06F, 0xF070, 0xF071, 0xF072, 0xF0A8, 0xF0FC, 0xF0FD, 0xF0FE)}
+BOX_LIKE_PUA = {chr(c) for c in (0xF06F, 0xF070, 0xF071, 0xF0A8, 0xF0FD, 0xF0FE)}
+# Verified on rendered pages of real solicitations (decisions.md D-017): U+F0FC shows a check mark in front of a
+# selected clause, U+F072 an empty square on a form. The first counts as checked only at the start of a line.
+VERIFIED_PUA_AT_START = {chr(0xF0FC): "X"}
+VERIFIED_PUA = {chr(0xF072): " "}
 
 
 def is_pua(c: str) -> bool:
@@ -100,6 +104,10 @@ def _line_from_chars(chars: list[dict[str, Any]], bbox: tuple[float, ...]) -> Li
             state = TICKS_AT_LINE_START[c]
         elif c == FILLED_SQUARE and at_start and _CLAUSE_AFTER.match("".join(x["c"] for x in chars[i + 1 :])):
             state = "X"
+        elif c in VERIFIED_PUA:
+            state, detail = VERIFIED_PUA[c], f"U+{ord(c):04X}"
+        elif c in VERIFIED_PUA_AT_START:
+            state, detail = (VERIFIED_PUA_AT_START[c] if at_start else "?"), f"U+{ord(c):04X}"
         elif c in BOX_LIKE_PUA:
             state, detail = "?", f"U+{ord(c):04X}"
         elif is_pua(c):

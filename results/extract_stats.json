@@ -1,29 +1,35 @@
 {
- "documents": 60,
- "extracted": 60,
+ "documents": 120,
+ "extracted": 120,
  "errors": {},
- "pages": 864,
- "scanned_documents": 1,
- "documents_with_any_box": 20,
- "documents_with_widgets": 6,
+ "pages": 2776,
+ "scanned_documents": 2,
+ "documents_with_any_box": 38,
+ "documents_with_widgets": 13,
  "box_counts_by_source_and_state": {
-  "drawing: ": 142,
-  "drawing:X": 25,
-  "glyph: ": 552,
-  "glyph:?": 12,
-  "lost:?": 165,
-  "widget: ": 38,
-  "widget:X": 22
+  "drawing: ": 264,
+  "drawing:X": 130,
+  "glyph: ": 838,
+  "glyph:?": 42,
+  "glyph:X": 50,
+  "lost:?": 316,
+  "widget: ": 136,
+  "widget:X": 38
  },
  "unverified_private_use_codepoints": {
-  "U+F0A7": 8,
-  "U+F0B7": 4
+  "U+F072": 24,
+  "U+F0FC": 18
  },
- "documents_with_a_marking_flag": {
-  "CUI": 5,
-  "export_control": 7,
-  "proprietary": 4
+ "documents_with_a_banner_marking": {
+  "CUI": 2,
+  "export_control": 5
  },
- "documents_with_any_marking_flag": 11,
- "seconds_total": 108.9
+ "documents_with_any_banner_marking": 7,
+ "documents_mentioning_a_marking_keyword": {
+  "CUI": 14,
+  "export_control": 18,
+  "proprietary": 10,
+  "source_selection": 1
+ },
+ "seconds_total": 154.2
 }

@@ -8,6 +8,7 @@ carries a safety factor, and the logged token counts are the ground truth to rec
 from __future__ import annotations
 
 import json
+import os
 import threading
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -24,6 +25,7 @@ PRICES: dict[str, tuple[float, float]] = {  # model -> (input, output) USD per 1
     "gpt-4.1-mini": (0.40, 1.60),
     "gpt-4o": (2.50, 10.00),
 }
+DEFAULT_CAP = 6.0  # owner credit was USD 6.89 on 2026-10-07; the rest is a buffer for stale prices
 SAFETY = 1.5  # estimated costs are multiplied by this before they are compared with the cap
 LEDGER = Path("data/logs/spend.jsonl")
 
@@ -66,12 +68,14 @@ def strict_schema(schema: dict[str, Any]) -> dict[str, Any]:
 
 def make_openai_chat(
     schema: dict[str, Any],
-    cap_usd: float = 3.5,
+    cap_usd: float | None = None,
     ledger: Path = LEDGER,
     transport: httpx.BaseTransport | None = None,
     base_url: str = "https://api.openai.com/v1",
 ) -> Callable[[str, list[dict[str, str]]], str]:
     load_env()
+    if cap_usd is None:
+        cap_usd = float(os.environ.get("OPENAI_SPEND_CAP", DEFAULT_CAP))
     key = require("OPENAI_API_KEY")
     client = httpx.Client(
         base_url=base_url, timeout=120.0, transport=transport, headers={"Authorization": f"Bearer {key}"}

@@ -40,3 +40,13 @@ Listed in `docs/EXECUTION_PLAN.md` section 3 (role count versus head size, legal
 
 ## D-011 (2026-10-06): housekeeping before starting
 Finished projects were already cleared (each folder is under 30 MB). The Hugging Face cache held 14 GB of unreferenced blobs and 1.1 GB of models/datasets from finished projects; the unreferenced blobs (no symlink or hardlink from any snapshot) and those entries were deleted, plus the pip cache (3.7 GB). Kept: ModernBERT-base (needed here), the Ollama models (the owner's), small ORCH and benchmark caches. `/home` went from 180 GB to 197 GB free.
+
+## D-012 (2026-10-06): owner decisions after Checkpoint 0
+Raihan approved Checkpoint 0 ("you can go ahead") and decided, in his own words (paraphrased):
+- GovCon plan is **Pro**; `GOVCON_API_KEY` is in `fedproc-ledger/.env` (set; length only was checked, never printed).
+- **Disk:** up to 40 GB under `data/` is fine. The downloader enforces a hard cap (38 GB by default) and stops with a message.
+- **VETR repo:** read-only access to `/home/raihan/Desktop/APPS/VETR-Framework` is granted.
+- **Authority and permissions:** Raihan is the CTO and the technical decision maker; he states that no company permission step is needed from him and that Dr. Lori Smith (founder) is not an obstacle. The plan's permission item is therefore recorded as owner-decided; the paper will still carry the affiliation and conflict-of-interest statement (plan 14.1 item 9).
+- **arXiv:** no rejection reason was received; he will give the PDF, and I will evaluate it to judge why it was rejected (Phase 10 input).
+- **Money:** Anthropic spend, if any, at most about $10 now and perhaps $10 to 20 later for labeling if results justify it. **Preference: local or open-weight models** for silver labels and baselines: the local Ollama (running) and his NVIDIA API key for open-weight models. I will not ask for the NVIDIA key until Phase 7 and will treat its terms and rate limits as something to verify then.
+- D-009 (shared quota) is not answered by "I'm on Pro": it is unknown whether the key is the production key. The client therefore reads the exact `X-RateLimit-Remaining` header, keeps a reserve and a hard local ceiling, and the plan stays conservative until the first `/me` reading shows the real limit.

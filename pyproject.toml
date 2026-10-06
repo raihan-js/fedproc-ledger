@@ -64,3 +64,7 @@ python_version = "3.11"
 files = ["src"]
 strict = true
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["fedproc_ledger.extract.*"]
+disallow_untyped_calls = false  # PyMuPDF ships no complete type information

@@ -180,3 +180,24 @@ def test_run_download_end_to_end_with_mocks(tmp_path):
         c, client(files), notices, cfg, Journal(tmp_path / "j.jsonl"), tmp_path / "files", workers=2, log=lambda m: None
     )
     assert again["notices"] == 0 and again["attachments_failed"] == 1
+
+
+def test_a_file_that_takes_too_long_is_skipped_not_waited_for(tmp_path):
+    t = {"now": 0.0}
+
+    def clock():
+        t["now"] += 100.0  # every read of the clock is 100 s later
+        return t["now"]
+
+    body = b"%PDF-" + b"x" * 5000
+    res = fetch_to_store(
+        client(lambda r: httpx.Response(200, content=body)),
+        "https://x/1",
+        tmp_path,
+        filename="a",
+        max_bytes=10**6,
+        bucket=None,
+        max_seconds=150,
+        clock=clock,
+    )
+    assert res == {"status": "skipped", "reason": "too_slow"} and list(tmp_path.iterdir()) == []

@@ -16,6 +16,8 @@ max_redirects = 5
 timeout_s = 60
 min_seconds_between_downloads = 1.0
 max_file_mb = 50
+max_seconds_per_file = 180             # SAM.gov serves each connection at about 30 KB/s (decisions.md D-016): a slow file is skipped, not waited for
+workers = 24                          # parallel downloads; the 1-request-per-second limit still applies to starts
 keep_extensions = [".pdf", ".docx", ".doc", ".txt"]
 
 [api]

@@ -71,3 +71,8 @@ def test_stats_count_what_happened_to_every_file():
     assert s["files_not_stored_by_reason"] == {"skipped:extension": 1, "failed:gone_404": 1}
     assert s["documents_rows"] == 3 and s["documents_unique_sha256"] == 2 and s["bytes_unique"] == 150
     assert s["api_calls"]["total"] == 2 and s["api_calls"]["by_status"] == {"200": 1, "429": 1}
+
+
+def test_a_replayed_notice_does_not_duplicate_its_documents():
+    docs = build_documents(JOURNAL + [ok("n1", "a")], NOTICES)  # n1's file appears again after an interruption
+    assert len(docs) == 3

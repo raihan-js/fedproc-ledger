@@ -22,9 +22,13 @@ def build_documents(journal: list[dict[str, Any]], notices: pd.DataFrame) -> pd.
     meta = notices.set_index("notice_id")
     rows = []
     seen: set[str] = set()
+    done_pairs: set[tuple[str, str]] = set()
     for e in journal:
         if e.get("event") != "file" or e.get("status") != "ok":
             continue
+        if (e["notice_id"], e["sha256"]) in done_pairs:  # an interrupted notice that was re-run repeats its files
+            continue
+        done_pairs.add((e["notice_id"], e["sha256"]))
         n = meta.loc[e["notice_id"]]
         sha = e["sha256"]
         rows.append(

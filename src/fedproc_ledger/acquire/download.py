@@ -11,6 +11,7 @@ import json
 import os
 import re
 import threading
+import time
 import zipfile
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -81,6 +82,8 @@ def fetch_to_store(
     bucket: TokenBucket | None,
     sleep: Callable[[float], None] = lambda s: None,
     attempts: int = 4,
+    max_seconds: float = 0.0,
+    clock: Callable[[], float] = time.monotonic,
 ) -> dict[str, Any]:
     """GET (never HEAD) with redirects, stream to a temp file, hash, sniff, store as {sha256}{ext}.
 
@@ -93,6 +96,7 @@ def fetch_to_store(
             bucket.acquire()
         tmp = files_dir / f".tmp-{threading.get_ident()}-{os.getpid()}"
         h, size, head = hashlib.sha256(), 0, b""
+        t0 = clock()
         try:
             with http.stream("GET", url) as resp:
                 if resp.status_code in (404, 410):
@@ -114,6 +118,8 @@ def fetch_to_store(
                         size += len(chunk)
                         if size > max_bytes:
                             return {"status": "skipped", "reason": "too_large"}
+                        if max_seconds and clock() - t0 > max_seconds:
+                            return {"status": "skipped", "reason": "too_slow"}
                         h.update(chunk)
                         f.write(chunk)
             if size == 0:
@@ -165,6 +171,7 @@ def download_notice(
     max_file_bytes: int,
     cap_bytes: int,
     sleep: Callable[[float], None] = lambda s: None,
+    max_seconds: float = 0.0,
 ) -> None:
     nid = notice["notice_id"]
     for s in skipped:
@@ -190,6 +197,7 @@ def download_notice(
             max_bytes=max_file_bytes,
             bucket=bucket,
             sleep=sleep,
+            max_seconds=max_seconds,
         )
         journal.write(
             {
@@ -239,6 +247,9 @@ def run_download(
     Stops cleanly on the disk cap, a local call ceiling or an unknown quota; waits out a reached reserve.
     """
     f = cfg["files"]
+    max_seconds = float(cfg["download"].get("max_seconds_per_file", 0))
+    for leftover in files_dir.glob(".tmp-*"):  # half-written files of a run that was killed
+        leftover.unlink(missing_ok=True)
     keep_ext = cfg["download"]["keep_extensions"]
     max_file = cfg["download"]["max_file_mb"] * 1_000_000
     max_notice = f["max_bytes_per_notice_mb"] * 1_000_000
@@ -250,7 +261,7 @@ def run_download(
 
     def work(n: dict[str, Any], sel: list[dict[str, Any]], skipped: list[dict[str, Any]]) -> None:
         try:
-            download_notice(http, n, sel, skipped, files_dir, journal, bucket, max_file, cap, sleep)
+            download_notice(http, n, sel, skipped, files_dir, journal, bucket, max_file, cap, sleep, max_seconds)
         except DiskCapReached as e:
             reason.append(str(e))
             stop.set()

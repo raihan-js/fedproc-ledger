@@ -167,7 +167,9 @@ def pool() -> None:
 @acquire_app.command()
 def download(
     limit: int = typer.Option(0, help="Process at most this many notices (0 = all selected); for trials."),
-    workers: int = typer.Option(4, help="Parallel downloads (the 1-per-second rate limit is shared)."),
+    workers: int = typer.Option(
+        0, help="Parallel downloads (default: configs/acquisition.toml; 1 request/s limit is shared)."
+    ),
 ) -> None:
     """Attachment lists and downloads for the selected notices, in rank order. Resumable; stops at the disk cap."""
     cfg = load_config("acquisition")
@@ -199,7 +201,7 @@ def download(
             cfg,
             journal,
             DATA / "raw" / "files",
-            workers=workers,
+            workers=workers or d["workers"],
             bucket=bucket,
             log=typer.echo,
             sleep=time.sleep,

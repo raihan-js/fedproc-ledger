@@ -61,6 +61,9 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 "src/fedproc_ledger/extract/report.py" = ["E501"]  # HTML templates
 "src/fedproc_ledger/rules/commands.py" = ["E501"]  # HTML templates
 "scripts/checkpoint_summary.py" = ["E501"]  # report text
+"scripts/select_pilot.py" = ["E501"]
+"src/fedproc_ledger/label/commands.py" = ["E501"]
+"src/fedproc_ledger/label/panel.py" = ["E501"]  # prompt text
 
 [tool.mypy]
 python_version = "3.11"

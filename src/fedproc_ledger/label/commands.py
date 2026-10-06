@@ -1,0 +1,219 @@
+"""`fl label ...`: panel votes over the rules-stage candidates (D-019)."""
+
+from __future__ import annotations
+
+import json
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import Any
+
+import httpx
+import pandas as pd
+import typer
+
+from fedproc_ledger.label import panel as P
+from fedproc_ledger.paths import PROCESSED, RESULTS
+from fedproc_ledger.rules import sections as S
+
+label_app = typer.Typer(help="Panel labeler: local models vote on each candidate's role (D-019).", no_args_is_help=True)
+OUT = PROCESSED / "panel"
+CACHE = Path("data/interim/panel_cache.jsonl")
+
+
+def build_items(doc_id: str) -> list[dict[str, Any]]:
+    """Candidates of one document with neutral context: surrounding lines and the headings above (no B1 output)."""
+    cands = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
+    shard = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"]).sort_values(
+        "page"
+    )
+    pages = {int(str(r.page)): str(r.text_layout).split("\n") for r in shard.itertuples()}
+    heads = [
+        (ln.page, ln.line_no, ln.text)
+        for ln in S.label_document([(p, "\n".join(ls)) for p, ls in pages.items()])
+        if ln.heading
+    ]
+    items = []
+    for c in cands.itertuples():
+        if bool(c.from_range):
+            continue  # range copies inherit the role of the range's first number
+        before = [t for pg, ln, t in heads if (pg, ln) < (int(str(c.page)), int(str(c.line_no)))][-3:]
+        lines = pages[int(str(c.page))]
+        items.append(
+            {
+                "id": str(c.cand_id),
+                "number": str(c.number),
+                "alternate": c.alternate or None,
+                "cited_date": c.cited_date or None,
+                "breadcrumb": [t[:80] for t in before],
+                "context": P.context_text(lines, int(str(c.line_no)), str(c.raw)),
+                "b1": str(c.role),
+            }
+        )
+    return items
+
+
+def make_chat(base_url: str, timeout: float = 300.0) -> P.Chat:
+    client = httpx.Client(base_url=base_url, timeout=timeout)
+
+    def chat(model: str, messages: list[dict[str, str]]) -> str:
+        body = {
+            "model": model,
+            "messages": messages,
+            "temperature": 0,
+            "max_tokens": 1200,
+            "response_format": {"type": "json_schema", "json_schema": {"name": "labels", "schema": P.schema()}},
+        }
+        for attempt in range(3):
+            try:
+                r = client.post("/chat/completions", json=body)
+                r.raise_for_status()
+                return str(r.json()["choices"][0]["message"]["content"])
+            except (httpx.HTTPError, KeyError):
+                if attempt == 2:
+                    raise
+        return ""
+
+    return chat
+
+
+@label_app.command()
+def run(
+    voter: str = typer.Option(
+        ..., help="name:model:variant, for example 9b-A:qwen3.5:9b:A (model may contain a colon)"
+    ),
+    base_url: str = typer.Option("http://127.0.0.1:11600/v1"),
+    docs: str = typer.Option("", help="file with one doc_id per line (default: every rules-stage document)"),
+    limit: int = typer.Option(0),
+    workers: int = typer.Option(4),
+) -> None:
+    """Run one voter over documents; votes are saved per document and calls are cached (safe to re-run)."""
+    name, rest = voter.split(":", 1)
+    model, variant = rest.rsplit(":", 1)
+    v = P.Voter(name, model, variant)
+    ids = (
+        [x.strip() for x in Path(docs).read_text().splitlines() if x.strip()]
+        if docs
+        else sorted(p.stem for p in (PROCESSED / "rules").glob("*.parquet") if not p.stem.startswith("_"))
+    )
+    if limit:
+        ids = ids[:limit]
+    (OUT / "votes").mkdir(parents=True, exist_ok=True)
+    cache, chat = P.Cache(CACHE), make_chat(base_url)
+
+    def one(doc_id: str) -> tuple[str, int]:
+        path = OUT / "votes" / f"{doc_id}.{v.name}.json"
+        if path.exists():
+            return doc_id, -1
+        items = build_items(doc_id)
+        got = P.vote(items, v, chat, cache)
+        path.write_text(json.dumps(got), encoding="utf-8")
+        return doc_id, len(got)
+
+    done = 0
+    with ThreadPoolExecutor(workers) as ex:
+        for doc_id, n in ex.map(one, ids):
+            done += 1
+            typer.echo(f"[{done}/{len(ids)}] {doc_id} {'cached' if n < 0 else f'{n} votes'}")
+
+
+@label_app.command()
+def merge(docs: str = typer.Option("", help="file with doc ids (default: documents that have votes)")) -> None:
+    """Combine saved votes with B1 into data/processed/panel/<doc>.parquet and write results/panel_stats.json."""
+    files = sorted((OUT / "votes").glob("*.json"))
+    by_doc: dict[str, dict[str, dict[str, str]]] = {}
+    for f in files:
+        doc_id, vname = f.stem.rsplit(".", 1)
+        by_doc.setdefault(doc_id, {})[vname] = json.loads(f.read_text())
+    if docs:
+        keep = set(Path(docs).read_text().split())
+        by_doc = {d: v for d, v in by_doc.items() if d in keep}
+    rows = []
+    for doc_id, voters in by_doc.items():
+        items = build_items(doc_id)
+        for it in items:
+            votes = {n: v[it["id"]] for n, v in voters.items() if it["id"] in v}
+            votes["b1"] = it["b1"]
+            adj = P.adjudicate(votes)
+            rows.append(
+                {"doc_id": doc_id, "cand_id": it["id"], "number": it["number"], **adj, "votes": json.dumps(votes)}
+            )
+    df = pd.DataFrame(rows)
+    OUT.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(OUT / "panel.parquet", index=False)
+    names = sorted({n for v in by_doc.values() for n in v})
+    kappas = {}
+    vv = [json.loads(x) for x in df["votes"]] if len(df) else []
+    for i, a in enumerate(names + ["b1"]):
+        for b in (names + ["b1"])[i + 1 :]:
+            pairs = [(x[a], x[b]) for x in vv if a in x and b in x]
+            kappas[f"{a}~{b}"] = {
+                "n": len(pairs),
+                "kappa": P.pairwise_kappa([p for p, _ in pairs], [q for _, q in pairs]),
+            }
+    stats = {
+        "documents": len(by_doc),
+        "mentions": len(df),
+        "tiers": df["tier"].value_counts().to_dict() if len(df) else {},
+        "roles": df["role"].value_counts().to_dict() if len(df) else {},
+        "kappa": kappas,
+    }
+    RESULTS.mkdir(exist_ok=True)
+    (RESULTS / "panel_stats.json").write_text(json.dumps(stats, indent=1, default=float) + "\n", encoding="utf-8")
+    typer.echo(json.dumps(stats, indent=1, default=float))
+
+
+@label_app.command()
+def pilot(docs: str = typer.Option("data/interim/pilot_docs.txt")) -> None:
+    """Pilot report: B0 and B1 against the panel ledger; panel members against objective checkbox truth (slice A)."""
+    from fedproc_ledger.candidates.patterns import extract_clause_numbers
+    from fedproc_ledger.label import pilot as PL
+    from fedproc_ledger.rules import baseline as B
+    from fedproc_ledger.rules.commands import load_registry
+
+    ids = [x for x in Path(docs).read_text().split() if x]
+    panel_df = pd.read_parquet(OUT / "panel.parquet")
+    registry = load_registry()
+    per_doc: dict[str, Any] = {}
+    a_pred: dict[str, list[str]] = {}
+    a_truth: list[str] = []
+    for doc_id in ids:
+        rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
+        alt = dict(zip(rules["cand_id"], rules["alternate"], strict=True))
+        mine = panel_df[panel_df["doc_id"] == doc_id]
+        gold, uncertain = PL.panel_ledger([{str(k): v for k, v in r.items()} for r in mine.to_dict("records")], alt)
+        b1 = {
+            (str(r.number), r.alternate or None)
+            for r in rules.itertuples()
+            if r.role in B.BINDING and not bool(r.from_range)
+        }
+        excl = {str(r.number) for r in rules.itertuples() if r.role == B.EXCLUDED}
+        b1 = {k for k in b1 if k[0] not in excl}
+        shard = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["text_plain"])
+        plain = "\n".join(str(t) for t in shard["text_plain"])
+        b0 = {
+            (n, None)
+            for n in (
+                B.b0_ledger(extract_clause_numbers(plain), registry) if registry else extract_clause_numbers(plain)
+            )
+        }
+        per_doc[doc_id] = {"gold": gold, "uncertain": uncertain, "systems": {"B0": b0, "B1": b1}}
+        votes = {str(r.cand_id): json.loads(str(r.votes)) for r in mine.itertuples()}
+        for r in rules.itertuples():
+            truth = PL.slice_a_truth(str(r.box_marker) if r.box_marker else None, str(r.section))
+            if truth and str(r.cand_id) in votes:
+                a_truth.append(truth)
+                for name, role in votes[str(r.cand_id)].items():
+                    a_pred.setdefault(name, []).append(role)
+    scores = PL.score_systems(per_doc)
+    a_scores = {n: PL.role_agreement(p, a_truth) for n, p in a_pred.items() if len(p) == len(a_truth)}
+    stats = json.loads((RESULTS / "panel_stats.json").read_text()) if (RESULTS / "panel_stats.json").exists() else {}
+    report = {
+        "documents": len(ids),
+        "panel": stats,
+        "ledger_vs_panel": scores,
+        "slice_a": {"n": len(a_truth), "per_voter": a_scores},
+        "decision": PL.decide(scores["B0"]["precision"], scores["B1"]["f"]),
+        "note": "References are panel-adjudicated, not human gold (D-019); slice A is objective but B1 reads the same glyphs.",
+    }
+    (RESULTS / "pilot.json").write_text(PL.dumps(report) + "\n", encoding="utf-8")
+    typer.echo(PL.dumps({k: report[k] for k in ("ledger_vs_panel", "slice_a", "decision")}))

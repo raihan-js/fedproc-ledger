@@ -1,0 +1,175 @@
+{
+ "seed": 20261006,
+ "rfo_cutoff": "2025-10-28",
+ "rfo_era_documents": 14,
+ "strata": {
+  "checklist": [
+   "839c06c27240191f",
+   "0b6d32ff843b3186",
+   "1c8d9a656ea96839",
+   "7475997a1400070e",
+   "90eaed77d44d3668",
+   "4312e6927b11c7f5",
+   "6cc53dd21059c4b3",
+   "9e80a2e2fb0b04b5"
+  ],
+  "ibr": [
+   "2b41faa2103a85d7",
+   "a58a2e3043a9fc0d",
+   "615c6ca225c5b544",
+   "aa0a8d3f982c13b5",
+   "765685279f71f0c7",
+   "6cd0a89df8722cd7"
+  ],
+  "other": [
+   "16f2b2137480e193",
+   "90e399ce0d5bc193",
+   "5fcd04c0a83d4f05",
+   "3e2d70619899cd52",
+   "2dbb05703eeffe9d",
+   "1c1762fb0e907b98"
+  ]
+ },
+ "info": {
+  "0b6d32ff843b3186": {
+   "candidates": "113",
+   "chk": "9",
+   "ibr": "4",
+   "posted_date": "2026-04-07",
+   "department": "DOD_ARMY"
+  },
+  "16f2b2137480e193": {
+   "candidates": "57",
+   "chk": "1",
+   "ibr": "0",
+   "posted_date": "2026-05-08",
+   "department": "VA"
+  },
+  "1c1762fb0e907b98": {
+   "candidates": "19",
+   "chk": "0",
+   "ibr": "0",
+   "posted_date": "2026-05-21",
+   "department": "DOD_NAVY"
+  },
+  "1c8d9a656ea96839": {
+   "candidates": "83",
+   "chk": "6",
+   "ibr": "0",
+   "posted_date": "2026-06-29",
+   "department": "DOD_ARMY"
+  },
+  "2b41faa2103a85d7": {
+   "candidates": "55",
+   "chk": "0",
+   "ibr": "22",
+   "posted_date": "2026-08-13",
+   "department": "DOD_AIR_FORCE"
+  },
+  "2dbb05703eeffe9d": {
+   "candidates": "27",
+   "chk": "0",
+   "ibr": "0",
+   "posted_date": "2025-11-05",
+   "department": "DOD_DLA"
+  },
+  "3e2d70619899cd52": {
+   "candidates": "47",
+   "chk": "0",
+   "ibr": "0",
+   "posted_date": "2026-02-16",
+   "department": "DOD_NAVY"
+  },
+  "4312e6927b11c7f5": {
+   "candidates": "45",
+   "chk": "15",
+   "ibr": "15",
+   "posted_date": "2026-05-08",
+   "department": "USDA"
+  },
+  "5fcd04c0a83d4f05": {
+   "candidates": "21",
+   "chk": "0",
+   "ibr": "0",
+   "posted_date": "2025-08-21",
+   "department": "VA"
+  },
+  "615c6ca225c5b544": {
+   "candidates": "20",
+   "chk": "0",
+   "ibr": "10",
+   "posted_date": "2025-07-23",
+   "department": "DOD_NAVY"
+  },
+  "6cc53dd21059c4b3": {
+   "candidates": "121",
+   "chk": "87",
+   "ibr": "4",
+   "posted_date": "2026-06-23",
+   "department": "USDA"
+  },
+  "6cd0a89df8722cd7": {
+   "candidates": "53",
+   "chk": "0",
+   "ibr": "49",
+   "posted_date": "2024-12-11",
+   "department": "DOE"
+  },
+  "7475997a1400070e": {
+   "candidates": "112",
+   "chk": "23",
+   "ibr": "48",
+   "posted_date": "2026-05-28",
+   "department": "DOD_NAVY"
+  },
+  "765685279f71f0c7": {
+   "candidates": "75",
+   "chk": "0",
+   "ibr": "35",
+   "posted_date": "2025-02-27",
+   "department": "DOD_ARMY"
+  },
+  "839c06c27240191f": {
+   "candidates": "112",
+   "chk": "92",
+   "ibr": "4",
+   "posted_date": "2026-03-06",
+   "department": "DHS"
+  },
+  "90e399ce0d5bc193": {
+   "candidates": "56",
+   "chk": "0",
+   "ibr": "1",
+   "posted_date": "2025-04-21",
+   "department": "VA"
+  },
+  "90eaed77d44d3668": {
+   "candidates": "122",
+   "chk": "23",
+   "ibr": "16",
+   "posted_date": "2025-04-25",
+   "department": "GSA"
+  },
+  "9e80a2e2fb0b04b5": {
+   "candidates": "97",
+   "chk": "6",
+   "ibr": "0",
+   "posted_date": "2026-04-24",
+   "department": "DOD_ARMY"
+  },
+  "a58a2e3043a9fc0d": {
+   "candidates": "65",
+   "chk": "0",
+   "ibr": "30",
+   "posted_date": "2026-08-06",
+   "department": "DOD_ARMY"
+  },
+  "aa0a8d3f982c13b5": {
+   "candidates": "52",
+   "chk": "0",
+   "ibr": "49",
+   "posted_date": "2026-06-16",
+   "department": "DOE"
+  }
+ }
+}

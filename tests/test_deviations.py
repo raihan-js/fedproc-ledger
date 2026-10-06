@@ -76,3 +76,15 @@ def test_dhs_conformed_table_rows():
     assert rows["31"]["date"] == "2025-07-31"  # "FAR Class Deviation for FAR Part 31" variant
     assert rows["26"]["date"] == "2025-08-22" and rows["26"]["effective"] == "2025-11-03"  # issue date is the last date
     assert rows["4"]["revision"] == "1" and rows["4"]["date"] == "2025-11-06" and rows["4"]["effective"] == "2025-11-28"
+
+
+def test_dod_memo_parsing_and_clause_extraction():
+    from fedproc_ledger.registry.dod import clauses_252, parse_memo
+
+    memo = "DARS Tracking Number: 2026-O0043\nEffective February 17, 2026, contracting officers shall use"
+    got = parse_memo(memo)
+    assert (got["deviation_number"], got["date"], got["revision"]) == ("2026-O0043", "2026-02-17", False)
+    rev = "Tracking Number: 2026-O0048 Effective immediately, this revises and supersedes Class Deviation 2026- O0048, issued on March 5, 2026."
+    got = parse_memo(rev)
+    assert (got["date"], got["revision"], got["supersedes_issued"]) == (None, True, "2026-03-05")
+    assert clauses_252("use 252.204-7012 and 252.204-7012, not 2252.204-70123 or 52.204-21") == ["252.204-7012"]

@@ -33,6 +33,15 @@ _CUES = {
     "e_g": r"\be\.g\.|\bsee\b|\bin accordance with\b|\bpursuant to\b",
     "definitions": r"\(a\)\s*definitions|\bdefinitions\.",
     "deviation": r"deviation",
+    "found_herein": r"found herein|set forth herein|attached hereto|included herein",
+    "incorporated_herein": r"incorporated (?:herein|into this)|hereby incorporated",
+    "apply_stmt": (
+        r"\b(?:clauses?|provisions?)\b[^.;]{0,50}\b(?:apply|applies|applicable)\b"
+        r"|are as follows|the following (?:FAR |DFARS )?(?:clauses|provisions)"
+    ),
+    "requirement": r"\b(?:shall|must|is required|are required|required to)\b",
+    "in_accordance": r"in accordance with|pursuant to|\bIAW\b|\bper (?:FAR|DFARS)\b",
+    "includes_clause": r"\b(?:includes?|included|including) (?:the )?(?:FAR |DFARS )?(?:clause|provision)",
 }
 _CUE_RE = {k: re.compile(v, re.I) for k, v in _CUES.items()}
 _HEAD_KEYS = {
@@ -90,6 +99,8 @@ def mention_features(item: dict[str, Any], prev_lines: list[str], next_lines: li
     f["cited_date"] = float(bool(item.get("cited_date")))
     f["n_prev_nums"] = float(sum(len(re.findall(r"\d{2,4}\.\d{3}-\d", x)) for x in prev_lines))
     f["n_line_nums"] = float(len(re.findall(r"\d{2,4}\.\d{3}-\d", line)))
+    f["semi_list"] = float(line.count(";") >= 2 and len(re.findall(r"\d{2,4}\.\d{3}-\d", line)) >= 2)
+    f["after_semicolon"] = float(after.lstrip().startswith(";"))
     f["upper_ratio"] = float(sum(c.isupper() for c in line) / max(1, sum(c.isalpha() for c in line)))
     window = " ".join(prev_lines[-3:] + [line] + next_lines[:2])
     for k, rx in _CUE_RE.items():

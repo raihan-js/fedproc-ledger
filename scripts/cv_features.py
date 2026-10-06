@@ -1,6 +1,6 @@
 """Kaggle-style loop (D-019): grouped CV of a feature classifier on the agent-labelled audit sets plus slice A.
 
-Experiments: B1 alone, the 9b voter alone, features only, features + B1, features + B1 + voter vote (stacking).
+Experiments: B1 alone, features only, features + B1 (the LLM-vote stacking rows were dropped with Qwen, D-021).
 Every experiment is logged to results/leaderboard.jsonl. Groups are documents (so no document is in train and test).
 """
 
@@ -17,8 +17,7 @@ from sklearn.metrics import f1_score
 from sklearn.model_selection import GroupKFold
 
 from fedproc_ledger.eval.leaderboard import log_run
-from fedproc_ledger.label import panel as P
-from fedproc_ledger.label.commands import CACHE, build_items, make_chat, slice_a_ids
+from fedproc_ledger.label.commands import build_items, slice_a_ids
 from fedproc_ledger.model.features import mention_features
 from fedproc_ledger.paths import PROCESSED, RESULTS
 from fedproc_ledger.rules.baseline import BINDING
@@ -34,8 +33,6 @@ def build_dataset() -> pd.DataFrame:
                 labels[k] = (v, src)
     docs = sorted({k.rsplit("-p", 1)[0] for k in labels} | set(Path("data/interim/pilot_docs.txt").read_text().split()))
     rows = []
-    voter = P.Voter("9b-C", "qwen3.5:9b", "C")
-    chat, cache = make_chat("http://127.0.0.1:11600/v1"), P.Cache(CACHE)
     for d in docs:
         a = slice_a_ids(d)
         for k, v in a.items():
@@ -49,7 +46,6 @@ def build_dataset() -> pd.DataFrame:
         pg = pd.read_parquet(PROCESSED / "pages" / f"{d}.parquet", columns=["page", "text_layout"])
         pages = {int(str(r.page)): str(r.text_layout).split("\n") for r in pg.itertuples()}
         items = [i for i in build_items(d) if i["id"] in want]
-        votes = P.vote(items, voter, chat, cache)
         for it in items:
             r = rules.loc[it["id"]]
             lines = pages[int(r["page"])]
@@ -70,7 +66,7 @@ def build_dataset() -> pd.DataFrame:
                     "b1": it["b1"],
                     "b1_conf": float(r["confidence"]),
                     "section": str(r["section"]),
-                    "vote": votes.get(it["id"], "UNCLEAR"),
+                    "vote": "NA",
                     "feat": json.dumps(f),
                 }
             )
@@ -125,14 +121,14 @@ def main() -> None:
     print(len(df), "labelled mentions;", df["doc"].nunique(), "documents;", df["source"].value_counts().to_dict())
     truth = df["label"].to_numpy()
     hard = (df["source"] != "slice_a").to_numpy()  # the non-box mentions: where the methods differ
-    preds = {"B1 alone": df["b1"].to_numpy(), "9b-C vote alone": df["vote"].to_numpy()}
+    preds = {
+        "B1 alone": df["b1"].to_numpy(),
+    }
     for name, b1, vote, model in [
         ("features (lr)", False, False, "lr"),
         ("features (hgb)", False, False, "hgb"),
         ("features+B1 (lr)", True, False, "lr"),
         ("features+B1 (hgb)", True, False, "hgb"),
-        ("features+B1+vote (lr)", True, True, "lr"),
-        ("features+B1+vote (hgb)", True, True, "hgb"),
     ]:
         preds[name] = cv(df, b1, vote, model)
     print(

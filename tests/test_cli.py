@@ -27,7 +27,7 @@ def test_env_json_is_valid():
 
 
 def test_unbuilt_steps_exit_nonzero_with_a_pointer_to_the_plan():
-    r = runner.invoke(app, ["candidates"])
+    r = runner.invoke(app, ["silver"])
     assert r.exit_code == 2
 
 

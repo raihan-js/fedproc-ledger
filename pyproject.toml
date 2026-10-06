@@ -59,6 +59,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501"]  # fixtures hold literal HTML/XML lines
 "src/fedproc_ledger/extract/report.py" = ["E501"]  # HTML templates
+"src/fedproc_ledger/rules/commands.py" = ["E501"]  # HTML templates
 
 [tool.mypy]
 python_version = "3.11"

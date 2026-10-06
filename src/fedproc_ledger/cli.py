@@ -11,6 +11,7 @@ from fedproc_ledger.acquire.commands import acquire_app
 from fedproc_ledger.envinfo import environment, gpu_line
 from fedproc_ledger.extract.commands import extract_app
 from fedproc_ledger.registry.commands import registry_app
+from fedproc_ledger.rules.commands import rules_app
 
 app = typer.Typer(
     help="fedproc-ledger: which clauses actually bind a US federal solicitation, and how.",
@@ -77,7 +78,8 @@ def _register(name: str, phase: int, desc: str) -> None:
 app.add_typer(acquire_app, name="acquire", help="Phase 1: GovCon search, notice pool, attachment download.")
 app.add_typer(registry_app, name="registry", help="Phase 2: the eCFR clause registry with version history.")
 app.add_typer(extract_app, name="extract", help="Phase 3: layout-aware text extraction with checkbox markers.")
-_IMPLEMENTED = {"acquire", "registry", "extract"}
+app.add_typer(rules_app, name="rules", help="Phase 4: candidates, section labels, rules baseline B1 and status-quo B0.")
+_IMPLEMENTED = {"acquire", "registry", "extract", "rules"}
 
 for _name, _phase, _desc in PHASES:
     if _name not in _IMPLEMENTED:

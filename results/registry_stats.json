@@ -1,0 +1,320 @@
+{
+ "ecfr_as_of": "2026-10-02",
+ "earliest_version_date": "2014-10-17",
+ "sections": 2434,
+ "by_status": {
+  "active": 2136,
+  "reserved": 188,
+  "removed": 110
+ },
+ "by_regulation": {
+  "FAR": 702,
+  "DFARS": 428,
+  "GSAM": 208,
+  "VAAR": 145,
+  "NFS": 144,
+  "CH15": 91,
+  "CH13": 87,
+  "AIDAR": 84,
+  "DEAR": 77,
+  "CH12": 73,
+  "HSAR": 58,
+  "HHSAR": 54,
+  "HUDAR": 51,
+  "DOSAR": 42,
+  "CH20": 35,
+  "CH34": 33,
+  "CH14": 26,
+  "CH16": 26,
+  "CH21": 21,
+  "CH29": 15,
+  "CH10": 11,
+  "CH28": 10,
+  "CH19": 7,
+  "AGAR": 4,
+  "DLAD": 2
+ },
+ "kind_active": {
+  "clause": 1643,
+  "provision": 372,
+  "unknown": 121
+ },
+ "parts": [
+  {
+   "part": "52",
+   "regulation": "FAR",
+   "version_records": 2264,
+   "snapshot_dates": 104,
+   "sections_now": 680,
+   "rows": 702,
+   "snapshot_unavailable_dates": []
+  },
+  {
+   "part": "252",
+   "regulation": "DFARS",
+   "version_records": 1385,
+   "snapshot_dates": 97,
+   "sections_now": 405,
+   "rows": 428,
+   "snapshot_unavailable_dates": [
+    "2016-12-22"
+   ]
+  },
+  {
+   "part": "352",
+   "regulation": "HHSAR",
+   "version_records": 85,
+   "snapshot_dates": 5,
+   "sections_now": 53,
+   "rows": 54,
+   "snapshot_unavailable_dates": [
+    "2016-10-04"
+   ]
+  },
+  {
+   "part": "452",
+   "regulation": "AGAR",
+   "version_records": 122,
+   "snapshot_dates": 2,
+   "sections_now": 4,
+   "rows": 4,
+   "snapshot_unavailable_dates": [
+    "2016-10-04"
+   ]
+  },
+  {
+   "part": "552",
+   "regulation": "GSAM",
+   "version_records": 703,
+   "snapshot_dates": 77,
+   "sections_now": 193,
+   "rows": 208,
+   "snapshot_unavailable_dates": [
+    "2016-10-04"
+   ]
+  },
+  {
+   "part": "652",
+   "regulation": "DOSAR",
+   "version_records": 64,
+   "snapshot_dates": 7,
+   "sections_now": 41,
+   "rows": 42,
+   "snapshot_unavailable_dates": [
+    "2016-10-04"
+   ]
+  },
+  {
+   "part": "752",
+   "regulation": "AIDAR",
+   "version_records": 244,
+   "snapshot_dates": 20,
+   "sections_now": 76,
+   "rows": 84,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "852",
+   "regulation": "VAAR",
+   "version_records": 608,
+   "snapshot_dates": 38,
+   "sections_now": 117,
+   "rows": 145,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "952",
+   "regulation": "DEAR",
+   "version_records": 174,
+   "snapshot_dates": 5,
+   "sections_now": 73,
+   "rows": 77,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "1052",
+   "regulation": "CH10",
+   "version_records": 24,
+   "snapshot_dates": 3,
+   "sections_now": 11,
+   "rows": 11,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "1252",
+   "regulation": "CH12",
+   "version_records": 165,
+   "snapshot_dates": 3,
+   "sections_now": 73,
+   "rows": 73,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "1352",
+   "regulation": "CH13",
+   "version_records": 141,
+   "snapshot_dates": 2,
+   "sections_now": 86,
+   "rows": 87,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "1452",
+   "regulation": "CH14",
+   "version_records": 55,
+   "snapshot_dates": 4,
+   "sections_now": 24,
+   "rows": 26,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "1552",
+   "regulation": "CH15",
+   "version_records": 209,
+   "snapshot_dates": 13,
+   "sections_now": 89,
+   "rows": 91,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "1652",
+   "regulation": "CH16",
+   "version_records": 46,
+   "snapshot_dates": 2,
+   "sections_now": 26,
+   "rows": 26,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "1852",
+   "regulation": "NFS",
+   "version_records": 279,
+   "snapshot_dates": 26,
+   "sections_now": 142,
+   "rows": 144,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "1952",
+   "regulation": "CH19",
+   "version_records": 7,
+   "snapshot_dates": 1,
+   "sections_now": 7,
+   "rows": 7,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "2052",
+   "regulation": "CH20",
+   "version_records": 45,
+   "snapshot_dates": 1,
+   "sections_now": 35,
+   "rows": 35,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "2152",
+   "regulation": "CH21",
+   "version_records": 34,
+   "snapshot_dates": 1,
+   "sections_now": 21,
+   "rows": 21,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "2452",
+   "regulation": "HUDAR",
+   "version_records": 120,
+   "snapshot_dates": 5,
+   "sections_now": 51,
+   "rows": 51,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "2852",
+   "regulation": "CH28",
+   "version_records": 19,
+   "snapshot_dates": 2,
+   "sections_now": 10,
+   "rows": 10,
+   "snapshot_unavailable_dates": [
+    "2016-12-16"
+   ]
+  },
+  {
+   "part": "2952",
+   "regulation": "CH29",
+   "version_records": 17,
+   "snapshot_dates": 3,
+   "sections_now": 15,
+   "rows": 15,
+   "snapshot_unavailable_dates": [
+    "2014-10-17"
+   ]
+  },
+  {
+   "part": "3052",
+   "regulation": "HSAR",
+   "version_records": 117,
+   "snapshot_dates": 12,
+   "sections_now": 57,
+   "rows": 58,
+   "snapshot_unavailable_dates": [
+    "2014-10-17"
+   ]
+  },
+  {
+   "part": "3452",
+   "regulation": "CH34",
+   "version_records": 68,
+   "snapshot_dates": 3,
+   "sections_now": 33,
+   "rows": 33,
+   "snapshot_unavailable_dates": [
+    "2014-10-17"
+   ]
+  },
+  {
+   "part": "5452",
+   "regulation": "DLAD",
+   "version_records": 4,
+   "snapshot_dates": 1,
+   "sections_now": 2,
+   "rows": 2,
+   "snapshot_unavailable_dates": [
+    "2014-10-17"
+   ]
+  }
+ ],
+ "warnings": [],
+ "requests": 356,
+ "cache_hits": 139
+}

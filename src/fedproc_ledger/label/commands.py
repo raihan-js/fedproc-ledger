@@ -244,7 +244,8 @@ def pilot(docs: str = typer.Option("data/interim/pilot_docs.txt")) -> None:
 
 
 def slice_a_ids(doc_id: str) -> dict[str, str]:
-    """Candidate id -> objective truth (SELECTED / NOT_SELECTED) for checklist item lines of one document."""
+    """Candidate id -> objective truth (SELECTED / NOT_SELECTED) for checklist item lines of one document: glyph boxes
+    (⟦X⟧ / ⟦ ⟧) and typed forms ("__ (43)", "X (44)", "[ ]", "[X]"), decided on the first candidate of the line."""
     from fedproc_ledger.label import pilot as PL
 
     rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
@@ -253,8 +254,15 @@ def slice_a_ids(doc_id: str) -> dict[str, str]:
     first = set(rules.sort_values("char_start").groupby(["page", "line_no"])["cand_id"].first().astype(str))
     out = {}
     for r in rules.itertuples():
-        on_item = (int(str(r.page)), int(str(r.line_no))) in keys and str(r.cand_id) in first
+        if str(r.cand_id) not in first or bool(r.from_range):
+            continue
+        on_item = (int(str(r.page)), int(str(r.line_no))) in keys
         truth = PL.slice_a_truth(str(r.box_marker) if r.box_marker else None, on_item)
+        if truth is None:
+            line = str(r.line_text)
+            pos = line.find(str(r.raw))
+            if 0 <= pos <= 40:  # the number sits right after the "__ (43)" / "X (44)" prefix
+                truth = PL.typed_item_state(line)
         if truth:
             out[str(r.cand_id)] = truth
     return out

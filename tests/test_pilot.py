@@ -54,3 +54,14 @@ def test_scoring_ignores_uncertain_numbers_and_the_decision_rule_follows_plan():
     s = PL.score_systems(per)["S"]  # d1: tp1 fn1 (c ignored); d2: tp1 fp1
     assert abs(s["precision"] - 2 / 3) < 1e-9 and abs(s["recall"] - 2 / 3) < 1e-9
     assert PL.decide(0.7, 0.95).startswith("GO_MODEL") and PL.decide(0.9, 0.95).startswith("PIVOT")
+
+
+def test_typed_checklist_forms_are_decided_by_rule():
+    assert PL.typed_item_state("__ (43) 52.225-5, Trade Agreements (Nov 2013)") == "CHECKLIST_NOT_SELECTED"
+    assert PL.typed_item_state("[ ] (ii) 252.225-7020, Trade Agreements Certificate.") == "CHECKLIST_NOT_SELECTED"
+    assert PL.typed_item_state("___ (7) 52.222-55, Minimum Wages") == "CHECKLIST_NOT_SELECTED"
+    assert PL.typed_item_state("X (44) 52.225-13, Restrictions") == "CHECKLIST_SELECTED"
+    assert PL.typed_item_state("__X__ (33) 52.222-21, Prohibition of Segregated Facilities") == "CHECKLIST_SELECTED"
+    assert PL.typed_item_state("[X]FAR 52.225-13 Restrictions on Certain Foreign Purchases") == "CHECKLIST_SELECTED"
+    assert PL.typed_item_state("52.204-21 Basic Safeguarding") is None
+    assert PL.typed_item_state("__ Offeror certifies that it is a small business") is None

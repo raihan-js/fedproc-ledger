@@ -60,6 +60,23 @@ def checklist_item_keys(pages: Iterable[tuple[int, str]]) -> set[tuple[int, int]
     return {(pg, i) for pg, text in pages for i, line in enumerate(text.split("\n")) if _ITEM.match(line)}
 
 
+_TYPED_BLANK = re.compile(r"^\s*(?:_{2,}|\[\s*\])\s*(?:\(\d{1,3}\)|\([a-z]{1,4}\)|\([ivx]+\))")
+_TYPED_X = re.compile(r"^\s*(?:_*X_*|\[X\])\s*(?:\(\d{1,3}\)|\([A-Za-z]{1,4}\)|FAR\b)")
+
+
+def typed_item_state(line: str) -> str | None:
+    """Checklist state of a typed item line (the list form of 52.212-5 and agency checklists).
+
+    "__ (43) 52.225-5" or "[ ] (ii) ..." is not selected; "X (44) ...", "__X__ (33) ..." or "[X]FAR ..." is selected;
+    None when the line is not such an item.
+    """
+    if _TYPED_X.match(line):
+        return SELECTED
+    if _TYPED_BLANK.match(line):
+        return NOT_SELECTED
+    return None
+
+
 def role_agreement(pred: Sequence[str], truth: Sequence[str]) -> dict[str, float]:
     n = len(truth)
     ok = sum(p == t for p, t in zip(pred, truth, strict=True))

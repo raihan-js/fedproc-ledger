@@ -1,0 +1,19 @@
+# Phase 1 defaults (plan section 5). Edit here, never in code. Dates are inclusive.
+[search]
+notice_types = ["Solicitation", "Combined Synopsis/Solicitation"]
+posted_from = "2024-01-01"
+has_attachments = true
+page_limit = 1000            # 100 on the free trial
+sort_by = "posted_date"
+
+[pool]
+target_unique_solicitations = 3000
+max_department_share = 0.25
+
+[download]
+user_agent = "fedproc-ledger-research/1.0 (contact: araihansikder@gmail.com)"
+max_redirects = 5
+timeout_s = 60
+min_seconds_between_downloads = 1.0
+max_file_mb = 50
+keep_extensions = [".pdf", ".docx", ".doc", ".txt"]

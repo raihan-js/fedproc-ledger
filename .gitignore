@@ -1,0 +1,27 @@
+# data and secrets never go in git
+data/
+.env
+*.key
+# models and experiment stores
+models/
+artifacts/
+*.onnx
+*.pt
+*.safetensors
+wandb/
+mlruns/
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+# paper build
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.synctex.gz

@@ -39,3 +39,25 @@ def test_markings_are_reported_by_name():
     assert find_markings("Export Controlled technical data (ITAR)") == ["export_control"]
     assert find_markings("A plain solicitation for janitorial services") == []
     assert find_markings("Distribution Statement A: approved for public release") == []  # A is public release
+
+
+def test_a_banner_marking_is_a_short_upper_case_line_not_a_sentence_that_mentions_the_topic():
+    from fedproc_ledger.extract.privacy import find_banner_markings
+
+    banners = [
+        "CUI",
+        "CONTROLLED UNCLASSIFIED INFORMATION",
+        "SOURCE SELECTION INFORMATION - SEE FAR 2.101 AND 3.104",
+        "EXPORT CONTROLLED",
+    ]
+    assert find_banner_markings(banners) == ["CUI", "export_control", "source_selection"]
+    sentences = [
+        "Offerors shall mark proprietary data in accordance with 52.215-1(e).",
+        "The contractor shall protect CUI as required by 252.204-7012.",
+        "Export-controlled items are subject to the EAR and the ITAR.",
+    ]
+    assert find_banner_markings(sentences) == []
+    assert find_banner_markings(["Distribution Statement D: authorized to DoD components only"]) == [
+        "distribution_statement"
+    ]
+    assert find_banner_markings(["x" * 400 + " CUI"]) == []  # a long line is not a banner

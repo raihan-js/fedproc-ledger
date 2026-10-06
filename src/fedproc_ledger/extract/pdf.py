@@ -27,7 +27,15 @@ UNCHECKED = {"☐", "□", "◻", "❏", "❑"}  # ☐ □ ◻ ❏ ❑
 # Marks that are a checkbox only when they stand where a box would: at the start of a line.
 TICKS_AT_LINE_START = {"✓": "X", "✔": "X", "✗": "X", "✘": "X"}  # ✓ ✔ ✗ ✘
 FILLED_SQUARE = "■"  # ■ checked at the start of a clause line, otherwise a bullet
-_PUA = re.compile("[-]")  # Wingdings and friends: meaning not verified, so the state is unknown and logged
+# Private-use code points (Wingdings and friends). Only box-shaped ones can be a checkbox, and their meaning (checked or
+# not) has not been verified on rendered pages, so their state is unknown. Bullets such as U+F0B7 and U+F0A7 are ignored
+# as boxes and logged. Built with chr() so no invisible private-use character sits in the source.
+BOX_LIKE_PUA = {chr(c) for c in (0xF06F, 0xF070, 0xF071, 0xF072, 0xF0A8, 0xF0FC, 0xF0FD, 0xF0FE)}
+
+
+def is_pua(c: str) -> bool:
+    return 0xF000 <= ord(c) <= 0xF0FF
+
 
 _CLAUSE_AFTER = re.compile(r"^\s*(?:\(\w{1,4}\)\s*)*(?:FAR\s+|DFARS\s+)?(?:\d{2,4})\.\d{3}(?:-\d{1,4})?")
 _CHECKLIST_LINE = re.compile(
@@ -51,6 +59,7 @@ class Line:
     text_layout: str
     bbox: list[float]
     boxes: list[Box] = field(default_factory=list)
+    ignored_pua: list[str] = field(default_factory=list)  # private-use code points that are not boxes (bullets)
 
 
 @dataclass
@@ -63,6 +72,7 @@ class PageText:
     scanned: bool
     pua_codepoints: dict[str, int]
     unattached_widgets: int = 0
+    pua_ignored: dict[str, int] = field(default_factory=dict)
 
     def offset_map(self) -> list[list[Any]]:
         """[start, end, bbox] of every line of `text_layout` (line granularity: enough to point at evidence)."""
@@ -74,7 +84,7 @@ class PageText:
 
 
 def _line_from_chars(chars: list[dict[str, Any]], bbox: tuple[float, ...]) -> Line:
-    plain, layout, boxes = [], [], []
+    plain, layout, boxes, ignored = [], [], [], []
     first_text = next((i for i, c in enumerate(chars) if not c["c"].isspace()), 0)
     for i, ch in enumerate(chars):
         c = ch["c"]
@@ -90,14 +100,16 @@ def _line_from_chars(chars: list[dict[str, Any]], bbox: tuple[float, ...]) -> Li
             state = TICKS_AT_LINE_START[c]
         elif c == FILLED_SQUARE and at_start and _CLAUSE_AFTER.match("".join(x["c"] for x in chars[i + 1 :])):
             state = "X"
-        elif _PUA.match(c):
+        elif c in BOX_LIKE_PUA:
             state, detail = "?", f"U+{ord(c):04X}"
+        elif is_pua(c):
+            ignored.append(f"U+{ord(c):04X}")
         if state is None:
             layout.append(c)
         else:
             layout.append(MARK[state])
             boxes.append(Box(state, "glyph", [round(v, 1) for v in ch["bbox"]], detail, 1.0 if state != "?" else 0.0))
-    return Line("".join(plain), "".join(layout), [round(v, 1) for v in bbox], boxes)
+    return Line("".join(plain), "".join(layout), [round(v, 1) for v in bbox], boxes, ignored)
 
 
 def _widget_checked(value: Any) -> bool:
@@ -205,6 +217,7 @@ def extract_page(page: pymupdf.Page, number: int) -> PageText:
         scanned,
         dict(pua),
         unattached,
+        dict(Counter(c for ln in lines for c in ln.ignored_pua)),
     )
 
 
@@ -222,7 +235,12 @@ def page_row(doc_id: str, p: PageText) -> dict[str, Any]:
         "text_plain": p.text_plain,
         "text_layout": p.text_layout,
         "box_signals": json.dumps(
-            {"counts": p.box_counts, "pua": p.pua_codepoints, "unattached_widgets": p.unattached_widgets}
+            {
+                "counts": p.box_counts,
+                "pua": p.pua_codepoints,
+                "pua_ignored": p.pua_ignored,
+                "unattached_widgets": p.unattached_widgets,
+            }
         ),
         "offset_map": json.dumps(p.offset_map()),
         "scanned": p.scanned,

@@ -1,0 +1,29 @@
+{
+ "documents": 60,
+ "extracted": 60,
+ "errors": {},
+ "pages": 864,
+ "scanned_documents": 1,
+ "documents_with_any_box": 20,
+ "documents_with_widgets": 6,
+ "box_counts_by_source_and_state": {
+  "drawing: ": 142,
+  "drawing:X": 25,
+  "glyph: ": 552,
+  "glyph:?": 12,
+  "lost:?": 165,
+  "widget: ": 38,
+  "widget:X": 22
+ },
+ "unverified_private_use_codepoints": {
+  "U+F0A7": 8,
+  "U+F0B7": 4
+ },
+ "documents_with_a_marking_flag": {
+  "CUI": 5,
+  "export_control": 7,
+  "proprietary": 4
+ },
+ "documents_with_any_marking_flag": 11,
+ "seconds_total": 108.9
+}

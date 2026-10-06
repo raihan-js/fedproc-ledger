@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 
 # Markings that exclude a document from the public release (counted for internal statistics only).
 MARKINGS: dict[str, re.Pattern[str]] = {
@@ -23,7 +24,35 @@ _PHONE = re.compile(
 
 
 def find_markings(text: str) -> list[str]:
+    """Every marking keyword MENTIONED anywhere in the text.
+
+    Common FAR/DFARS boilerplate mentions CUI, export control and proprietary data, so this is NOT evidence that a
+    document is marked; see `find_banner_markings`.
+    """
     return sorted(name for name, pat in MARKINGS.items() if pat.search(text))
+
+
+def find_banner_markings(lines: Iterable[str]) -> list[str]:
+    """Markings that stand as a banner, or an explicit `Distribution Statement B-F`.
+
+    A banner is a short, mostly upper-case line such as a header or footer (`CUI`, `SOURCE SELECTION INFORMATION - SEE
+    FAR 2.101 AND 3.104`). This is what excludes a document from the public release; a sentence that merely mentions the
+    topic does not.
+    """
+    found: set[str] = set()
+    for raw in lines:
+        s = raw.strip()
+        if not 3 <= len(s) <= 120:
+            continue
+        for name, pat in MARKINGS.items():
+            if not pat.search(s):
+                continue
+            letters = [c for c in s if c.isalpha()]
+            if name == "distribution_statement" or (
+                letters and sum(c.isupper() for c in letters) / len(letters) >= 0.8
+            ):
+                found.add(name)
+    return sorted(found)
 
 
 _CLAUSE_SHAPE = re.compile(r"\d{3,4}\.\d{3}-\d{4}")  # 252.204-7012 has a phone number's digit groups but mixes . and -

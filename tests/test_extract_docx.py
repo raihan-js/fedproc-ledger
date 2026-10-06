@@ -73,12 +73,17 @@ def test_batch_runner_writes_a_shard_and_reports_errors_without_raising(tmp_path
     from fedproc_ledger.extract.run import process_document
 
     d = docx.Document()
-    d.add_paragraph("☒ (1) 52.203-6 Restrictions. This document is marked CUI.")
+    d.add_paragraph("☒ (1) 52.203-6 Restrictions. See also the CUI program.")
+    d.add_paragraph("CUI")
     src = tmp_path / "a.docx"
     d.save(src)
     ok = process_document("abc123", str(src), ".docx", str(tmp_path / "pages"), str(tmp_path / "work"))
     assert (
-        ok["error"] is None and ok["n_pages"] == 1 and ok["box_counts"] == {"glyph:X": 1} and ok["markings"] == ["CUI"]
+        ok["error"] is None
+        and ok["n_pages"] == 1
+        and ok["box_counts"] == {"glyph:X": 1}
+        and ok["markings"] == ["CUI"]
+        and ok["marking_mentions"] == ["CUI"]
     )
     shard = pd.read_parquet(tmp_path / "pages" / "abc123.parquet")
     assert shard.iloc[0]["text_layout"].startswith(CHECKED_M)

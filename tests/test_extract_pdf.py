@@ -76,6 +76,11 @@ def test_unverified_private_use_glyphs_are_unknown_and_logged(tmp_path):
             assert b.state == "?"
 
 
+def test_private_use_bullets_are_not_boxes_but_are_logged(tmp_path):
+    p = make_pdf(tmp_path / "bul.pdf", [chr(0xF0B7) + " a bullet line", chr(0xF0A7) + " another bullet"])
+    assert p.box_counts == {} and all(not ln.boxes for ln in p.lines)
+
+
 def test_form_widget_checkbox_state_is_attached_to_the_line_on_its_right(tmp_path):
     p = make_pdf(
         tmp_path / "d.pdf",

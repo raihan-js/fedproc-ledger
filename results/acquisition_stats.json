@@ -1,0 +1,84 @@
+{
+ "notices_selected": 4800,
+ "notices_done": 292,
+ "notices_failed_attachment_list": 0,
+ "notices_with_no_stored_file": 4,
+ "files_by_status": {
+  "ok": 942,
+  "skipped": 689,
+  "failed": 39
+ },
+ "files_not_stored_by_reason": {
+  "skipped:over_file_cap": 520,
+  "skipped:extension": 134,
+  "failed:http_400": 39,
+  "skipped:too_slow": 25,
+  "skipped:too_large": 6,
+  "skipped:empty": 4
+ },
+ "documents_rows": 939,
+ "documents_unique_sha256": 932,
+ "bytes_unique": 663110837,
+ "by_file_type": {
+  "pdf": 751,
+  "docx": 170,
+  "txt": 4,
+  "doc": 7
+ },
+ "by_department": {
+  "HHS": 45,
+  "DHS": 50,
+  "VA": 165,
+  "DOD_ARMY": 88,
+  "DOI": 99,
+  "DOD_DLA": 55,
+  "USDA": 52,
+  "DOD_AIR_FORCE": 112,
+  "DOE": 33,
+  "OTHER": 47,
+  "DOJ": 34,
+  "DOD_OTHER": 51,
+  "DOD_NAVY": 72,
+  "GSA": 12,
+  "DOT": 8,
+  "NASA": 16
+ },
+ "by_month": {
+  "2024-10": 40,
+  "2024-11": 35,
+  "2024-12": 35,
+  "2025-01": 39,
+  "2025-02": 33,
+  "2025-03": 43,
+  "2025-04": 40,
+  "2025-05": 37,
+  "2025-06": 34,
+  "2025-07": 33,
+  "2025-08": 46,
+  "2025-09": 42,
+  "2025-10": 42,
+  "2025-11": 43,
+  "2025-12": 38,
+  "2026-01": 32,
+  "2026-02": 45,
+  "2026-03": 46,
+  "2026-04": 40,
+  "2026-05": 30,
+  "2026-06": 47,
+  "2026-07": 41,
+  "2026-08": 39,
+  "2026-09": 39
+ },
+ "documents_per_notice_median": 3.0,
+ "api_calls": {
+  "total": 561,
+  "by_path": {
+   "/me": 6,
+   "opportunities": 555
+  },
+  "by_status": {
+   "200": 558,
+   "429": 3
+  }
+ }
+}

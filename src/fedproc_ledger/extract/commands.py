@@ -67,9 +67,12 @@ def stats() -> None:
         for k, v in s["pua"].items():
             pua[k] = pua.get(k, 0) + v
     markings: dict[str, int] = {}
+    mentions: dict[str, int] = {}
     for s in ok:
         for m in s["markings"]:
             markings[m] = markings.get(m, 0) + 1
+        for m in s.get("marking_mentions", []):
+            mentions[m] = mentions.get(m, 0) + 1
     errors: dict[str, int] = {}
     for s in summaries.values():
         if s.get("error"):
@@ -85,8 +88,9 @@ def stats() -> None:
         "documents_with_widgets": sum(1 for s in ok if any(k.startswith("widget") for k in s["box_counts"])),
         "box_counts_by_source_and_state": dict(sorted(boxes.items())),
         "unverified_private_use_codepoints": dict(sorted(pua.items(), key=lambda kv: -kv[1])),
-        "documents_with_a_marking_flag": {k: v for k, v in sorted(markings.items())},
-        "documents_with_any_marking_flag": sum(1 for s in ok if s["markings"]),
+        "documents_with_a_banner_marking": {k: v for k, v in sorted(markings.items())},
+        "documents_with_any_banner_marking": sum(1 for s in ok if s["markings"]),
+        "documents_mentioning_a_marking_keyword": {k: v for k, v in sorted(mentions.items())},
         "seconds_total": round(sum(s["seconds"] for s in summaries.values()), 1),
     }
     RESULTS.mkdir(exist_ok=True)

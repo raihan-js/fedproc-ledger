@@ -13,7 +13,7 @@ import pandas as pd
 
 from fedproc_ledger.extract.docx import extract_docx
 from fedproc_ledger.extract.pdf import PageText, _line_from_chars, extract_pdf, page_row
-from fedproc_ledger.extract.privacy import find_markings
+from fedproc_ledger.extract.privacy import find_banner_markings, find_markings
 
 
 def _extract_txt(path: Path) -> list[PageText]:
@@ -96,7 +96,8 @@ def process_document(doc_id: str, path: str, ext: str, out_dir: str, work_dir: s
             box_counts=counts,
             pua=pua,
             unattached_widgets=sum(p.unattached_widgets for p in pages),
-            markings=find_markings(text),
+            markings=find_banner_markings(ln.text_plain for p in pages for ln in p.lines),
+            marking_mentions=find_markings(text),
         )
     except Exception as e:  # noqa: BLE001  (one bad file must not stop the batch)
         summary["error"] = f"{type(e).__name__}: {str(e)[:200]}"

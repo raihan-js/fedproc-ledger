@@ -59,9 +59,15 @@ def test_dates_alternates_and_ranges(reg):
 
 
 def test_every_active_section_has_one_known_kind_value_and_the_counts_are_plausible(reg):
-    assert set(reg["kind"]) <= {"clause", "provision", "unknown"} and set(reg["status"]) == {
-        "active",
-        "reserved",
-        "removed",
-    }
+    assert set(reg["kind"]) <= {"clause", "provision", "unknown"}
+    assert set(reg["status"]) == {"active", "reserved", "removed", "rfo_only"}
     assert reg["regulation"].isin(["FAR", "DFARS"]).sum() > 1000 and (reg["status"] == "active").sum() > 2000
+
+
+def test_the_rfo_layer(reg):
+    assert (
+        reg.loc["52.212-5", "rfo_status"] == "reserved" and reg.loc["52.212-5", "status"] == "active"
+    )  # eCFR still has it
+    assert reg.loc["52.219-14", "rfo_status"] == "text"
+    assert reg.loc["52.240-90", "status"] == "rfo_only" and reg.loc["52.240-90", "kind"] == "provision"
+    assert (reg["status"] == "rfo_only").sum() == 10 and reg.loc["252.204-7012", "rfo_status"] is None

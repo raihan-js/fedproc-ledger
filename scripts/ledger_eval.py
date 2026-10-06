@@ -31,7 +31,9 @@ _MAP = {"binding": {"B": "B", "N": "N", "R": "N", "U": "U"}, "applicable": {"B":
 ]
 gold = {d: {n: _MAP[v] for n, v in labels.items()} for d, labels in gold.items()}
 registry = load_registry()
-systems: dict[str, dict[str, set[str]]] = {k: {} for k in ["all-candidates", "B0 (VETR)", "B1 rules"]}
+systems: dict[str, dict[str, set[str]]] = {
+    k: {} for k in ["all-candidates", "B0 (VETR)", "B0 minus empty-box clauses", "B1 rules"]
+}
 probs: dict[str, dict[str, dict[str, float]]] = {"noisy_or": {}, "max": {}}
 for d in gold:
     rules = pd.read_parquet(PROCESSED / "rules" / f"{d}.parquet")
@@ -46,6 +48,12 @@ for d in gold:
     systems["B0 (VETR)"][d] = set(
         B.b0_ledger(extract_clause_numbers(plain), registry) if registry else extract_clause_numbers(plain)
     )
+    unchecked = {
+        n
+        for n, g in pred.groupby("number")
+        if (g["source"] == "box_rule").all() and (g["role"] == "CHECKLIST_NOT_SELECTED").all()
+    }
+    systems["B0 minus empty-box clauses"][d] = systems["B0 (VETR)"][d] - unchecked
     for mode in probs:
         q = ledger_for(pred, mode)
         agg: dict[str, float] = {}

@@ -197,7 +197,7 @@ def test_a_file_that_takes_too_long_is_skipped_not_waited_for(tmp_path):
         filename="a",
         max_bytes=10**6,
         bucket=None,
-        max_seconds=150,
+        max_seconds=50,
         clock=clock,
     )
     assert res == {"status": "skipped", "reason": "too_slow"} and list(tmp_path.iterdir()) == []

@@ -59,6 +59,26 @@ VARIANT_B_INTRO = (
 )
 
 
+FEWSHOT = """Examples (context -> role):
+headings: 52.212-5 Contract Terms and Conditions Required to Implement Statutes
+⟦X⟧ (1) >>>52.219-8<<< Utilization of Small Business Concerns -> CHECKLIST_SELECTED
+headings: 52.212-5 Contract Terms and Conditions Required to Implement Statutes
+⟦ ⟧ (4) >>>52.222-26<<< Equal Opportunity -> CHECKLIST_NOT_SELECTED
+headings: SECTION I - CONTRACT CLAUSES > CLAUSES INCORPORATED BY REFERENCE
+>>>52.204-21<<< Basic Safeguarding of Covered Contractor Information Systems (NOV 2021) -> INCORPORATED_BY_REFERENCE
+headings: CLAUSES IN FULL TEXT
+>>>52.204-21<<< Basic Safeguarding of Covered Contractor Information Systems (NOV 2021)
+(a) Definitions. As used in this clause... -> FULL_TEXT
+headings: 52.204-13 System for Award Management Maintenance
+(b) "Registered in SAM" has the meaning given in >>>52.204-7<<<. -> INTERNAL_REFERENCE
+headings: SECTION L - INSTRUCTIONS TO OFFERORS
+Offerors shall submit representations in accordance with >>>52.212-1<<<. -> NARRATIVE_MENTION
+headings: TABLE OF CONTENTS
+>>>52.204-21<<< Basic Safeguarding .............. 45 -> INDEX_ENTRY"""
+
+RULES = """Rules: a line that starts with a box followed (possibly after "(1)") by a clause number is an item of a checklist: ⟦X⟧ -> CHECKLIST_SELECTED, ⟦ ⟧ -> CHECKLIST_NOT_SELECTED, whatever words surround it. The role depends on the line and its headings, not on how common the clause is. Use headings: under "incorporated by reference" lists the role is INCORPORATED_BY_REFERENCE; under "in full text" the clause heading line is FULL_TEXT."""
+
+
 def schema() -> dict[str, Any]:
     return {
         "type": "object",
@@ -97,11 +117,13 @@ def context_text(lines: Sequence[str], line_no: int, number_raw: str, before: in
 
 def build_prompt(items: Sequence[Mapping[str, Any]], voter: Voter) -> list[dict[str, str]]:
     guide = GUIDE
-    if voter.variant == "B":
+    if voter.variant in ("B", "C", "D"):
         head, *roles = guide.split("\n")
         body = [r for r in roles if r.split(":")[0] in LLM_ROLES]
         rest = [r for r in roles if r.split(":")[0] not in LLM_ROLES]
         guide = "\n".join([VARIANT_B_INTRO + head, *reversed(body), *rest])
+    if voter.variant in ("C", "D"):
+        guide = guide + "\n\n" + FEWSHOT + ("\n\n" + RULES if voter.variant == "D" else "")
     blocks = []
     for it in items:
         crumbs = " > ".join(it["breadcrumb"]) or "(no heading seen)"

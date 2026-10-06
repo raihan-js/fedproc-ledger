@@ -20,6 +20,11 @@ OUT = PROCESSED / "panel"
 CACHE = Path("data/interim/panel_cache.jsonl")
 
 
+def _text(v: Any) -> str | None:
+    """A string, or None for None / NaN / empty (pandas hands back NaN, which is truthy)."""
+    return None if v is None or (isinstance(v, float) and v != v) or v == "" else str(v)
+
+
 def build_items(doc_id: str) -> list[dict[str, Any]]:
     """Candidates of one document with neutral context: surrounding lines and the headings above (no B1 output)."""
     cands = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
@@ -42,8 +47,8 @@ def build_items(doc_id: str) -> list[dict[str, Any]]:
             {
                 "id": str(c.cand_id),
                 "number": str(c.number),
-                "alternate": c.alternate or None,
-                "cited_date": c.cited_date or None,
+                "alternate": _text(c.alternate),
+                "cited_date": _text(c.cited_date),
                 "breadcrumb": [t[:80] for t in before],
                 "context": P.context_text(lines, int(str(c.line_no)), str(c.raw)),
                 "b1": str(c.role),
@@ -226,3 +231,88 @@ def pilot(docs: str = typer.Option("data/interim/pilot_docs.txt")) -> None:
     }
     (RESULTS / "pilot.json").write_text(PL.dumps(report) + "\n", encoding="utf-8")
     typer.echo(PL.dumps({k: report[k] for k in ("ledger_vs_panel", "slice_a", "decision")}))
+
+
+def slice_a_ids(doc_id: str) -> dict[str, str]:
+    """Candidate id -> objective truth (SELECTED / NOT_SELECTED) for checklist item lines of one document."""
+    from fedproc_ledger.label import pilot as PL
+
+    rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
+    pg = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"]).sort_values("page")
+    keys = PL.checklist_item_keys([(int(str(r.page)), str(r.text_layout)) for r in pg.itertuples()])
+    first = set(rules.sort_values("char_start").groupby(["page", "line_no"])["cand_id"].first().astype(str))
+    out = {}
+    for r in rules.itertuples():
+        on_item = (int(str(r.page)), int(str(r.line_no))) in keys and str(r.cand_id) in first
+        truth = PL.slice_a_truth(str(r.box_marker) if r.box_marker else None, on_item)
+        if truth:
+            out[str(r.cand_id)] = truth
+    return out
+
+
+@label_app.command()
+def lab(
+    voter: str = typer.Option(..., help="name:model:variant"),
+    base_url: str = typer.Option("http://127.0.0.1:11600/v1"),
+    docs: str = typer.Option("data/interim/pilot_docs.txt"),
+) -> None:
+    """Score one voter configuration on slice A only (objective checklist boxes) and log it to the leaderboard."""
+    from fedproc_ledger.eval.leaderboard import log_run
+    from fedproc_ledger.label import pilot as PL
+
+    name, rest = voter.split(":", 1)
+    model, variant = rest.rsplit(":", 1)
+    v = P.Voter(name, model, variant)
+    cache, chat = P.Cache(CACHE), make_chat(base_url)
+    pred: list[str] = []
+    truth: list[str] = []
+    for doc_id in [x for x in Path(docs).read_text().split() if x]:
+        a = slice_a_ids(doc_id)
+        if not a:
+            continue
+        items = [i for i in build_items(doc_id) if i["id"] in a]
+        got = P.vote(items, v, chat, cache)
+        for i in items:
+            pred.append(got.get(i["id"], "UNCLEAR"))
+            truth.append(a[i["id"]])
+    res = PL.role_agreement(pred, truth)
+    log_run(
+        RESULTS / "leaderboard.jsonl",
+        f"slice-A {v.name}",
+        {"model": model, "variant": variant},
+        res,
+        split="pilot-slice-a",
+    )
+    typer.echo(json.dumps(res))
+
+
+@label_app.command()
+def audit(
+    voter: str = typer.Option("", help="name:model:variant (empty = score B1 only)"),
+    base_url: str = typer.Option("http://127.0.0.1:11600/v1"),
+    labels: str = typer.Option("results/audit_claude_pilot.json"),
+) -> None:
+    """Score one voter (and B1) against the agent-labelled audit set; UNCLEAR audit labels are excluded."""
+    from fedproc_ledger.eval.leaderboard import log_run
+    from fedproc_ledger.label import pilot as PL
+
+    ref = json.loads(Path(labels).read_text())["labels"]
+    ref = {k: v for k, v in ref.items() if v != "UNCLEAR"}
+    docs = sorted({k.rsplit("-p", 1)[0] for k in ref})
+    items = [i for d in docs for i in build_items(d) if i["id"] in ref]
+    truth = [ref[i["id"]] for i in items]
+    out: dict[str, Any] = {"n": len(items), "b1": PL.role_agreement([i["b1"] for i in items], truth)}
+    if voter:
+        name, rest = voter.split(":", 1)
+        model, variant = rest.rsplit(":", 1)
+        v = P.Voter(name, model, variant)
+        got = P.vote(items, v, make_chat(base_url), P.Cache(CACHE))
+        out[name] = PL.role_agreement([got.get(i["id"], "UNCLEAR") for i in items], truth)
+        log_run(
+            RESULTS / "leaderboard.jsonl",
+            f"audit {name}",
+            {"model": model, "variant": variant},
+            out[name],
+            split="pilot-audit",
+        )
+    typer.echo(json.dumps(out))

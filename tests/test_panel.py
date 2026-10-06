@@ -80,3 +80,19 @@ def test_chunks_respect_count_and_size():
     big = [{"id": str(i), "context": "x" * 4000} for i in range(5)]
     assert [len(c) for c in P.chunks(big)] == [2, 2, 1]
     assert P.chunks([]) == []
+
+
+def test_nan_alternate_and_date_never_reach_the_prompt():
+    from fedproc_ledger.label.commands import _text
+
+    assert _text(float("nan")) is None and _text(None) is None and _text("") is None
+    assert _text("Alternate II") == "Alternate II"
+    it = {
+        "id": "a",
+        "number": "52.1-1",
+        "breadcrumb": [],
+        "context": "c",
+        "alternate": _text(float("nan")),
+        "cited_date": _text(None),
+    }
+    assert "nan" not in P.build_prompt([it], P.Voter("a", "m"))[1]["content"]

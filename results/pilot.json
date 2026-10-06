@@ -1,0 +1,96 @@
+{
+ "documents": 20,
+ "panel": {
+  "documents": 20,
+  "mentions": 1352,
+  "tiers": {
+   "split": 665,
+   "majority": 477,
+   "unanimous": 210
+  },
+  "roles": {
+   "UNCLEAR": 665,
+   "INCORPORATED_BY_REFERENCE": 272,
+   "INTERNAL_REFERENCE": 148,
+   "FULL_TEXT": 130,
+   "CHECKLIST_NOT_SELECTED": 62,
+   "CHECKLIST_SELECTED": 55,
+   "NARRATIVE_MENTION": 20
+  },
+  "kappa": {
+   "4b-A~9b-A": {
+    "n": 1352,
+    "kappa": 0.45946871015919427
+   },
+   "4b-A~9b-B": {
+    "n": 1352,
+    "kappa": 0.3672639013917769
+   },
+   "4b-A~b1": {
+    "n": 1352,
+    "kappa": 0.15984537452108102
+   },
+   "9b-A~9b-B": {
+    "n": 1352,
+    "kappa": 0.4276374717207627
+   },
+   "9b-A~b1": {
+    "n": 1352,
+    "kappa": 0.14492934245795613
+   },
+   "9b-B~b1": {
+    "n": 1352,
+    "kappa": 0.30992872165697816
+   }
+  }
+ },
+ "ledger_vs_panel": {
+  "B0": {
+   "precision": 0.6144329896907217,
+   "recall": 0.7412935323383084,
+   "f": 0.6719278466741827,
+   "ci_f1": {
+    "point": 0.6719278466741827,
+    "lo": 0.42482374115433386,
+    "hi": 0.8767801916981941
+   }
+  },
+  "B1": {
+   "precision": 0.9915966386554622,
+   "recall": 0.5870646766169154,
+   "f": 0.7375,
+   "ci_f1": {
+    "point": 0.7375,
+    "lo": 0.5709486296605454,
+    "hi": 0.8537823108221309
+   }
+  }
+ },
+ "slice_a": {
+  "n": 211,
+  "per_voter": {
+   "4b-A": {
+    "n": 211.0,
+    "role_agreement": 0.38388625592417064,
+    "binding_agreement": 0.6777251184834123
+   },
+   "9b-A": {
+    "n": 211.0,
+    "role_agreement": 0.36018957345971564,
+    "binding_agreement": 0.5450236966824644
+   },
+   "9b-B": {
+    "n": 211.0,
+    "role_agreement": 0.7156398104265402,
+    "binding_agreement": 0.7488151658767772
+   },
+   "b1": {
+    "n": 211.0,
+    "role_agreement": 1.0,
+    "binding_agreement": 1.0
+   }
+  }
+ },
+ "decision": "GO_MODEL: a learned model has room to improve (B0 over-counts or B1 is under 0.90)",
+ "note": "References are panel-adjudicated, not human gold (D-019); slice A is objective but B1 reads the same glyphs."
+}

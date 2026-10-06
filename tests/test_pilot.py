@@ -18,10 +18,24 @@ def test_panel_ledger_binds_excludes_and_flags_uncertain_numbers():
 
 
 def test_slice_a_truth_needs_a_checklist_line_and_a_known_box():
-    assert PL.slice_a_truth("⟦X⟧", "CHECKLIST") == "CHECKLIST_SELECTED"
-    assert PL.slice_a_truth("⟦ ⟧", "CHECKLIST") == "CHECKLIST_NOT_SELECTED"
-    assert PL.slice_a_truth("⟦?⟧", "CHECKLIST") is None and PL.slice_a_truth("⟦X⟧", "OTHER") is None
-    assert PL.slice_a_truth(None, "CHECKLIST") is None
+    assert PL.slice_a_truth("⟦X⟧", True) == "CHECKLIST_SELECTED"
+    assert PL.slice_a_truth("⟦ ⟧", True) == "CHECKLIST_NOT_SELECTED"
+    assert PL.slice_a_truth("⟦?⟧", True) is None and PL.slice_a_truth("⟦X⟧", False) is None
+    assert PL.slice_a_truth(None, True) is None
+
+
+def test_checklist_item_lines_are_box_then_number_and_not_sf1449_block_27():
+    text = "\n".join(
+        [
+            "⟦X⟧ (1) 52.203-6 Restrictions on Subcontractor Sales",
+            "⟦ ⟧ 52.232-36, Payment by Third Party",
+            "⟦ ⟧  Alternate I  (Nov 2025) of 52.212-4",
+            "⟦X⟧ 27a. SOLICITATION INCORPORATES BY REFERENCE FAR 52.212-1",
+            "⟦?⟧ (2) 52.233-3 Protest",
+            "52.204-21 Basic Safeguarding",
+        ]
+    )
+    assert PL.checklist_item_keys([(3, text)]) == {(3, 0), (3, 1), (3, 2)}
 
 
 def test_role_agreement_counts_exact_roles_and_binding_class():

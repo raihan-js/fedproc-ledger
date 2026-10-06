@@ -1,0 +1,44 @@
+{
+ "documents": 20,
+ "mentions": 1352,
+ "tiers": {
+  "split": 665,
+  "majority": 477,
+  "unanimous": 210
+ },
+ "roles": {
+  "UNCLEAR": 665,
+  "INCORPORATED_BY_REFERENCE": 272,
+  "INTERNAL_REFERENCE": 148,
+  "FULL_TEXT": 130,
+  "CHECKLIST_NOT_SELECTED": 62,
+  "CHECKLIST_SELECTED": 55,
+  "NARRATIVE_MENTION": 20
+ },
+ "kappa": {
+  "4b-A~9b-A": {
+   "n": 1352,
+   "kappa": 0.45946871015919427
+  },
+  "4b-A~9b-B": {
+   "n": 1352,
+   "kappa": 0.3672639013917769
+  },
+  "4b-A~b1": {
+   "n": 1352,
+   "kappa": 0.15984537452108102
+  },
+  "9b-A~9b-B": {
+   "n": 1352,
+   "kappa": 0.4276374717207627
+  },
+  "9b-A~b1": {
+   "n": 1352,
+   "kappa": 0.14492934245795613
+  },
+  "9b-B~b1": {
+   "n": 1352,
+   "kappa": 0.30992872165697816
+  }
+ }
+}

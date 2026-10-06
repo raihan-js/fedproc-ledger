@@ -7,6 +7,7 @@ slice A cannot score B1 (circular); it scores the panel members, and later the t
 from __future__ import annotations
 
 import json
+import re
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
@@ -35,11 +36,28 @@ def panel_ledger(rows: Iterable[Mapping[str, Any]], alt: Mapping[str, str | None
     return {k for k in bind if k[0] not in excluded}, uncertain
 
 
-def slice_a_truth(box_marker: str | None, section: str) -> str | None:
-    """SELECTED / NOT_SELECTED when a checklist line has a known box glyph; None otherwise."""
-    if section != "CHECKLIST" or not box_marker:
+def slice_a_truth(box_marker: str | None, in_checklist_item: bool) -> str | None:
+    """SELECTED / NOT_SELECTED for the first number of a list item inside a checklist clause (52.212-5 and the like)
+    whose line starts with a known box glyph; None otherwise. Boxes elsewhere (SF 1449 block 27 and so on) are not
+    items of a checklist, so their glyph does not decide a role."""
+    if not in_checklist_item or not box_marker:
         return None
     return {"⟦X⟧": SELECTED, "⟦ ⟧": NOT_SELECTED}.get(box_marker)
+
+
+_ITEM = re.compile(
+    r"^\s*⟦[X ]⟧\s*(?:\(\w{1,3}\)\s*)?"
+    r"(?:Alternate\s+[IVXLC]+\s*(?:\([^)]*\)\s*)?(?:of\s+)?)?"
+    r"(?:FAR\s+|DFARS\s+)?\d{2,4}\.\d{3}-\d{1,4}",
+    re.I,
+)
+
+
+def checklist_item_keys(pages: Iterable[tuple[int, str]]) -> set[tuple[int, int]]:
+    """(page, line_no) of checklist item lines: a box, an optional "(1)" or "Alternate I of", then the clause number
+    straight away. A local rule on the extracted text, independent of the section detector. SF 1449 block 27 lines
+    ("⟦X⟧ 27a. SOLICITATION INCORPORATES ...") do not match."""
+    return {(pg, i) for pg, text in pages for i, line in enumerate(text.split("\n")) if _ITEM.match(line)}
 
 
 def role_agreement(pred: Sequence[str], truth: Sequence[str]) -> dict[str, float]:

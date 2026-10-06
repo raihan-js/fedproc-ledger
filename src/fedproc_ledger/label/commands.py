@@ -197,9 +197,18 @@ def pilot(docs: str = typer.Option("data/interim/pilot_docs.txt")) -> None:
             )
         }
         per_doc[doc_id] = {"gold": gold, "uncertain": uncertain, "systems": {"B0": b0, "B1": b1}}
+        pages = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"])
+        items_at = PL.checklist_item_keys(
+            [(int(str(r.page)), str(r.text_layout)) for r in pages.sort_values("page").itertuples()]
+        )
+        first = rules.sort_values("char_start").groupby(["page", "line_no"])["cand_id"].first()
+        firsts = set(first.astype(str))
         votes = {str(r.cand_id): json.loads(str(r.votes)) for r in mine.itertuples()}
         for r in rules.itertuples():
-            truth = PL.slice_a_truth(str(r.box_marker) if r.box_marker else None, str(r.section))
+            truth = PL.slice_a_truth(
+                str(r.box_marker) if r.box_marker else None,
+                (int(str(r.page)), int(str(r.line_no))) in items_at and str(r.cand_id) in firsts,
+            )
             if truth and str(r.cand_id) in votes:
                 a_truth.append(truth)
                 for name, role in votes[str(r.cand_id)].items():

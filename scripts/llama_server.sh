@@ -11,7 +11,7 @@ esac
 L="$HOME/.local/ollama/lib/ollama"
 mkdir -p data/logs
 GGML_BACKEND_PATH="$L/cuda_v13/libggml-cuda.so" LD_LIBRARY_PATH="$L:$L/cuda_v13" \
-  nohup "$L/llama-server" -m "$HOME/.ollama/models/blobs/$blob" -ngl 99 -c 16384 -np 4 -fa on -ctk q8_0 -ctv q8_0 \
+  nohup "$L/llama-server" -m "$HOME/.ollama/models/blobs/$blob" -ngl 99 -c 32768 -np 4 -fa on -ctk q8_0 -ctv q8_0 \
   --host 127.0.0.1 --port "$port" --jinja --chat-template-kwargs '{"enable_thinking": false}' \
   > "data/logs/llama_server_$size.log" 2>&1 &
 echo $! > "data/logs/llama_server_$size.pid"; echo "pid $(cat data/logs/llama_server_$size.pid), log data/logs/llama_server_$size.log"

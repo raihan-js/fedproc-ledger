@@ -19,6 +19,25 @@ from fedproc_ledger.rules.baseline import BINDING, ROLES
 
 LLM_ROLES = [r for r in ROLES if r != "UNCLEAR"] + ["UNCLEAR"]
 CHUNK = 10
+MAX_CHARS = (
+    9000  # per call (about 3k tokens): a slot holds 8k tokens with the server settings in scripts/llama_server.sh
+)
+
+
+def chunks(items: Sequence[Mapping[str, Any]]) -> list[list[Mapping[str, Any]]]:
+    """At most CHUNK items per call and at most MAX_CHARS of context."""
+    out: list[list[Mapping[str, Any]]] = []
+    cur: list[Mapping[str, Any]] = []
+    size = 0
+    for it in items:
+        n = len(str(it["context"])) + 150
+        if cur and (len(cur) >= CHUNK or size + n > MAX_CHARS):
+            out.append(cur)
+            cur, size = [], 0
+        cur.append(it)
+        size += n
+    return out + [cur] if cur else out
+
 
 GUIDE = """You label how a clause-number reference is used inside a US federal solicitation (FAR/DFARS).
 For each candidate (marked in its context line by >>> <<<) choose exactly one role:
@@ -139,8 +158,7 @@ Chat = Callable[[str, list[dict[str, str]]], str]
 def vote(items: Sequence[Mapping[str, Any]], voter: Voter, chat: Chat, cache: Cache | None = None) -> dict[str, str]:
     """One voter's roles for a list of items (chunks of CHUNK per call; a failed parse is retried once per id)."""
     out: dict[str, str] = {}
-    for i in range(0, len(items), CHUNK):
-        chunk = items[i : i + CHUNK]
+    for chunk in chunks(items):
         ids = [str(c["id"]) for c in chunk]
         msgs = build_prompt(chunk, voter)
         k = Cache.key(voter.model, msgs)

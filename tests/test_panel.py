@@ -72,3 +72,11 @@ def test_kappa_perfect_chance_and_empty():
     assert P.pairwise_kappa(a, ["x", "x", "y", "y"]) == pytest.approx(0.0, abs=1e-9)  # agreement at chance level
     assert P.pairwise_kappa(["x", "x"], ["x", "x"]) == 1.0
     assert P.pairwise_kappa([], []) != P.pairwise_kappa([], [])  # nan
+
+
+def test_chunks_respect_count_and_size():
+    small = [{"id": str(i), "context": "x" * 10} for i in range(25)]
+    assert [len(c) for c in P.chunks(small)] == [10, 10, 5]
+    big = [{"id": str(i), "context": "x" * 4000} for i in range(5)]
+    assert [len(c) for c in P.chunks(big)] == [2, 2, 1]
+    assert P.chunks([]) == []

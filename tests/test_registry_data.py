@@ -70,4 +70,4 @@ def test_the_rfo_layer(reg):
     )  # eCFR still has it
     assert reg.loc["52.219-14", "rfo_status"] == "text"
     assert reg.loc["52.240-90", "status"] == "rfo_only" and reg.loc["52.240-90", "kind"] == "provision"
-    assert (reg["status"] == "rfo_only").sum() == 10 and reg.loc["252.204-7012", "rfo_status"] is None
+    assert (reg["status"] == "rfo_only").sum() == 10 and pd.isna(reg.loc["252.204-7012", "rfo_status"])

@@ -1,0 +1,7 @@
+{
+ "frozen_at": "2026-10-06T19:51:01+00:00",
+ "git_commit_before_run": "88b5dce30d6a7a074441cc97ac8d9ba12ab73260",
+ "model_sha256": "9e9611a49fefde95164058c82b5df95253434dd3d179707fdec76ce776e05933",
+ "test_list_sha256": "175b90d39c8eeb25e761ff8462d61e93a257f26c53dd7c047e8ad779783940a9",
+ "note": "Model, features and thresholds are fixed from this commit; no test document was labelled or predicted before this file was written."
+}

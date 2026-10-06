@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Any
 
@@ -99,3 +100,55 @@ def stats() -> None:
         "extract.stats", [SUMMARIES], [RESULTS / "extract_stats.json"], {}, PROCESSED / "manifest_extract.json"
     )
     typer.echo(json.dumps(out, indent=1, ensure_ascii=False))
+
+
+@extract_app.command()
+def report(n: int = typer.Option(5, help="Number of pages to show.")) -> None:
+    """HTML report (data/reports/extract_report.html): page images beside text_layout, markers highlighted."""
+    from fedproc_ledger.extract.report import build_report, choose_pages, page_image_b64
+
+    docs = pd.read_parquet(DATA / "interim" / "documents.parquet").drop_duplicates("doc_id").set_index("doc_id")
+    cands: list[dict[str, Any]] = []
+    for f in sorted(SHARDS.glob("*.parquet")):
+        df = pd.read_parquet(f)
+        if docs.loc[df["doc_id"].iloc[0], "file_type"] != "pdf":
+            continue
+        for r in df.itertuples():
+            counts = json.loads(str(r.box_signals))["counts"]
+            by_source: dict[str, int] = {}
+            for k, v in counts.items():
+                by_source[k.split(":")[0]] = by_source.get(k.split(":")[0], 0) + v
+            total = sum(counts.values())
+            if total >= 3:
+                checklist = int(bool(re.search(r"52\.212-5|52\.213-4|252\.212-7001", str(r.text_plain))))
+                cands.append(
+                    {
+                        "doc_id": r.doc_id,
+                        "page": r.page,
+                        "layout": r.text_layout,
+                        "counts": counts,
+                        "by_source": by_source,
+                        "total": total,
+                        "checklist": checklist,
+                    }
+                )
+    chosen = choose_pages(cands, n)
+    rows = []
+    for c in chosen:
+        d = docs.loc[c["doc_id"]]
+        rows.append(
+            {
+                "title": str(d["filename"]),
+                "page": c["page"],
+                "layout": c["layout"],
+                "counts": c["counts"],
+                "image_b64": page_image_b64(DATA / "raw" / "files" / f"{d['sha256']}.pdf", c["page"]),
+            }
+        )
+    stats = (
+        json.loads((RESULTS / "extract_stats.json").read_text()) if (RESULTS / "extract_stats.json").exists() else {}
+    )
+    out = DATA / "reports" / "extract_report.html"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(build_report(rows, stats), encoding="utf-8")
+    typer.echo(f"wrote {out} ({len(rows)} pages from {len(cands)} candidate pages)")

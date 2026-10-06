@@ -1,0 +1,74 @@
+{
+ "entries": 40510,
+ "pre_rfo": {
+  "entries": 22641,
+  "by_category": {
+   "no_date_cited": 15367,
+   "matches_in_force": 5926,
+   "older_than_in_force": 566,
+   "not_in_registry": 400,
+   "no_version_data": 262,
+   "newer_than_in_force": 120
+  },
+  "dated_entries": 6612,
+  "older_share_of_dated": 0.08560193587416817,
+  "docs": 416
+ },
+ "rfo": {
+  "entries": 17869,
+  "by_category": {
+   "no_date_cited": 13308,
+   "matches_in_force": 3013,
+   "newer_than_in_force": 584,
+   "not_in_registry": 406,
+   "no_version_data": 288,
+   "older_than_in_force": 270
+  },
+  "dated_entries": 3867,
+  "older_share_of_dated": 0.06982156710628394,
+  "docs": 369
+ },
+ "pre_rfo_most_often_stale": [
+  [
+   "52.219-28",
+   49
+  ],
+  [
+   "52.222-19",
+   44
+  ],
+  [
+   "52.222-50",
+   40
+  ],
+  [
+   "52.225-3",
+   33
+  ],
+  [
+   "52.219-8",
+   22
+  ],
+  [
+   "52.212-5",
+   18
+  ],
+  [
+   "52.204-7",
+   18
+  ],
+  [
+   "52.222-36",
+   15
+  ],
+  [
+   "52.212-2",
+   14
+  ],
+  [
+   "52.209-6",
+   13
+  ]
+ ],
+ "rfo_era_entries_citing_clauses_the_rfo_reserves": 1654
+}

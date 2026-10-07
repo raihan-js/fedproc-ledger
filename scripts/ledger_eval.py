@@ -109,10 +109,12 @@ for mode in ("noisy_or", "max"):
         res[name] = summarize(name, all_counts[name])
 best = max((k for k in all_counts if k.startswith("model")), key=lambda k: res[k]["f"])
 print("best model config by F1:", best)
-for base in ("B1 rules", "B0 (VETR)", "all-candidates"):
-    d = M.paired_bootstrap(all_counts[base][:, :3], all_counts[best][:, :3], n_boot=4000)
-    print(f"  {best} - {base}: dF1 {d['diff']:+.3f} [{d['lo']:+.3f},{d['hi']:+.3f}]")
-    res[f"paired {best} vs {base}"] = d
+PRE = "model noisy_or q>=0.5"  # the pre-registered configuration is always compared, whichever config is best
+for cfg in dict.fromkeys([best, PRE]):
+    for base in ("B1 rules", "B0 (VETR)", "all-candidates"):
+        d = M.paired_bootstrap(all_counts[base][:, :3], all_counts[cfg][:, :3], n_boot=4000)
+        print(f"  {cfg} - {base}: dF1 {d['diff']:+.3f} [{d['lo']:+.3f},{d['hi']:+.3f}]")
+        res[f"paired {cfg} vs {base}"] = d
 RESULTS.mkdir(exist_ok=True)
 res["_meta"] = {
     "documents": len(gold),

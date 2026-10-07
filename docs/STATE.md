@@ -8,6 +8,8 @@
 6. What is NOT done / open: nothing pushed or published (needs the owner's OK and the company's permission); second pre-registered round on a checklist-heavy frame; R-tier (narrative requirement) model; product gold from VETR; HF dataset and model card; DoD deviations are parsed but not yet merged into registry dates.
 7. Hazards: `fl rules run` overwrites rules parquet (deterministic); `ledger_eval.py` writes results/ledger_eval_<tag>.json; the frozen test files must not be edited; test docs must not enter training.
 
+- **Status 2026-10-07 (round 2 DONE, read D-032):** 858 numbers hand-labelled by the agent plus both judges (word labels). Pre-registered verdicts: H1 holds, H2 fails, H3 FAILS on the majority gold (-0.103 [-0.185, -0.036]), H4 fails, H5 holds (25.4%), H6 holds (40/40). Annotator disagreement is the finding (agent gold: model +0.138; judges accept unchecked boxes as BINDS, kappa 0.05 and 0.21). Reproduce: `scripts/ledger_judge.py <model> results/ledger_gold_round2_agent.json round2`, `scripts/test_gold.py round2`, `scripts/ledger_eval.py <gold> binding`, `scripts/round2_report.py`, `scripts/make_results_md.py`. Next: decide round 3 (judge sheets with the checkbox convention and A2, or human experts), HF/paper drafts (paper needs the round-2 section), publishing permission.
+
 # Where we are (update after every step; read this first when resuming)
 
 - **Phases 0 to 4 are built. Checkpoint material for 1 to 4 is in `results/checkpoints.md` (regenerate with `uv run python scripts/checkpoint_summary.py`); the HTML reports are `data/reports/extract_report.html` and `data/reports/rules_report.html`. Waiting on the owner's review before Phase 5 (annotation).** Owner approved Checkpoint 0 and the plan inputs (D-012).

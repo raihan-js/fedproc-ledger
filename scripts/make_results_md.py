@@ -100,6 +100,42 @@ out.append("\n## Version currency (pre-RFO notices, eCFR is the authority)\n")
 out.append(
     f"{dated:,} ledger entries cite a date: {c['matches_in_force']:,} ({c['matches_in_force'] / dated:.1%}) match the version in force on the posting day, {c['older_than_in_force']:,} ({c['older_than_in_force'] / dated:.1%}) cite an older version, {c['newer_than_in_force']:,} ({c['newer_than_in_force'] / dated:.1%}) a newer one; {c['no_date_cited']:,} entries have no attachable date."
 )
+
+r2 = load("round2_report.json")
+e2 = load("ledger_eval_round2_majority_binding.json")
+ea = load("ledger_eval_round2_agent.json")
+PA = "paired model noisy_or q>=0.5 vs B0 (VETR)"
+out.append("\n## Round 2, checklist-heavy frame (pre-registered, D-032): 36 documents, 808 labelled numbers\n")
+out.append(HEAD)
+for s_ in SYSTEMS:
+    if s_ in e2:
+        out.append(row(s_, e2[s_]))
+out.append("\n| id | outcome |\n|---|---|")
+out.append(
+    f"| H1 | {'holds' if r2['H1']['holds'] else 'FAILS'}: {r2['H1']['diff']:+.3f} [{r2['H1']['ci'][0]:+.3f}, {r2['H1']['ci'][1]:+.3f}] |"
+)
+out.append(
+    f"| H2 | {'holds' if r2['H2']['holds'] else 'FAILS'}: specificity {r2['H2']['model_specificity']:.3f}, recall {r2['H2']['model_recall']:.3f} |"
+)
+out.append(
+    f"| H3 | non-inferior: {r2['H3']['non_inferior']}; {r2['H3']['diff']:+.3f} [{r2['H3']['ci'][0]:+.3f}, {r2['H3']['ci'][1]:+.3f}] (primary majority gold) |"
+)
+out.append(
+    f"| H4 | {'holds' if r2['H4']['holds'] else 'FAILS'}: coverage {r2['H4']['coverage']:.3f}, accuracy {r2['H4']['accuracy']:.3f} |"
+)
+out.append(
+    f"| H5 | {'holds' if r2['H5']['holds'] else 'FAILS'}: {r2['H5']['share']:.1%} of B0 entries in M/L documents are empty-box clauses ({r2['H5']['empty_box_entries']} of {r2['H5']['b0_entries']}) |"
+)
+out.append(
+    f"| H6 | {'holds' if r2['H6']['holds'] else 'FAILS'}: rule agreed on {r2['H6']['agreed']} of {r2['H6']['items']} |"
+)
+sd = r2["H3"]["single_annotator_diffs"]
+out.append(
+    "\nModel minus B0, F1 difference per annotator (annotator-dependent; the judges mostly accept unchecked boxes as binding):\n"
+)
+out.append("| gold | difference [95% CI] |\n|---|---|")
+for k, v in sd.items():
+    out.append(f"| {k} | {v[0]:+.3f} [{v[1]:+.3f}, {v[2]:+.3f}] |")
 Path("docs/RESULTS.md").write_text("\n".join(out) + "\n")
 
 head = (
@@ -107,6 +143,7 @@ head = (
     f"(difference {h3['diff']:+.3f}, interval [{h3['ci'][0]:+.3f}, {h3['ci'][1]:+.3f}]: non-inferior, **not shown better**); specificity {test['model noisy_or q>=0.5']['specificity']:.0%} vs {test['B0 (VETR)']['specificity']:.0%}.\n"
     f"- After correcting a label-letter collision in the judge protocol (post-hoc, D-031): F1 {t2['model noisy_or q>=0.5']['f']:.3f} vs {t2['B0 (VETR)']['f']:.3f} (lower bound {g3['ci'][0]:+.5f}, so no superiority claim), specificity {t2['model noisy_or q>=0.5']['specificity']:.0%} vs {t2['B0 (VETR)']['specificity']:.0%}; H2 {'holds' if g2['holds'] else 'fails'} on the corrected gold.\n"
     f"- Objective, annotator-free: **{obj['share_of_b0']:.1%}** of status-quo ledger entries are clauses whose own checklist box is empty ({obj['documents_where_b0_counts_unchecked_items']} of {obj['documents_with_a_decided_checklist']} documents with a decided checklist).\n"
+    f"- Round 2 (pre-registered checklist-heavy frame, 36 documents, D-032): H3 FAILS on the majority gold ({r2['H3']['diff']:+.3f} [{r2['H3']['ci'][0]:+.3f}, {r2['H3']['ci'][1]:+.3f}]) while the two LLM judges label most of the agent's NOT items BINDS (86% and 63%); against the agent's own labels the model leads ({sd['agent'][0]:+.3f}); objective H5 holds ({r2['H5']['share']:.1%} of status-quo entries in checklist-heavy documents are empty boxes) and H6 holds ({r2['H6']['agreed']}/{r2['H6']['items']}).\n"
     f"- Pre-registered hypotheses as originally scored: H1 {'holds' if h1['holds'] else 'fails'}, H2 {'holds' if h2['holds'] else 'FAILS'}, H3 holds as non-inferiority only, H4 {'holds' if h4['holds'] else 'FAILS'}. Full tables: [`docs/RESULTS.md`](docs/RESULTS.md)."
 )
 rd = Path("README.md").read_text()

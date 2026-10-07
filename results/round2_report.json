@@ -1,0 +1,73 @@
+{
+ "H1": {
+  "diff": 0.2312772941344371,
+  "ci": [
+   0.12809415502576893,
+   0.35081737213068276
+  ],
+  "holds": true
+ },
+ "H2": {
+  "model_specificity": 0.6833333333333333,
+  "model_recall": 0.7252906976744186,
+  "b0_specificity": 0.2,
+  "holds": false
+ },
+ "H3": {
+  "diff": -0.10318051858424537,
+  "ci": [
+   -0.18500114890488878,
+   -0.03564676095048539
+  ],
+  "non_inferior": false,
+  "superior": false,
+  "single_annotator_diffs": {
+   "agent": [
+    0.13779018892131123,
+    0.09572637383153616,
+    0.18525873983285893
+   ],
+   "judge_gpt-4o-mini": [
+    -0.14573917714792883,
+    -0.23020098644388826,
+    -0.07608227278098573
+   ],
+   "judge_gpt-4.1-mini": [
+    -0.11955259720997402,
+    -0.20695701310291953,
+    -0.04510034352709574
+   ]
+  },
+  "positive_on": 1
+ },
+ "H4": {
+  "t_from_round1": 0.6002026800173135,
+  "coverage": 0.9418316831683168,
+  "accuracy": 0.7319316688567674,
+  "holds": false
+ },
+ "H5": {
+  "b0_entries": 2279,
+  "empty_box_entries": 579,
+  "share": 0.2540587977182975,
+  "median_doc_share": 0.2720588235294118,
+  "holds": true
+ },
+ "H6": {
+  "items": 40,
+  "agreed": 40,
+  "holds": true
+ },
+ "annotator_diagnostics": {
+  "gpt-4o-mini": {
+   "agent_N_judged_B": 0.8620689655172413,
+   "agent_B_judged_B": 0.926873857404022,
+   "agent_N_total": 232
+  },
+  "gpt-4.1-mini": {
+   "agent_N_judged_B": 0.6336206896551724,
+   "agent_B_judged_B": 0.8007312614259597,
+   "agent_N_total": 232
+  }
+ }
+}

@@ -55,3 +55,31 @@ Of 423,328 status-quo ledger entries, **57,225 (13.5%)** are clause numbers whos
 ## Version currency (pre-RFO notices, eCFR is the authority)
 
 48,345 ledger entries cite a date: 43,820 (90.6%) match the version in force on the posting day, 3,649 (7.5%) cite an older version, 876 (1.8%) a newer one; 106,111 entries have no attachable date.
+
+## Round 2, checklist-heavy frame (pre-registered, D-032): 36 documents, 808 labelled numbers
+
+| system | precision | recall | F1 [95% CI] | F2 | specificity |
+|---|---|---|---|---|---|
+| all-candidates | 0.851 | 1.000 | 0.920 [0.879, 0.950] | 0.966 | 0.000 |
+| B0 (VETR) | 0.874 | 0.967 | 0.918 [0.881, 0.947] | 0.946 | 0.200 |
+| B0 minus empty-box clauses | 0.874 | 0.967 | 0.918 [0.881, 0.947] | 0.946 | 0.200 |
+| B1 rules | 0.933 | 0.424 | 0.583 [0.471, 0.679] | 0.476 | 0.825 |
+| model noisy_or q>=0.5 | 0.929 | 0.725 | 0.815 [0.738, 0.874] | 0.759 | 0.683 |
+| model noisy_or q>=0.7 | 0.954 | 0.692 | 0.802 [0.716, 0.867] | 0.732 | 0.808 |
+
+| id | outcome |
+|---|---|
+| H1 | holds: +0.231 [+0.128, +0.351] |
+| H2 | FAILS: specificity 0.683, recall 0.725 |
+| H3 | non-inferior: False; -0.103 [-0.185, -0.036] (primary majority gold) |
+| H4 | FAILS: coverage 0.942, accuracy 0.732 |
+| H5 | holds: 25.4% of B0 entries in M/L documents are empty-box clauses (579 of 2279) |
+| H6 | holds: rule agreed on 40 of 40 |
+
+Model minus B0, F1 difference per annotator (annotator-dependent; the judges mostly accept unchecked boxes as binding):
+
+| gold | difference [95% CI] |
+|---|---|
+| agent | +0.138 [+0.096, +0.185] |
+| judge_gpt-4o-mini | -0.146 [-0.230, -0.076] |
+| judge_gpt-4.1-mini | -0.120 [-0.207, -0.045] |

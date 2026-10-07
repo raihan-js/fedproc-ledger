@@ -12,7 +12,7 @@ import typer
 from sklearn.model_selection import GroupKFold
 
 from fedproc_ledger.eval import metrics as M
-from fedproc_ledger.label.commands import build_items, slice_a_ids
+from fedproc_ledger.label.commands import build_items, inherited_ids, para_a_ids, slice_a_ids
 from fedproc_ledger.model import classifier as C
 from fedproc_ledger.model.dataset import featurize_doc
 from fedproc_ledger.paths import PROCESSED, RESULTS
@@ -55,6 +55,9 @@ def predict_doc(model: C.RoleModel, doc_id: str) -> pd.DataFrame:
         return pd.DataFrame()
     rows = featurize_doc(doc_id, items)
     truth = slice_a_ids(doc_id)
+    para_a = para_a_ids(doc_id)
+    for k, v in inherited_ids(doc_id).items():
+        truth.setdefault(k, v)
     p = model.proba([r["feat"] for r in rows], [r["context"] for r in rows])
     b, e = model.binding_prob(p), model.exclusion_prob(p)
     out = []
@@ -64,6 +67,9 @@ def predict_doc(model: C.RoleModel, doc_id: str) -> pd.DataFrame:
         if r["id"] in truth:  # checklist item line with a known box glyph: decided by rule
             role, src = truth[r["id"]], "box_rule"
             bi, ei = float(role == "CHECKLIST_SELECTED"), 0.0
+        elif r["id"] in para_a:  # unconditional paragraph (a) of 52.212-5: binding (amendment A2)
+            role, src = "INCORPORATED_BY_REFERENCE", "para_a_rule"
+            bi, ei = 1.0, 0.0
         out.append(
             {
                 "cand_id": r["id"],
@@ -89,9 +95,11 @@ def predict_doc(model: C.RoleModel, doc_id: str) -> pd.DataFrame:
 def predict(
     docs: str = typer.Option("", help="file with doc ids (default: every document with candidates)"),
     limit: int = typer.Option(0),
+    model_path: str = typer.Option(str(MODEL), "--model"),
+    out_dir: str = typer.Option(str(PRED), "--out"),
 ) -> None:
     """Role and binding probability per candidate -> data/processed/predictions/<doc>.parquet."""
-    model = C.RoleModel.load(MODEL)
+    model = C.RoleModel.load(Path(model_path))
     ids = (
         [x for x in Path(docs).read_text().split() if x]
         if docs
@@ -99,12 +107,13 @@ def predict(
     )
     if limit:
         ids = ids[:limit]
-    PRED.mkdir(parents=True, exist_ok=True)
+    pred_dir = Path(out_dir)
+    pred_dir.mkdir(parents=True, exist_ok=True)
     n = 0
     for i, d in enumerate(ids):
         df = predict_doc(model, d)
         if len(df):
-            df.to_parquet(PRED / f"{d}.parquet", index=False)
+            df.to_parquet(pred_dir / f"{d}.parquet", index=False)
             n += len(df)
         if (i + 1) % 100 == 0:
             typer.echo(f"{i + 1}/{len(ids)} documents, {n} mentions")

@@ -6,6 +6,7 @@ class, specificity (share of N numbers correctly left out), accuracy; cluster bo
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -20,11 +21,16 @@ from fedproc_ledger.paths import PROCESSED, RESULTS
 from fedproc_ledger.rules import baseline as B
 from fedproc_ledger.rules.commands import load_registry
 
+PRED_DIR = Path(os.environ.get("PRED_DIR", str(PROCESSED / "predictions")))  # v2 predictions live elsewhere
+
 GOLD = sys.argv[1] if len(sys.argv) > 1 else "results/ledger_gold_agent_v0.json"
 MODE = (
     sys.argv[2] if len(sys.argv) > 2 else "binding"
 )  # binding: B positive, N and R negative; applicable: B and R positive
 TAG = Path(GOLD).stem.replace("ledger_gold_", "") + ("" if MODE == "binding" else "_" + MODE)
+TAG += os.environ.get(
+    "EVAL_SUFFIX", ""
+)  # e.g. _v11: evaluations of a later model version never overwrite recorded ones
 gold = json.loads(Path(GOLD).read_text())["gold"]
 _MAP = {"binding": {"B": "B", "N": "N", "R": "N", "U": "U"}, "applicable": {"B": "B", "R": "B", "N": "N", "U": "U"}}[
     MODE
@@ -37,7 +43,7 @@ systems: dict[str, dict[str, set[str]]] = {
 probs: dict[str, dict[str, dict[str, float]]] = {"noisy_or": {}, "max": {}}
 for d in gold:
     rules = pd.read_parquet(PROCESSED / "rules" / f"{d}.parquet")
-    pred = pd.read_parquet(PROCESSED / "predictions" / f"{d}.parquet")
+    pred = pd.read_parquet(PRED_DIR / f"{d}.parquet")
     systems["all-candidates"][d] = set(pred["number"])
     b1 = {str(r.number) for r in rules.itertuples() if r.role in B.BINDING and not bool(r.from_range)}
     excl = {str(r.number) for r in rules.itertuples() if r.role == B.EXCLUDED}

@@ -2,6 +2,7 @@
 
 import collections
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +14,8 @@ from fedproc_ledger.model.commands import ledger_for
 from fedproc_ledger.paths import PROCESSED
 from fedproc_ledger.rules import baseline as B
 from fedproc_ledger.rules.commands import load_registry
+
+PRED_DIR = Path(os.environ.get("PRED_DIR", str(PROCESSED / "predictions")))  # v2 predictions live elsewhere
 
 R = Path("results")
 
@@ -54,7 +57,7 @@ def number_probs(gold_path: str) -> tuple[np.ndarray, np.ndarray]:
     gold = json.loads(Path(gold_path).read_text())["gold"]
     q, y = [], []
     for d, labels in gold.items():
-        pred = pd.read_parquet(PROCESSED / "predictions" / f"{d}.parquet")
+        pred = pd.read_parquet(PRED_DIR / f"{d}.parquet")
         agg: dict[str, float] = {}
         for (n, _a), v in ledger_for(pred).items():
             agg[n] = max(agg.get(n, 0.0), v)
@@ -84,7 +87,7 @@ tot = only = 0
 per_doc = []
 for S in "ML":
     for d in fz["strata"][S]:
-        pred = pd.read_parquet(PROCESSED / "predictions" / f"{d}.parquet")
+        pred = pd.read_parquet(PRED_DIR / f"{d}.parquet")
         plain = "\n".join(
             str(t) for t in pd.read_parquet(PROCESSED / "pages" / f"{d}.parquet", columns=["text_plain"])["text_plain"]
         )

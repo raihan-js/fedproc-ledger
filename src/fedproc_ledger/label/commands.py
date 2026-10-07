@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -265,6 +266,81 @@ def slice_a_ids(doc_id: str) -> dict[str, str]:
                 truth = PL.typed_item_state(line)
         if truth:
             out[str(r.cand_id)] = truth
+    return out
+
+
+_PARA_A_START = re.compile(
+    r"^\s*\(a\)\s+The Contractor shall comply with the following (?:Federal Acquisition Regulation|FAR)", re.I
+)
+_PARA_A_END = re.compile(r"^\s*\(b\)\s+\S")
+_PARA_A_ITEM = re.compile(r"^\s*\(\d{1,2}\)\s*(?:FAR\s+)?\d")
+
+
+def para_a_ids(doc_id: str) -> set[str]:
+    """Candidate ids that sit in the unconditional paragraph (a) of FAR 52.212-5: numbered items "(1) 52.203-19, ..." with no
+    checkbox. Amendment A2 (docs/preregistration_round2.md) reads them as binding wherever 52.212-5 is incorporated or included.
+    The span runs from "(a) The Contractor shall comply with the following FAR clauses" to the next "(b)" line (at most 150 lines)."""
+    rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
+    pg = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"]).sort_values("page")
+    span: set[tuple[int, int]] = set()
+    active, used = False, 0
+    for r in pg.itertuples():
+        for i, ln in enumerate(str(r.text_layout).split("\n")):
+            if not active and _PARA_A_START.match(ln):
+                active, used = True, 0
+            elif active:
+                used += 1
+                if _PARA_A_END.match(ln) or used > 150:
+                    active = False
+                elif _PARA_A_ITEM.match(ln) and "\u27e6" not in ln:
+                    span.add((int(str(r.page)), i))
+    out = set()
+    for c in rules.itertuples():
+        if bool(c.from_range):
+            continue
+        if (int(str(c.page)), int(str(c.line_no))) in span and str(c.line_text).find(str(c.raw)) <= 16:
+            out.add(str(c.cand_id))
+    return out
+
+
+_PARENT = re.compile(r"^\s*(?P<m>_*X+_*|\[X\]|\u27e6X\u27e7|_{2,}|\[\s*\]|\u27e6 \u27e7)\s*\(\d{1,3}\)\s*$")
+_CHILD = re.compile(r"^\s*\u27e6\?\u27e7\s*\((?:i|ii|iii|iv|v|vi)\)")
+_BLOCK27 = re.compile(r"^\s*\u27e6(?P<m>X| )\u27e7\s*27[ab]\.")
+
+
+def inherited_ids(doc_id: str) -> dict[str, str]:
+    """Candidate id -> SELECTED / NOT_SELECTED for two layouts the plain box rule cannot read: (1) a sub-item "⟦?⟧ (i) 52.x"
+    whose marker was lost takes the state of its parent line "__ (35)" / "X (36)" within the previous three lines; (2) SF 1449
+    blocks 27a and 27b: the glyph at the start of the block decides every candidate up to the next glyph line."""
+    rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
+    pg = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"]).sort_values("page")
+    state: dict[tuple[int, int], str] = {}
+    for r in pg.itertuples():
+        lines = str(r.text_layout).split("\n")
+        block: str | None = None
+        for i, ln in enumerate(lines):
+            m27 = _BLOCK27.match(ln)
+            if m27:
+                block = "CHECKLIST_SELECTED" if m27.group("m") == "X" else "CHECKLIST_NOT_SELECTED"
+                state[(int(str(r.page)), i)] = block
+                continue
+            if block and ln.lstrip().startswith("\u27e6"):
+                block = None
+            elif block:
+                state[(int(str(r.page)), i)] = block
+            if _CHILD.match(ln):
+                for back in range(1, 4):
+                    pm = _PARENT.match(lines[i - back]) if i - back >= 0 else None
+                    if pm:
+                        sel = "X" in pm.group("m")
+                        state[(int(str(r.page)), i)] = "CHECKLIST_SELECTED" if sel else "CHECKLIST_NOT_SELECTED"
+                        break
+    out = {}
+    first = set(rules.sort_values("char_start").groupby(["page", "line_no"])["cand_id"].first().astype(str))
+    for c in rules.itertuples():
+        key = (int(str(c.page)), int(str(c.line_no)))
+        if not bool(c.from_range) and key in state and (str(c.cand_id) in first or state[key]):
+            out[str(c.cand_id)] = state[key]
     return out
 
 

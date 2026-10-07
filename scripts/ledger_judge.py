@@ -18,6 +18,11 @@ NOT = does not bind: only cited or explained inside other clause text or narrati
 REFERENCED = referenced requirement: the narrative states the clause or provision applies or must be followed (for example "in accordance with FAR 52.204-7, registration is required") without listing or incorporating it.
 UNDECIDED = you cannot decide from the evidence shown.
 Each number comes with up to three contexts (H = nearest heading; the number is marked >>> <<<). Answer with JSON only."""
+GUIDE_V2 = GUIDE.replace(
+    "Each number comes with",
+    """Checklists: a line that starts with a box or blank is a checklist item. A marker X, [X] or a filled box means SELECTED (BINDS). Blank underscores ("__", "____"), "[ ]" or an empty box mean NOT SELECTED (NOT), even though the clause title is printed; "⟦X⟧" is selected, "⟦ ⟧" is empty, "⟦?⟧" means the marker was lost (UNDECIDED unless another context decides). An Alternate line is judged by its own box. Items numbered (1), (2), ... in the unconditional paragraph (a) of FAR 52.212-5, and every clause in a list headed "incorporated by reference", are BINDS; the roman-numeral flow-down list (i), (ii), ... of paragraph (e) is NOT.
+Each number comes with""",
+)
 SCHEMA = {
     "type": "object",
     "properties": {
@@ -54,7 +59,7 @@ def sheet(doc: str) -> dict[str, str]:
     return out
 
 
-def main(model: str, gold_file: str, tag: str) -> None:
+def main(model: str, gold_file: str, tag: str, guide: str = GUIDE) -> None:
     gold = json.loads(Path(gold_file).read_text())["gold"]
     chat = make_openai_chat(SCHEMA)
     cache = P.Cache(Path("data/interim/judge_cache.jsonl"))
@@ -67,7 +72,7 @@ def main(model: str, gold_file: str, tag: str) -> None:
             chunk = nums[i : i + 12]
             body = "\n\n".join(f"[{n}]\n{sh[n]}" for n in chunk)
             msgs = [
-                {"role": "system", "content": GUIDE},
+                {"role": "system", "content": guide},
                 {
                     "role": "user",
                     "content": body + '\n\nReturn {"verdicts":[{"k":<number>,"v":"BINDS|NOT|REFERENCED|UNDECIDED"}]}',
@@ -115,4 +120,4 @@ def main(model: str, gold_file: str, tag: str) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], GUIDE_V2 if len(sys.argv) > 4 and sys.argv[4] == "v2" else GUIDE)

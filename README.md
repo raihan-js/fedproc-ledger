@@ -10,6 +10,7 @@ Which FAR/DFARS clauses actually bind a US federal solicitation, and how (incorp
 - After correcting a label-letter collision in the judge protocol (post-hoc, D-031): F1 0.962 vs 0.939 (lower bound +0.00003, so no superiority claim), specificity 73% vs 8%; H2 holds on the corrected gold.
 - Objective, annotator-free: **13.5%** of status-quo ledger entries are clauses whose own checklist box is empty (2247 of 2648 documents with a decided checklist).
 - Round 2 (pre-registered checklist-heavy frame, 36 documents, D-032): H3 FAILS on the majority gold (-0.103 [-0.185, -0.036]) while the two LLM judges label most of the agent's NOT items BINDS (86% and 63%); against the agent's own labels the model leads (+0.138); objective H5 holds (25.4% of status-quo entries in checklist-heavy documents are empty boxes) and H6 holds (40/40).
+- Post-hoc (D-033), judges re-run with the checkbox convention in their instructions: model minus B0 +0.047 [-0.000, +0.096], specificity 78% vs 6%; non-inferior, no superiority claim.
 - Pre-registered hypotheses as originally scored: H1 holds, H2 FAILS, H3 holds as non-inferiority only, H4 FAILS. Full tables: [`docs/RESULTS.md`](docs/RESULTS.md).
 <!-- headline:end -->
 

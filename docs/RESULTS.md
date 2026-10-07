@@ -83,3 +83,16 @@ Model minus B0, F1 difference per annotator (annotator-dependent; the judges mos
 | agent | +0.138 [+0.096, +0.185] |
 | judge_gpt-4o-mini | -0.146 [-0.230, -0.076] |
 | judge_gpt-4.1-mini | -0.120 [-0.207, -0.045] |
+
+### Round 2, post-hoc (D-033): judges re-run with the checkbox convention and A2 in their instructions
+
+| system | precision | recall | F1 [95% CI] | F2 | specificity |
+|---|---|---|---|---|---|
+| all-candidates | 0.742 | 1.000 | 0.852 [0.787, 0.901] | 0.935 | 0.000 |
+| B0 (VETR) | 0.748 | 0.968 | 0.844 [0.780, 0.893] | 0.914 | 0.061 |
+| B0 minus empty-box clauses | 0.748 | 0.968 | 0.844 [0.780, 0.893] | 0.914 | 0.061 |
+| B1 rules | 0.923 | 0.445 | 0.600 [0.476, 0.707] | 0.496 | 0.893 |
+| model noisy_or q>=0.5 | 0.919 | 0.865 | 0.891 [0.849, 0.923] | 0.875 | 0.781 |
+| model noisy_or q>=0.7 | 0.944 | 0.837 | 0.887 [0.843, 0.921] | 0.856 | 0.857 |
+
+Model minus B0: +0.047 [-0.000, +0.096] (760 labelled, 564 binding); non-inferior: True; superiority not claimed (lower bound not above +0.01, post-hoc gold).

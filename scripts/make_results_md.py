@@ -136,6 +136,17 @@ out.append(
 out.append("| gold | difference [95% CI] |\n|---|---|")
 for k, v in sd.items():
     out.append(f"| {k} | {v[0]:+.3f} [{v[1]:+.3f}, {v[2]:+.3f}] |")
+
+v2 = load("ledger_eval_round2v2_majority_binding.json")
+pv = v2[PA]
+out.append("\n### Round 2, post-hoc (D-033): judges re-run with the checkbox convention and A2 in their instructions\n")
+out.append(HEAD)
+for s_ in SYSTEMS:
+    if s_ in v2:
+        out.append(row(s_, v2[s_]))
+out.append(
+    f"\nModel minus B0: {pv['diff']:+.3f} [{pv['lo']:+.3f}, {pv['hi']:+.3f}] ({v2['_meta']['labelled']} labelled, {v2['_meta']['binding']} binding); non-inferior: {pv['lo'] > -0.03}; superiority not claimed (lower bound not above +0.01, post-hoc gold)."
+)
 Path("docs/RESULTS.md").write_text("\n".join(out) + "\n")
 
 head = (
@@ -144,6 +155,7 @@ head = (
     f"- After correcting a label-letter collision in the judge protocol (post-hoc, D-031): F1 {t2['model noisy_or q>=0.5']['f']:.3f} vs {t2['B0 (VETR)']['f']:.3f} (lower bound {g3['ci'][0]:+.5f}, so no superiority claim), specificity {t2['model noisy_or q>=0.5']['specificity']:.0%} vs {t2['B0 (VETR)']['specificity']:.0%}; H2 {'holds' if g2['holds'] else 'fails'} on the corrected gold.\n"
     f"- Objective, annotator-free: **{obj['share_of_b0']:.1%}** of status-quo ledger entries are clauses whose own checklist box is empty ({obj['documents_where_b0_counts_unchecked_items']} of {obj['documents_with_a_decided_checklist']} documents with a decided checklist).\n"
     f"- Round 2 (pre-registered checklist-heavy frame, 36 documents, D-032): H3 FAILS on the majority gold ({r2['H3']['diff']:+.3f} [{r2['H3']['ci'][0]:+.3f}, {r2['H3']['ci'][1]:+.3f}]) while the two LLM judges label most of the agent's NOT items BINDS (86% and 63%); against the agent's own labels the model leads ({sd['agent'][0]:+.3f}); objective H5 holds ({r2['H5']['share']:.1%} of status-quo entries in checklist-heavy documents are empty boxes) and H6 holds ({r2['H6']['agreed']}/{r2['H6']['items']}).\n"
+    f"- Post-hoc (D-033), judges re-run with the checkbox convention in their instructions: model minus B0 {pv['diff']:+.3f} [{pv['lo']:+.3f}, {pv['hi']:+.3f}], specificity {v2['model noisy_or q>=0.5']['specificity']:.0%} vs {v2['B0 (VETR)']['specificity']:.0%}; non-inferior, no superiority claim.\n"
     f"- Pre-registered hypotheses as originally scored: H1 {'holds' if h1['holds'] else 'fails'}, H2 {'holds' if h2['holds'] else 'FAILS'}, H3 holds as non-inferiority only, H4 {'holds' if h4['holds'] else 'FAILS'}. Full tables: [`docs/RESULTS.md`](docs/RESULTS.md)."
 )
 rd = Path("README.md").read_text()

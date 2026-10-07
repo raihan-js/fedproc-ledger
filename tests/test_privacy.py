@@ -10,6 +10,10 @@ from fedproc_ledger.extract.privacy import find_markings, redact
         ("Call (202) 555-0100 or 202-555-0101 or 202.555.0102.", "Call [PHONE] or [PHONE] or [PHONE]."),
         ("Phone: +1 703 555 0199 x123", "Phone: [PHONE]"),
         ("1-800-555-0100", "[PHONE]"),
+        # glued tokens from extraction (D-045): the address must still match;
+        # the whole blob is redacted, which is safe
+        ("Baker804-675-5000Courtney.MortlandBaker@va.gov", "[EMAIL]"),
+        ("questionsmatthew.combes@va.govayn", "[EMAIL]"),
     ],
 )
 def test_contact_details_are_redacted(raw, expected):

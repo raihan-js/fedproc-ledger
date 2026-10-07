@@ -17,7 +17,10 @@ MARKINGS: dict[str, re.Pattern[str]] = {
 # "CUI" is also the name of a FAR/DFARS topic (e.g. "CUI" in 252.204-7012 text); a hit is a flag for the release step,
 # not proof of a marking, so every hit is returned with its name and the release step decides.
 
-_EMAIL = re.compile(r"\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b")
+_EMAIL = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?![A-Za-z])")
+# No left word boundary on purpose (D-045): extraction glues tokens ("5000Courtney.X@va.gov"), and the address
+# must still match (consuming the glued digits into the redacted span). The right side is a negative lookahead for
+# letters (not \b) because fill-in underscores glue the TLD ("mail.mil_________").
 _PHONE = re.compile(
     r"(?<![\w.\-/$])(?:\+?1[\s.\-]?)?(?:\(\d{3}\)\s?|\d{3}[\s.\-])\d{3}[\s.\-]\d{4}(?:\s?(?:x|ext\.?)\s?\d{1,5})?(?![\w\-/])"
 )

@@ -13,8 +13,9 @@ from fedproc_ledger.eval import metrics as M
 from fedproc_ledger.label.commands import build_items
 from fedproc_ledger.model import classifier as C
 from fedproc_ledger.model.dataset import featurize_doc
+from fedproc_ledger.rules.baseline import BINDING
 
-OUT = Path("data/models/role_model_v2.pkl")
+OUT = Path(next((a.split("=")[1] for a in sys.argv if a.startswith("--out=")), "data/models/role_model_v2.pkl"))
 base = pd.read_parquet("data/interim/labeled_mentions.parquet")
 docs = pd.read_parquet("data/interim/documents.parquet").drop_duplicates("doc_id").set_index("doc_id")
 ctx: dict[str, str] = {}
@@ -31,10 +32,22 @@ for r in base.itertuples():
     src.append("v1")
 contexts = [ctx[i] for i in base["id"]]
 n_weak = 0
+
+
+def ok(r: dict) -> bool:
+    if "--no-checklist" in sys.argv and r["g41"].startswith("CHECKLIST"):
+        return False
+    return not ("--b1-agree" in sys.argv and (r["g41"] in BINDING) != (r["b1"] in BINDING))
+
+
 if "--no-weak" not in sys.argv:
     for line in Path("data/interim/weak_labels.jsonl").read_text().splitlines():
         rec = json.loads(line)
-        keep = {r["id"]: r["g41"] for r in rec["rows"] if r["g41"] and r["g41"] == r["g4o"] and r["g41"] != "UNCLEAR"}
+        keep = {
+            r["id"]: r["g41"]
+            for r in rec["rows"]
+            if r["g41"] and r["g41"] == r["g4o"] and r["g41"] != "UNCLEAR" and ok(r)
+        }
         if not keep:
             continue
         items = [i for i in build_items(rec["doc"]) if i["id"] in keep]

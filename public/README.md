@@ -18,9 +18,10 @@ A small (0.46 MB) classifier that decides, for each FAR/DFARS clause-number ment
 ```python
 import numpy as np
 from inference import LedgerScorer
+
 scorer = LedgerScorer("fedproc_ledger_v1.npz")
-p = scorer.proba(feats, contexts)   # feats: [{feature: value}], contexts: [str]
-bind = scorer.binding_prob(p)       # P(mention role is binding)
+p = scorer.proba(feats, contexts)  # feats: [{feature: value}], contexts: [str]
+bind = scorer.binding_prob(p)  # P(mention role is binding)
 ```
 
 `feats` are the structural mention features from the research pipeline (box markers, section labels, line patterns); `contexts` are the mention windows. See the dataset (`raihan-js/fedproc-ledger-bench`, `mentions.parquet`) for the exact feature contract.

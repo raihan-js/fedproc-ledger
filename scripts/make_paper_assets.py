@@ -22,6 +22,7 @@ ROUNDS = {  # round -> (label, eval-file suffix for the max-q configuration)
     4: ("Round 4 (rules v1.2)", ""),
     5: ("Round 5 (rules v1.2)", "_maxprim"),
     6: ("Round 6 (rules v1.3)", ""),
+    7: ("Round 7 (rules v1.4, temporal)", ""),
 }
 ANN = [
     ("majority", "majority_binding"),

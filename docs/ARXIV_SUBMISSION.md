@@ -23,3 +23,8 @@ Dead repo links, a headline comparison that was not like-for-like, thin real dat
 ## After acceptance on arXiv
 - Put the arXiv ID into the HF model/dataset cards and the README headline.
 - Announce with the dev.to article + Zenn summary (`docs/article/`).
+
+## Troubleshooting: arXiv ran plain `etex` instead of pdflatex (submit/8192309, 2026-10-07)
+Symptom: log shows `/usr/local/texlive/.../etex ... main.tex` and `! Undefined control sequence. l.1 \documentclass`.
+Cause: the Process step used the `tex` compiler, not a source defect (the source is pure ASCII, starts with a clean `\documentclass`, all figures are PDF, all `\input` files present).
+Fix: at Add Files upload ONLY the four flat files (`main.tex`, `tab_fresh.tex`, `tab_ceiling.tex`, `fig_forest.pdf` — ready-made `release/paper/arxiv_bundle.zip`, no paper PDF, no subdirectories). At the Process step select **pdflatex** from the compiler dropdown, then Reprocess. Do not hand-craft a 00README file.

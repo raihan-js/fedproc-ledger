@@ -1,3 +1,13 @@
+# RESUME GUIDE (written 2026-10-07 late; read this first after any interruption)
+
+1. `git log --oneline | head -20` (everything is committed locally; `git log --all --format=%B | grep -ci co-authored` must print 0; never add Claude trailers).
+2. Source of truth: `docs/decisions.md` (D-001 to D-029), `results/*.json`, `docs/RESULTS.md` (generated: `uv run python scripts/make_results_md.py`), `docs/preregistration.md` (frozen; test set `results/ledger_test_docs_FROZEN.json`, model hash in `results/test_run_manifest.json`).
+3. Environment: `uv run ...`; secrets only in `.env` (GOVCON_API_KEY, OPENAI_API_KEY; never print); OpenAI spend ledger `data/logs/spend.jsonl` (cap USD 6.00 in `label/openai_chat.py`, about USD 0.43 spent); no Qwen anywhere (D-021); the owner's Ollama (port 11434) is theirs: never stop or change it.
+4. Pipeline commands: `fl acquire|registry|extract|rules|label|model`; trained model `data/models/role_model.pkl` (rebuild: `uv run python scripts/cv_features.py --rebuild && uv run fl model train`); predictions `data/processed/predictions/`; evaluation `scripts/ledger_eval.py <gold.json> [binding|applicable]`; test verdicts `scripts/test_report.py`.
+5. What is DONE: acquisition (4,755 notices), registry, extraction (14,540 docs), rules, classifier, dev and frozen-test evaluation (H1 holds, H2 and H4 fail, H3 non-inferior only), corpus findings (13.5% empty-box over-count), version currency, README, paper draft, integration contract draft.
+6. What is NOT done / open: nothing pushed or published (needs the owner's OK and the company's permission); second pre-registered round on a checklist-heavy frame; R-tier (narrative requirement) model; product gold from VETR; HF dataset and model card; DoD deviations are parsed but not yet merged into registry dates.
+7. Hazards: `fl rules run` overwrites rules parquet (deterministic); `ledger_eval.py` writes results/ledger_eval_<tag>.json; the frozen test files must not be edited; test docs must not enter training.
+
 # Where we are (update after every step; read this first when resuming)
 
 - **Phases 0 to 4 are built. Checkpoint material for 1 to 4 is in `results/checkpoints.md` (regenerate with `uv run python scripts/checkpoint_summary.py`); the HTML reports are `data/reports/extract_report.html` and `data/reports/rules_report.html`. Waiting on the owner's review before Phase 5 (annotation).** Owner approved Checkpoint 0 and the plan inputs (D-012).

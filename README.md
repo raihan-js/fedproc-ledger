@@ -2,7 +2,7 @@
 
 Which FAR/DFARS clauses actually bind a US federal solicitation, and how (incorporated by reference, full text, selected in a checklist), with a probability and the evidence lines. A mention-role classifier over regex clause candidates, validated against the eCFR registry; box states are decided by rule.
 
-**Status (2026-10-07): research prototype, nothing published.** Numbers below are generated from `results/*.json` by `scripts/make_results_md.py`; the annotators of every gold set are LLM agents, not procurement experts, and the evaluation frame under-represents checklist-heavy documents (see `docs/decisions.md`, D-028).
+**Status (2026-10-07): public research release.** Model: <https://huggingface.co/raihan-js/fedproc-ledger-v1> · data: <https://huggingface.co/datasets/raihan-js/fedproc-ledger-bench> · paper draft: [`release/paper/main.pdf`](release/paper/main.pdf). Numbers below are generated from `results/*.json` by `scripts/make_results_md.py`; the annotators of every gold set are LLM agents, not procurement experts (see `docs/decisions.md`, D-028).
 
 ## Headline
 <!-- headline:start -->

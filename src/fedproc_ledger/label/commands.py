@@ -269,11 +269,12 @@ def slice_a_ids(doc_id: str) -> dict[str, str]:
     return out
 
 
-_PARA_A_START = re.compile(
-    r"^\s*\(a\)\s+The Contractor shall comply with the following (?:Federal Acquisition Regulation|FAR)", re.I
-)
+_PARA_A_START = re.compile(r"^\s*\(a\)\s+The\s+Contractor\s+shall\s+comply\s+with\s+the\s+following", re.I)
 _PARA_A_END = re.compile(r"^\s*\(b\)\s+\S")
-_PARA_A_ITEM = re.compile(r"^\s*\(\d{1,2}\)\s*(?:FAR\s+)?\d")
+_PARA_A_ITEM = re.compile(r"^\s*\(\d{1,2}\)\s*(?:FAR\s+)?(?=\d)")
+_PARA_A_ITEM_LOST = re.compile(
+    r"^\s*\u27e6\?\u27e7\s*\(\d{1,2}\)\s*(?:FAR\s+)?\d"
+)  # marker lost: no checkbox exists in paragraph (a)
 
 
 def para_a_ids(doc_id: str) -> set[str]:
@@ -292,7 +293,7 @@ def para_a_ids(doc_id: str) -> set[str]:
                 used += 1
                 if _PARA_A_END.match(ln) or used > 150:
                     active = False
-                elif _PARA_A_ITEM.match(ln) and "\u27e6" not in ln:
+                elif _PARA_A_ITEM.sub("", ln, count=1) != ln or _PARA_A_ITEM_LOST.match(ln):
                     span.add((int(str(r.page)), i))
     out = set()
     for c in rules.itertuples():
@@ -341,6 +342,50 @@ def inherited_ids(doc_id: str) -> dict[str, str]:
         key = (int(str(c.page)), int(str(c.line_no)))
         if not bool(c.from_range) and key in state and (str(c.cand_id) in first or state[key]):
             out[str(c.cand_id)] = state[key]
+    return out
+
+
+_COND = re.compile(
+    r"(?:applies\s+only\s+if|if|when)\s+(?:Alternate\s+[IVX]+\s+to\s+)?the\s+(?:clause|provision)\s+at\s+"
+    r"(?:Federal\s+Acquisition\s+Regulation\s*\(FAR\)\s*|FAR\s*)?$",
+    re.I,
+)
+_DEFINED = re.compile(
+    r"(?:has|have)\s+the\s+meanings?\s+(?:given|provided)\s+in\s+the\s+(?:clause|provision)\s+at\s+(?:FAR\s*)?$", re.I
+)
+_PARAREF = re.compile(
+    r"paragraphs?\s+\([a-z0-9]+\)(?:\(\w+\))*\s+(?:of|in)\s+the\s+(?:clause|provision)\s+at\s+(?:FAR\s*)?$", re.I
+)
+_APPLIES_LABEL = re.compile(
+    r"^\s*(?:\([ivxl]+\)\s*)?(?:FAR|DFARS|AGAR|HSAR|VAAR)(?:\s+(?:Clause|Provision))?\s*$", re.I
+)
+_APPLIES_STMT = re.compile(
+    r"is\s+applicable\s+for\s+this\s+solicitation|applies\s+to\s+this\s+(?:solicitation|acquisition)", re.I
+)
+
+
+def text_rule_ids(doc_id: str) -> dict[str, str]:
+    """Candidate id -> NOT_BINDING / BINDING for four unambiguous wordings (D-036): (1) "(Applies only if) the clause at FAR 52.x is
+    included" (a conditional certificate, not binding by itself); (2) "... has the meaning provided in the clause at 52.x" (a
+    definition reference); (3) a line "FAR Clause 52.x, Title" followed within two lines by "is applicable for this solicitation"."""
+    rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
+    pg = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"]).sort_values("page")
+    pages = {int(str(r.page)): str(r.text_layout).split("\n") for r in pg.itertuples()}
+    out = {}
+    for c in rules.itertuples():
+        if bool(c.from_range):
+            continue
+        lines = pages[int(str(c.page))]
+        li = int(str(c.line_no))
+        line = lines[li]
+        pos = line.find(str(c.raw))
+        if pos < 0:
+            continue
+        before = (lines[li - 1][-80:] + " " if li > 0 else "") + line[:pos]
+        if _COND.search(before) or _DEFINED.search(before) or _PARAREF.search(before):
+            out[str(c.cand_id)] = "NOT_BINDING"
+        elif _APPLIES_LABEL.match(line[:pos]) and _APPLIES_STMT.search(" ".join(lines[li : li + 3])):
+            out[str(c.cand_id)] = "BINDING"
     return out
 
 

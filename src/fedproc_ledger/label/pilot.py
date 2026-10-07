@@ -61,7 +61,7 @@ def checklist_item_keys(pages: Iterable[tuple[int, str]]) -> set[tuple[int, int]
 
 
 _TYPED_BLANK = re.compile(r"^\s*(?:_{2,}|\[\s*\])\s*(?:\(\d{1,3}\)|\([a-z]{1,4}\)|\([ivx]+\))")
-_TYPED_X = re.compile(r"^\s*(?:_*X_*|\[X\])\s*(?:\(\d{1,3}\)|\([A-Za-z]{1,4}\)|FAR\b)")
+_TYPED_X = re.compile(r"^\s*(?:_*X{1,4}_*|\[X\])\s*(?:\(\d{1,3}\)|\([A-Za-z]{1,4}\)|FAR\b)")
 
 
 def typed_item_state(line: str) -> str | None:

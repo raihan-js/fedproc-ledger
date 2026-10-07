@@ -23,7 +23,7 @@ p = scorer.proba(feats, contexts)   # feats: [{feature: value}], contexts: [str]
 bind = scorer.binding_prob(p)       # P(mention role is binding)
 ```
 
-`feats` are the structural mention features from the research pipeline (box markers, section labels, line patterns); `contexts` are the mention windows. See the dataset (`raihan-js/fedproc-ledger-data`, `mentions.parquet`) for the exact feature contract.
+`feats` are the structural mention features from the research pipeline (box markers, section labels, line patterns); `contexts` are the mention windows. See the dataset (`raihan-js/fedproc-ledger-bench`, `mentions.parquet`) for the exact feature contract.
 
 ## Evidence (pre-registered rounds on fresh documents; labels from a coding agent and two OpenAI models, not legal experts)
 

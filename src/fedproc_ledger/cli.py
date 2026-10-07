@@ -92,3 +92,29 @@ for _name, _phase, _desc in PHASES:
 
 if __name__ == "__main__":
     app()
+
+
+@app.command()
+def ledger(
+    file: str = typer.Argument(..., help="PDF, DOCX, DOC or TXT solicitation"),
+    out: str = typer.Option("", help="write the JSON here instead of stdout"),
+) -> None:
+    """Clause ledger for one document (docs/INTEGRATION_CONTRACT.md)."""
+    from pathlib import Path
+
+    from fedproc_ledger.serve.ledger import ledger_for_file
+
+    text = json.dumps(ledger_for_file(Path(file)), indent=1, ensure_ascii=False)
+    if out:
+        Path(out).write_text(text + "\n")
+        typer.echo(f"wrote {out}")
+    else:
+        typer.echo(text)
+
+
+@app.command()
+def serve(host: str = "127.0.0.1", port: int = 8077) -> None:
+    """Run the local HTTP service (POST /v1/ledger)."""
+    import uvicorn
+
+    uvicorn.run("fedproc_ledger.serve.app:app", host=host, port=port)

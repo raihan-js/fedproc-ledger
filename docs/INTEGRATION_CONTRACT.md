@@ -1,4 +1,4 @@
-# FedProc-Ledger: integration contract for VETR (draft v0.1, 2026-10-07)
+# FedProc-Ledger: integration contract for VETR (draft v0.2, 2026-10-07)
 
 Audience: the VETR team. Status: **proposal; nothing is deployed, nothing in the VETR repository was changed** (read-only
 access, `FarClauseDetectionService.php` only read for the parity port). Numbers below are from this repository's results
@@ -13,42 +13,50 @@ Not for: legal advice; deciding obligations without a person; documents without 
 extractor flags them, no ledger is produced); clause ranges ("52.219-1 through 52.219-4") and alternates' dates are not
 resolved in this version.
 
-## 2. Evidence for its usefulness (read D-023 to D-028 before deciding)
-- **Objective, annotator-free (D-026):** in 6,472 documents, 13.5% of the entries the VETR-style regexes would list (57,225 of 423,328)
-  are clause numbers whose every mention is a checklist item with an **empty** box; 2,247 of the 2,648 documents with a decided
-  checklist are affected (median 30 clauses). Lower bound; describes the ported regexes, not VETR's current ledger logic.
-- **Frozen test (D-028, 32 documents, 679 labelled numbers, majority of three LLM annotators, not human experts):** model F1
-  0.912 [0.847, 0.956] against 0.891 [0.829, 0.935] for the status-quo regexes (difference +0.020 [-0.005, +0.046]: non-inferior,
-  **not shown better**); recall 0.945 vs 0.963; share of non-binding numbers correctly left out 38% vs 4%. A rules-only baseline (B1) is
-  far worse (F1 0.560). Pre-registered hypotheses H2 and H4 **failed** as originally scored (D-028). After a post-hoc correction of a judge-protocol bug (D-031) the model's specificity is 73% against 8.5% and H2 holds, F1 0.962 vs 0.939 (lower bound +0.00003: no superiority claim), H4 still fails.
-- **Recommendation:** adopt the checkbox rule first (zero-risk, objective). Use the model for *ranking and flagging*, not for
-  silently removing clauses: show every number, with its tier and probability.
+## 2. Evidence for its usefulness (read D-023 to D-036 before deciding; every number is in results/*.json)
+- **Objective, annotator-free:** in 6,472 documents, 13.5% of the entries the VETR-style regexes would list (57,225 of 423,328) are clause
+  numbers whose every mention is a checklist item with an **empty** box; in checklist-heavy documents 25.4% (round 2) and 31.0% (round 3).
+  The checkbox rule agreed with a reader on 100 of 100 random items (40 + 60). Lower bound; describes the ported regexes, not VETR's current logic.
+- **Round 3, a fresh pre-registered test (D-035; 30 new documents, 595 numbers, majority of the coding agent and two LLM judges, no human
+  experts):** F1 0.890 against 0.778 for the status-quo regexes (+0.111 [+0.049, +0.181]; the superiority criteria were met), specificity 84%
+  against 16%, **recall 0.874 against 0.933** (the cost). The difference is positive for the agent (+0.140) and gpt-4.1-mini (+0.064), about zero
+  for gpt-4o-mini. Per stratum: small documents +0.08, medium +0.05, large +0.22 F1.
+- **Earlier rounds:** round 1 (D-028, D-031): non-inferior, +0.020 original and +0.023 after a post-hoc protocol correction; round 2 (D-032, D-033):
+  the pre-registered non-inferiority test FAILED (-0.103) because the LLM judges accepted unchecked boxes as binding; with corrected instructions
+  +0.047. Annotator dependence is the main uncertainty: **the product gold sample in section 5 is required before any customer-visible use.**
+- **Since round 3 (development, not evidence):** rules v1.2 (D-036) fix the clean errors found in rounds 2 and 3; a fresh round 4 is needed before any
+  claim about them. Weak LLM labels did not help (D-034).
+- **Recommendation:** adopt the checkbox rule first (zero-risk, objective). Use the model for *ranking and flagging*, not for silently removing
+  clauses: show every number with its tier and probability; route UNDETERMINED and low-margin entries to a person (on round 3, a review queue of
+  numbers with q between 0.1 and 0.9 is about 39% of the numbers and holds 68% of the majority-gold errors and all agent-gold errors).
 
 ## 3. Interface (sidecar service; the model never runs inside PHP)
 `POST /v1/ledger` with `{"document": <bytes or text_layout pages>, "posted_date": "YYYY-MM-DD"}` returns:
 ```json
 {
-  "contract_version": "0.1",
-  "model": {"name": "role_model", "sha256": "…", "trained_on": "n mentions / m documents"},
-  "document": {"pages": 12, "scanned": false, "extraction_warnings": []},
+  "contract_version": "0.2",
+  "model": {"name": "role_model", "sha256": "…", "rules_version": "1.2", "aggregation": "max over mentions"},
+  "document": {"pages": 12, "scanned": false, "extraction_warnings": [], "candidates": 119},
   "entries": [
     {
       "number": "52.204-21", "alternate": null, "cited_date": "2021-11",
       "tier": "BINDING | NOT_BINDING | UNDETERMINED",
       "q": 0.97,
-      "decided_by": "box_rule | model",
-      "registry": {"status": "active|reserved|removed|rfo_only|unknown", "version_in_force": "2021-11",
-                   "currency": "matches|older|newer|no_date"},
-      "evidence": [{"page": 3, "line": 41, "role": "INCORPORATED_BY_REFERENCE", "p": 0.95, "text": "…"}]
+      "decided_by": "model | box_rule | para_a_rule | text_rule",
+      "registry": {"status": "active|reserved|removed|rfo_only|unknown"},
+      "evidence": [{"page": 3, "line": 41, "role": "INCORPORATED_BY_REFERENCE", "p": 0.95, "source": "model", "text": "…"}]
     }
   ],
-  "summary": {"binding": 41, "not_binding": 22, "undetermined": 6, "box_rule_share": 0.61}
+  "summary": {"binding": 41, "not_binding": 22, "undetermined": 6, "rule_decided_share": 0.61}
 }
 ```
-Rules: `q` is the noisy-OR over mentions of the binding probability (calibrated by temperature scaling; development ECE 0.06);
+Rules: `q` is the **maximum** over mentions of the binding probability (calibrated by temperature scaling; development ECE 0.06; v0.1 used noisy-OR);
 `tier` = BINDING if `q >= 0.7`, NOT_BINDING if `q <= 0.3`, otherwise UNDETERMINED (a person decides); the thresholds are
 configuration, not constants. Box-rule entries have `q` 1.0 or 0.0. The model **never creates a clause number**: numbers come from
 regex candidates validated against the eCFR registry.
+
+Run it: `fl ledger FILE.pdf [--out ledger.json]` (about 2.5 s for a 42-page PDF) or `fl serve` then `curl -F file=@FILE.pdf localhost:8077/v1/ledger`
+(`serve/ledger.py`, `serve/app.py`; tests in `tests/test_ledger_service.py`). Scanned documents return `scanned: true` and no entries.
 
 ## 4. Operating numbers (measured here, CPU only)
 Model file 0.86 MB; 115 ms per document including parsing and feature building (12-core desktop, 60 documents, 6,038 mentions);

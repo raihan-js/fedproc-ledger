@@ -122,3 +122,41 @@ def test_text_rules(tmp_path, monkeypatch):
     assert got["52.212-3"] == "NOT_BINDING"
     assert got["52.222-55"] == "BINDING"
     assert "52.222-41" not in got  # no applicability statement near it
+
+
+def test_alternative_reference_with_as_applicable(tmp_path, monkeypatch):
+    lines = [
+        "assignment is permitted except as expressly permitted by FAR 52.212-4(b) or FAR 52.232-23, as applicable."
+    ]
+    ids = _make(tmp_path, monkeypatch, lines, [(0, "52.232-23")])
+    assert {ids[c]: v for c, v in LC.text_rule_ids("d").items()} == {"52.232-23": "NOT_BINDING"}
+
+
+def test_bare_list_needs_four_lines_and_no_leaders(tmp_path, monkeypatch):
+    lines = [
+        "The following FAR clauses apply to this solicitation:",
+        "FAR 52.204-12, Unique Entity Identifier Maintenance (Oct 2016)",
+        "FAR 52.204-13, System for Award Management Maintenance (Oct 2018)",
+        "FAR 52.204-18, Commercial and Government Entity Code Maintenance (Aug 2020)",
+        "FAR 52.204-21, Basic Safeguarding of Covered Contractor Information Systems",
+        "(Nov 2021)",
+        "FAR 52.209-6, Protecting the Government's Interest When Subcontracting",
+    ]
+    nums = [(1, "52.204-12"), (2, "52.204-13"), (3, "52.204-18"), (4, "52.204-21"), (6, "52.209-6")]
+    ids = _make(tmp_path, monkeypatch, lines, nums)
+    assert {ids[c] for c in LC.bare_list_ids("d")} == {n for _, n in nums}
+    toc = [
+        "TABLE OF CONTENTS",
+        "52.204-12 Unique Entity Identifier ........ 3",
+        "52.204-13 System for Award Management ...... 4",
+        "52.204-18 Commercial and Government Entity ...... 5",
+        "52.204-21 Basic Safeguarding ........ 6",
+    ]
+    ids2 = (
+        _make(
+            tmp_path / "x", monkeypatch, toc, [(1, "52.204-12"), (2, "52.204-13"), (3, "52.204-18"), (4, "52.204-21")]
+        )
+        if (tmp_path / "x").mkdir() is None
+        else {}
+    )
+    assert ids2 and LC.bare_list_ids("d") == set()

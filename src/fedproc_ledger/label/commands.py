@@ -359,6 +359,13 @@ _PARAREF = re.compile(
 _APPLIES_LABEL = re.compile(
     r"^\s*(?:\([ivxl]+\)\s*)?(?:FAR|DFARS|AGAR|HSAR|VAAR)(?:\s+(?:Clause|Provision))?\s*$", re.I
 )
+_ALT_REF = re.compile(r"(?:,|\bor)\s*(?:FAR\s+)?$", re.I)
+_AS_APPLICABLE = re.compile(r"^\s*,?\s*as\s+applicable\b", re.I)
+_LIST_LINE = re.compile(
+    r"^\s*(?:(?:FAR|DFARS|AGAR|HSAR|VAAR|DIAR|NFS|JAR|DEA-)\s*)?\d{2,4}\.\d{3}[-\u2013]\d{1,4}\s*[,.\-\u2013]?\s+[A-Z\u201c\"]"
+)
+_LEADER = re.compile(r"\.{4,}|\s\d{1,3}\s*$")
+_TOC_HEAD = re.compile(r"table of contents|\bindex\b|contents", re.I)
 _APPLIES_STMT = re.compile(
     r"is\s+applicable\s+for\s+this\s+solicitation|applies\s+to\s+this\s+(?:solicitation|acquisition)", re.I
 )
@@ -382,11 +389,52 @@ def text_rule_ids(doc_id: str) -> dict[str, str]:
         if pos < 0:
             continue
         before = (lines[li - 1][-80:] + " " if li > 0 else "") + line[:pos]
-        if _COND.search(before) or _DEFINED.search(before) or _PARAREF.search(before):
+        after = line[pos + len(str(c.raw)) :]
+        alt_ref = bool(_ALT_REF.search(before) and _AS_APPLICABLE.match(after))
+        if _COND.search(before) or _DEFINED.search(before) or _PARAREF.search(before) or alt_ref:
             out[str(c.cand_id)] = "NOT_BINDING"
         elif _APPLIES_LABEL.match(line[:pos]) and _APPLIES_STMT.search(" ".join(lines[li : li + 3])):
             out[str(c.cand_id)] = "BINDING"
     return out
+
+
+def bare_list_ids(doc_id: str) -> set[str]:
+    """Candidate ids on lines of a bare list of clauses: at least four lines in a row (one wrapped continuation allowed) that start
+    with a clause number, a title and no dot leader or page number, outside a table of contents. Such a list names the clauses
+    the solicitation applies ("FAR 52.204-12, Unique Entity Identifier Maintenance (Oct 2016)"); D-040."""
+    rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
+    pg = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"]).sort_values("page")
+    hit: set[tuple[int, int]] = set()
+    for r in pg.itertuples():
+        lines = str(r.text_layout).split("\n")
+        match = [bool(_LIST_LINE.match(ln)) and not _LEADER.search(ln) for ln in lines]
+        i = 0
+        while i < len(lines):
+            if not match[i]:
+                i += 1
+                continue
+            j, last, run = i, i, [i]
+            while j + 1 < len(lines):
+                if match[j + 1]:
+                    j += 1
+                    last = j
+                    run.append(j)
+                elif j + 2 < len(lines) and match[j + 2] and not match[j + 1]:
+                    j += 2
+                    last = j
+                    run.append(j)
+                else:
+                    break
+            if len(run) >= 4 and not any(_TOC_HEAD.search(x) for x in lines[max(0, i - 4) : i]):
+                hit.update((int(str(r.page)), k) for k in run)
+            i = max(last, i) + 1
+    return {
+        str(c.cand_id)
+        for c in rules.itertuples()
+        if not bool(c.from_range)
+        and (int(str(c.page)), int(str(c.line_no))) in hit
+        and str(c.line_text).find(str(c.raw)) <= 12
+    }
 
 
 @label_app.command()

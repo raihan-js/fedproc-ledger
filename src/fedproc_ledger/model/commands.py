@@ -12,7 +12,14 @@ import typer
 from sklearn.model_selection import GroupKFold
 
 from fedproc_ledger.eval import metrics as M
-from fedproc_ledger.label.commands import build_items, inherited_ids, para_a_ids, slice_a_ids, text_rule_ids
+from fedproc_ledger.label.commands import (
+    bare_list_ids,
+    build_items,
+    inherited_ids,
+    para_a_ids,
+    slice_a_ids,
+    text_rule_ids,
+)
 from fedproc_ledger.model import classifier as C
 from fedproc_ledger.model.dataset import featurize_doc
 from fedproc_ledger.paths import PROCESSED, RESULTS
@@ -57,6 +64,7 @@ def predict_doc(model: C.RoleModel, doc_id: str) -> pd.DataFrame:
     truth = slice_a_ids(doc_id)
     para_a = para_a_ids(doc_id)
     text_rules = text_rule_ids(doc_id)
+    bare = bare_list_ids(doc_id)
     for k, v in inherited_ids(doc_id).items():
         truth.setdefault(k, v)
     p = model.proba([r["feat"] for r in rows], [r["context"] for r in rows])
@@ -70,6 +78,9 @@ def predict_doc(model: C.RoleModel, doc_id: str) -> pd.DataFrame:
             bi, ei = float(role == "CHECKLIST_SELECTED"), 0.0
         elif r["id"] in para_a:  # unconditional paragraph (a) of 52.212-5: binding (amendment A2)
             role, src = "INCORPORATED_BY_REFERENCE", "para_a_rule"
+            bi, ei = 1.0, 0.0
+        elif r["id"] in bare and r["id"] not in text_rules:  # bare list of clause numbers and titles (D-040)
+            role, src = "INCORPORATED_BY_REFERENCE", "list_rule"
             bi, ei = 1.0, 0.0
         elif r["id"] in text_rules:  # conditional certificate, definition reference, "is applicable" statement
             binds = text_rules[r["id"]] == "BINDING"

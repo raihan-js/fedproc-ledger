@@ -96,3 +96,31 @@ Model minus B0, F1 difference per annotator (annotator-dependent; the judges mos
 | model noisy_or q>=0.7 | 0.944 | 0.837 | 0.887 [0.843, 0.921] | 0.856 | 0.857 |
 
 Model minus B0: +0.047 [-0.000, +0.096] (760 labelled, 564 binding); non-inferior: True; superiority not claimed (lower bound not above +0.01, post-hoc gold).
+
+## Round 3, fresh pre-registered test of rules v1.1 (D-035): 30 documents, 553 labelled numbers
+
+| system | precision | recall | F1 [95% CI] | F2 | specificity |
+|---|---|---|---|---|---|
+| all-candidates | 0.644 | 1.000 | 0.783 [0.690, 0.855] | 0.900 | 0.000 |
+| B0 (VETR) | 0.668 | 0.933 | 0.778 [0.697, 0.839] | 0.864 | 0.162 |
+| B0 minus empty-box clauses | 0.668 | 0.933 | 0.778 [0.697, 0.839] | 0.864 | 0.162 |
+| B1 rules | 0.942 | 0.500 | 0.653 [0.517, 0.767] | 0.552 | 0.944 |
+| model noisy_or q>=0.5 | 0.886 | 0.876 | 0.881 [0.823, 0.923] | 0.878 | 0.797 |
+| model noisy_or q>=0.7 | 0.912 | 0.789 | 0.846 [0.783, 0.896] | 0.811 | 0.863 |
+
+| id | outcome |
+|---|---|
+| H1 | holds: +0.237 [+0.119, +0.369] |
+| H2 | FAILS: specificity 0.838, recall 0.874 |
+| H3 | non-inferior: True; superior: True; +0.111 [+0.049, +0.181], positive on 2 of 3 single annotators |
+| H4 | FAILS: coverage 0.302, accuracy 0.970 |
+| H5 | holds: 31.0% of B0 entries in M/L documents are empty-box clauses (521 of 1680) |
+| H6 | holds: rule agreed on 60 of 60 |
+
+Model minus B0, F1 difference per annotator:
+
+| gold | difference [95% CI] |
+|---|---|
+| agent | +0.140 [+0.096, +0.191] |
+| judge_gpt-4o-mini | -0.007 [-0.074, +0.054] |
+| judge_gpt-4.1-mini | +0.064 [-0.019, +0.147] |

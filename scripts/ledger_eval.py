@@ -115,7 +115,9 @@ for mode in ("noisy_or", "max"):
         res[name] = summarize(name, all_counts[name])
 best = max((k for k in all_counts if k.startswith("model")), key=lambda k: res[k]["f"])
 print("best model config by F1:", best)
-PRE = "model noisy_or q>=0.5"  # the pre-registered configuration is always compared, whichever config is best
+PRE = os.environ.get(
+    "PRIMARY", "model noisy_or q>=0.5"
+)  # the pre-registered configuration is always compared, whichever config is best
 for cfg in dict.fromkeys([best, PRE]):
     for base in ("B1 rules", "B0 (VETR)", "all-candidates"):
         d = M.paired_bootstrap(all_counts[base][:, :3], all_counts[cfg][:, :3], n_boot=4000)

@@ -1,0 +1,73 @@
+{
+ "H1": {
+  "diff": 0.2366316231575908,
+  "ci": [
+   0.11934197658283542,
+   0.3694109360283195
+  ],
+  "holds": true
+ },
+ "H2": {
+  "model_specificity": 0.8375634517766497,
+  "model_recall": 0.8735955056179775,
+  "b0_specificity": 0.16243654822335024,
+  "holds": false
+ },
+ "H3": {
+  "diff": 0.11141355847492718,
+  "ci": [
+   0.04850691432198748,
+   0.18139579493170702
+  ],
+  "non_inferior": true,
+  "superior": true,
+  "single_annotator_diffs": {
+   "agent": [
+    0.1403645541641465,
+    0.09564850806311263,
+    0.19076925597298408
+   ],
+   "judge_gpt-4o-mini": [
+    -0.0071077962644228165,
+    -0.07371829595063205,
+    0.05415364752263851
+   ],
+   "judge_gpt-4.1-mini": [
+    0.06402306526324719,
+    -0.01934764591239305,
+    0.14725302643743948
+   ]
+  },
+  "positive_on": 2
+ },
+ "H4": {
+  "t_from_round2": 0.9847005032801908,
+  "coverage": 0.30198915009041594,
+  "accuracy": 0.9700598802395209,
+  "holds": false
+ },
+ "H5": {
+  "b0_entries": 1680,
+  "empty_box_entries": 521,
+  "share": 0.3101190476190476,
+  "median_doc_share": 0.32019417475728157,
+  "holds": true
+ },
+ "H6": {
+  "items": 60,
+  "agreed": 60,
+  "holds": true
+ },
+ "annotator_diagnostics": {
+  "gpt-4o-mini": {
+   "agent_N_judged_B": 0.42011834319526625,
+   "agent_B_judged_B": 0.8267716535433071,
+   "agent_N_total": 169
+  },
+  "gpt-4.1-mini": {
+   "agent_N_judged_B": 0.26627218934911245,
+   "agent_B_judged_B": 0.6666666666666666,
+   "agent_N_total": 169
+  }
+ }
+}

@@ -152,3 +152,14 @@ Model minus B0, F1 difference per annotator:
 | agent | +0.144 [+0.090, +0.210] |
 | judge_gpt-4o-mini | +0.074 [+0.021, +0.136] |
 | judge_gpt-4.1-mini | +0.109 [+0.044, +0.185] |
+
+## Round 5, fresh pre-registered test of the stacker (D-039; max-q shown for comparison): 24 documents, 395 labelled numbers
+
+| system | precision | recall | F1 [95% CI] | F2 | specificity |
+|---|---|---|---|---|---|
+| B0 (VETR) | 0.769 | 0.899 | 0.829 [0.760, 0.883] | 0.869 | 0.192 |
+| B1 rules | 0.937 | 0.449 | 0.607 [0.451, 0.742] | 0.502 | 0.909 |
+| model max q>=0.5 | 0.928 | 0.916 | 0.922 [0.874, 0.955] | 0.918 | 0.788 |
+| model stacker q>=0.5 | 0.926 | 0.926 | 0.926 [0.876, 0.959] | 0.926 | 0.778 |
+
+Stacker minus B0: +0.097 [+0.040, +0.158] (positive on 3 of 3 annotators); stacker minus max-q: +0.004 [-0.003, +0.014] (no detectable gain, so max-q stays the default). H4 (review queue) FAILS: 16.7% of numbers hold 47.7% of errors. H7: 20.6% of B0 entries in M/L documents are empty-box clauses. H6: 60/60.

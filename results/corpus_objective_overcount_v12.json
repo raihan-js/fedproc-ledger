@@ -1,0 +1,8 @@
+{
+ "b0_entries": 423328,
+ "b0_entries_only_in_empty_checklist_boxes": 58294,
+ "share_of_b0": 0.13770409705949052,
+ "documents_with_a_decided_checklist": 3029,
+ "documents_where_b0_counts_unchecked_items": 2390,
+ "median_unchecked_per_affected_document": 30.0
+}

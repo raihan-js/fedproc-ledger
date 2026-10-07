@@ -132,7 +132,9 @@ PRE = os.environ.get(
     "PRIMARY", "model noisy_or q>=0.5"
 )  # the pre-registered configuration is always compared, whichever config is best
 for cfg in dict.fromkeys([best, PRE]):
-    for base in ("B1 rules", "B0 (VETR)", "all-candidates"):
+    for base in ("B1 rules", "B0 (VETR)", "all-candidates", "model max q>=0.5"):
+        if base == cfg:
+            continue
         d = M.paired_bootstrap(all_counts[base][:, :3], all_counts[cfg][:, :3], n_boot=4000)
         print(f"  {cfg} - {base}: dF1 {d['diff']:+.3f} [{d['lo']:+.3f},{d['hi']:+.3f}]")
         res[f"paired {cfg} vs {base}"] = d

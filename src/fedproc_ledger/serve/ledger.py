@@ -22,7 +22,7 @@ from fedproc_ledger.rules.commands import load_registry, run_document
 
 CONTRACT_VERSION = "0.2"
 RULES_VERSION = "1.2"
-HI, LO = 0.9, 0.1  # tier thresholds: configuration, not constants (contract section 3)
+HI, LO = 0.7, 0.3  # tier thresholds: configuration, not constants (contract section 3)
 RFO = "2025-10-28"
 _MODEL: C.RoleModel | None = None
 

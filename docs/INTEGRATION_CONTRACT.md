@@ -24,10 +24,11 @@ resolved in this version.
 - **Earlier rounds:** round 1 (D-028, D-031): non-inferior, +0.020 original and +0.023 after a post-hoc protocol correction; round 2 (D-032, D-033):
   the pre-registered non-inferiority test FAILED (-0.103) because the LLM judges accepted unchecked boxes as binding; with corrected instructions
   +0.047. Annotator dependence is the main uncertainty: **the product gold sample in section 5 is required before any customer-visible use.**
-- **Weak LLM labels did not help (D-034).** The review-queue target (q between 0.1 and 0.9 holds at least 60% of the errors) narrowly failed in round 4.
+- **Round 5 (a second fresh test, D-039; 24 documents, 420 numbers):** +0.097 [+0.040, +0.158] F1 over the status quo with the stacker, positive for all three annotators, specificity 78% against 19%, recall 0.926; the stacker was no better than the simpler max-over-mentions rule (+0.004), which stays the default (`FL_STACKER=1` enables the optional stacker). Corpus-wide, 13.8% of the status-quo entries are empty-box clauses (rules v1.2).
+- **Weak LLM labels did not help (D-034).** The review-queue target (q between 0.1 and 0.9 holds at least 60% of the errors) failed in rounds 4 (58%) and 5 (48%).
 - **Recommendation:** adopt the checkbox rule first (zero-risk, objective). Use the model for *ranking and flagging*, not for silently removing
   clauses: show every number with its tier and probability; route UNDETERMINED and low-margin entries to a person (on round 4, the queue of numbers with q between 0.1 and 0.9
-  is 32% of the labelled numbers and holds 58% of the majority-gold errors).
+  is 32% of the labelled numbers and holds 58% of the majority-gold errors; on round 5, 17% and 48%).
 
 ## 3. Interface (sidecar service; the model never runs inside PHP)
 `POST /v1/ledger` with `{"document": <bytes or text_layout pages>, "posted_date": "YYYY-MM-DD"}` returns:

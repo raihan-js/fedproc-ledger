@@ -4,6 +4,8 @@ of method differences, not an accuracy claim."""
 
 import collections
 import json
+import os
+from pathlib import Path
 
 import pandas as pd
 
@@ -13,12 +15,15 @@ from fedproc_ledger.paths import PROCESSED, RESULTS
 from fedproc_ledger.rules import baseline as B
 from fedproc_ledger.rules.commands import load_registry
 
+PRED_DIR = Path(os.environ.get("PRED_DIR", str(PROCESSED / "predictions")))
+SUFFIX = os.environ.get("OUT_SUFFIX", "")
+
 registry = load_registry()
 docs = pd.read_parquet("data/interim/documents.parquet").drop_duplicates("doc_id").set_index("doc_id")
 rows = []
 dropped = collections.Counter()
 kept = collections.Counter()
-for p in sorted((PROCESSED / "predictions").glob("*.parquet")):
+for p in sorted(PRED_DIR.glob("*.parquet")):
     d = p.stem
     pred = pd.read_parquet(p)
     rules = pd.read_parquet(PROCESSED / "rules" / f"{d}.parquet")
@@ -63,7 +68,7 @@ out = {
     "most_dropped_by_model": [(n, dropped[n], dropped[n] + kept[n]) for n, _ in dropped.most_common(15)],
 }
 print(json.dumps(out, indent=1, default=float))
-(RESULTS / "corpus_stats.json").write_text(json.dumps(out, indent=1, default=float) + "\n")
+(RESULTS / f"corpus_stats{SUFFIX}.json").write_text(json.dumps(out, indent=1, default=float) + "\n")
 df.to_parquet("data/processed/corpus_ledger_sizes.parquet", index=False)
 
 # Objective part (no model, no LLM): numbers the status quo counts although every mention of them is a checklist item whose box is empty.
@@ -73,7 +78,7 @@ docs_with_checklist = 0
 docs_affected = 0
 b0_total = 0
 per_doc_unchecked = []
-for p in sorted((PROCESSED / "predictions").glob("*.parquet")):
+for p in sorted(PRED_DIR.glob("*.parquet")):
     d = p.stem
     pred = pd.read_parquet(p)
     plain = "\n".join(
@@ -106,4 +111,4 @@ obj = {
     "median_unchecked_per_affected_document": float(pd.Series([x for x in per_doc_unchecked if x > 0]).median()),
 }
 print(json.dumps(obj, indent=1))
-(RESULTS / "corpus_objective_overcount.json").write_text(json.dumps(obj, indent=1) + "\n")
+(RESULTS / f"corpus_objective_overcount{SUFFIX}.json").write_text(json.dumps(obj, indent=1) + "\n")

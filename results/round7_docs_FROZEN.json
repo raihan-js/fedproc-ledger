@@ -1,0 +1,68 @@
+{
+ "seed": 20261021,
+ "strata": {
+  "S": [
+   "8c5cec573836a3e7",
+   "3953d512df7cbcb7",
+   "282ab96baab232a5",
+   "5db374aa97e0c42c",
+   "9068578bf92762a7",
+   "247ecab1fc5a70e1",
+   "24ec0c81d18d97eb",
+   "c82bf2ab1cad9801",
+   "8bb2ce5928af00a8",
+   "e0bbf2c9f59526d0"
+  ],
+  "M": [
+   "772510a2264ccc9d",
+   "040b08fcd4938e61",
+   "378f534a7578f49f",
+   "10be4f0e910add1d",
+   "c04abcd19e8ade7f",
+   "3b32475ba0a57bf4",
+   "dde4ac95590347f7"
+  ],
+  "L": [
+   "277e709d0b618c6c",
+   "b58ceb3611e02aed",
+   "00e54dd4c898791d",
+   "47340d0a9ec3ca0e",
+   "31f4569d1e00859d",
+   "e39c9fce47ed0c15",
+   "53255b536bb5f68b",
+   "0af29a5e18c6ab1b",
+   "b06980359371f3b4",
+   "30e7588023a731ee"
+  ]
+ },
+ "docs": [
+  "00e54dd4c898791d",
+  "040b08fcd4938e61",
+  "0af29a5e18c6ab1b",
+  "10be4f0e910add1d",
+  "247ecab1fc5a70e1",
+  "24ec0c81d18d97eb",
+  "277e709d0b618c6c",
+  "282ab96baab232a5",
+  "30e7588023a731ee",
+  "31f4569d1e00859d",
+  "378f534a7578f49f",
+  "3953d512df7cbcb7",
+  "3b32475ba0a57bf4",
+  "47340d0a9ec3ca0e",
+  "53255b536bb5f68b",
+  "5db374aa97e0c42c",
+  "772510a2264ccc9d",
+  "8bb2ce5928af00a8",
+  "8c5cec573836a3e7",
+  "9068578bf92762a7",
+  "b06980359371f3b4",
+  "b58ceb3611e02aed",
+  "c04abcd19e8ade7f",
+  "c82bf2ab1cad9801",
+  "dde4ac95590347f7",
+  "e0bbf2c9f59526d0",
+  "e39c9fce47ed0c15"
+ ],
+ "sha256": "218717797a81e0a9bd151ede09086904975a917cc86e353824ecf2e1ebd88844"
+}

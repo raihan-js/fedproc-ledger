@@ -1,0 +1,9 @@
+{
+ "model_sha256": "9e9611a49fefde95164058c82b5df95253434dd3d179707fdec76ce776e05933",
+ "stacker_sha256": "4b07e862d7cbbae54a3fe9ffb1d8403617acce1811118c8d3e279c4b09295048",
+ "code_commit": "d20aa33d1dc6c065ec1196204d88a35ccbc39f1f",
+ "docs": 27,
+ "labelled_universe": 1193,
+ "sampled": 515,
+ "sample_keys_sha256": "1ddafb24774176eed1e54bd949924723db36e61bf06b2334320150574f4e1920"
+}

@@ -1,4 +1,4 @@
-"""One document in, one clause ledger out (docs/INTEGRATION_CONTRACT.md): extract, candidates, rules v1.2, role model.
+"""One document in, one clause ledger out (docs/INTEGRATION_CONTRACT.md): extract, candidates, rules v1.4, role model.
 
 Scratch shards live under data/processed with an `adhoc-` prefix and are removed afterwards; nothing else is written.
 """
@@ -20,8 +20,8 @@ from fedproc_ledger.model.stacker import STACKER, Stacker, number_features
 from fedproc_ledger.paths import PROCESSED
 from fedproc_ledger.rules.commands import load_registry, run_document
 
-CONTRACT_VERSION = "0.2"
-RULES_VERSION = "1.2"
+CONTRACT_VERSION = "0.3"
+RULES_VERSION = "1.4"
 HI, LO = 0.7, 0.3  # tier thresholds: configuration, not constants (contract section 3)
 RFO = "2025-10-28"
 _MODEL: C.RoleModel | None = None

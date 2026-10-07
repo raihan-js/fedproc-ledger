@@ -30,7 +30,7 @@ def test_ledger_for_text_file(tmp_path):
     p.write_text(TEXT)
     out = ledger_for_file(p)
     by = {e["number"]: e for e in out["entries"]}
-    assert out["contract_version"] == "0.2" and out["document"]["scanned"] is False
+    assert out["contract_version"] == "0.3" and out["document"]["scanned"] is False
     assert by["52.222-35"]["tier"] == "NOT_BINDING" and by["52.222-35"]["decided_by"] == "box_rule"
     assert by["52.222-36"]["tier"] == "BINDING" and by["52.222-36"]["decided_by"] == "box_rule"
     assert by["52.204-21"]["tier"] == "BINDING"

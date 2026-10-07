@@ -16,12 +16,13 @@ from fedproc_ledger.extract.pdf import page_row
 from fedproc_ledger.extract.run import extract_file
 from fedproc_ledger.model import classifier as C
 from fedproc_ledger.model.commands import MODEL, ledger_for, predict_doc
+from fedproc_ledger.model.stacker import STACKER, Stacker, number_features
 from fedproc_ledger.paths import PROCESSED
 from fedproc_ledger.rules.commands import load_registry, run_document
 
 CONTRACT_VERSION = "0.2"
 RULES_VERSION = "1.2"
-HI, LO = 0.7, 0.3  # tier thresholds: configuration, not constants (contract section 3)
+HI, LO = 0.9, 0.1  # tier thresholds: configuration, not constants (contract section 3)
 RFO = "2025-10-28"
 _MODEL: C.RoleModel | None = None
 
@@ -90,6 +91,12 @@ def ledger_for_file(path: Path, hi: float = HI, lo: float = LO, posted_date: str
     if len(pred) and not scanned:
         where = cand.set_index("cand_id")[["page", "line_no"]] if len(cand) else pd.DataFrame()
         probs = ledger_for(pred, "max")
+        if (
+            STACKER.exists()
+        ):  # number-level stacker over the mention probabilities (D-038); rule-only numbers keep their rule value
+            nf = number_features(pred)
+            sq = dict(zip(nf.index, Stacker.load().proba(nf), strict=True))
+            probs = {(n, a): (float(sq[n]) if nf.loc[n, "n_model"] > 0 else q) for (n, a), q in probs.items()}
         reg_versions = _versions() if posted_date else None
         dates = (
             cand.dropna(subset=["cited_date"]).groupby("number")["cited_date"].agg(lambda x: x.value_counts().index[0])

@@ -41,6 +41,12 @@ systems: dict[str, dict[str, set[str]]] = {
     k: {} for k in ["all-candidates", "B0 (VETR)", "B0 minus empty-box clauses", "B1 rules"]
 }
 probs: dict[str, dict[str, dict[str, float]]] = {"noisy_or": {}, "max": {}}
+STK = None
+if os.environ.get("STACKER"):
+    from fedproc_ledger.model.stacker import Stacker, number_features
+
+    STK = Stacker.load(Path(os.environ["STACKER"]))
+    probs["stacker"] = {}
 for d in gold:
     rules = pd.read_parquet(PROCESSED / "rules" / f"{d}.parquet")
     pred = pd.read_parquet(PRED_DIR / f"{d}.parquet")
@@ -60,7 +66,14 @@ for d in gold:
         if (g["source"] == "box_rule").all() and (g["role"] == "CHECKLIST_NOT_SELECTED").all()
     }
     systems["B0 minus empty-box clauses"][d] = systems["B0 (VETR)"][d] - unchecked
-    for mode in probs:
+    if STK is not None:
+        nf = number_features(pred)
+        sq = STK.proba(nf)
+        probs["stacker"][d] = {
+            n: float(v) if nf.loc[n, "n_model"] > 0 else float(nf.loc[n, "qmax"])
+            for n, v in zip(nf.index, sq, strict=True)
+        }
+    for mode in [m for m in probs if m != "stacker"]:
         q = ledger_for(pred, mode)
         agg: dict[str, float] = {}
         for (n, _a), v in q.items():
@@ -107,7 +120,7 @@ all_counts = {}
 for name, s in systems.items():
     all_counts[name] = counts(s)
     res[name] = summarize(name, all_counts[name])
-for mode in ("noisy_or", "max"):
+for mode in list(probs):
     for t in (0.5, 0.7, 0.9):
         s = {d: {n for n, v in q.items() if v >= t} for d, q in probs[mode].items()}
         name = f"model {mode} q>={t}"

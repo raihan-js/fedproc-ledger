@@ -1,0 +1,63 @@
+{
+ "seed": 20261017,
+ "strata": {
+  "S": [
+   "02bb73ca7356df93",
+   "7dcc859e1b8601b3",
+   "beb0abecddfb13e7",
+   "00a3abc7b43275c7",
+   "2ba50e9fac211ca1",
+   "2e452c87ddd43030",
+   "398d6272e15ab4b4",
+   "bcce427515cf8be7",
+   "d11e155e7516cd63",
+   "f77cbf2ef69ff079"
+  ],
+  "M": [
+   "acdadaadad9b881c",
+   "dd2a7d6fd22f84fe",
+   "c55b01124f904684",
+   "7566316aeb90767b"
+  ],
+  "L": [
+   "a44469b9e36f8593",
+   "43c32d9b7390f5a6",
+   "0264101bfb9db4d1",
+   "6aa29edffd019931",
+   "2ef5c8ab8e813721",
+   "6a882476de870553",
+   "81b7d3d2994fdc38",
+   "bea09c25ef00a878",
+   "906984fbf214c4d9",
+   "2355335c86123352"
+  ]
+ },
+ "docs": [
+  "00a3abc7b43275c7",
+  "0264101bfb9db4d1",
+  "02bb73ca7356df93",
+  "2355335c86123352",
+  "2ba50e9fac211ca1",
+  "2e452c87ddd43030",
+  "2ef5c8ab8e813721",
+  "398d6272e15ab4b4",
+  "43c32d9b7390f5a6",
+  "6a882476de870553",
+  "6aa29edffd019931",
+  "7566316aeb90767b",
+  "7dcc859e1b8601b3",
+  "81b7d3d2994fdc38",
+  "906984fbf214c4d9",
+  "a44469b9e36f8593",
+  "acdadaadad9b881c",
+  "bcce427515cf8be7",
+  "bea09c25ef00a878",
+  "beb0abecddfb13e7",
+  "c55b01124f904684",
+  "d11e155e7516cd63",
+  "dd2a7d6fd22f84fe",
+  "f77cbf2ef69ff079"
+ ],
+ "rfo_era": 17,
+ "sha256": "65b763bc9d079ff29288f62f157f12463746acfffcad58215bb624730d61d3c4"
+}

@@ -1,8 +1,8 @@
 {
- "b0_entries": 59623,
- "b0_entries_only_in_empty_checklist_boxes": 8710,
- "share_of_b0": 0.1460845646814149,
- "documents_with_a_decided_checklist": 388,
- "documents_where_b0_counts_unchecked_items": 327,
- "median_unchecked_per_affected_document": 31.0
+ "b0_entries": 423328,
+ "b0_entries_only_in_empty_checklist_boxes": 57225,
+ "share_of_b0": 0.1351788683951924,
+ "documents_with_a_decided_checklist": 2648,
+ "documents_where_b0_counts_unchecked_items": 2247,
+ "median_unchecked_per_affected_document": 30.0
 }

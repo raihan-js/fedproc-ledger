@@ -1,74 +1,74 @@
 {
- "entries": 40510,
+ "entries": 292131,
  "pre_rfo": {
-  "entries": 22641,
+  "entries": 159445,
   "by_category": {
-   "no_date_cited": 15367,
-   "matches_in_force": 5926,
-   "older_than_in_force": 566,
-   "not_in_registry": 400,
-   "no_version_data": 262,
-   "newer_than_in_force": 120
+   "no_date_cited": 106111,
+   "matches_in_force": 43820,
+   "older_than_in_force": 3649,
+   "not_in_registry": 3065,
+   "no_version_data": 1924,
+   "newer_than_in_force": 876
   },
-  "dated_entries": 6612,
-  "older_share_of_dated": 0.08560193587416817,
-  "docs": 416
+  "dated_entries": 48345,
+  "older_share_of_dated": 0.07547833281621677,
+  "docs": 2911
  },
  "rfo": {
-  "entries": 17869,
+  "entries": 132686,
   "by_category": {
-   "no_date_cited": 13308,
-   "matches_in_force": 3013,
-   "newer_than_in_force": 584,
-   "not_in_registry": 406,
-   "no_version_data": 288,
-   "older_than_in_force": 270
+   "no_date_cited": 99140,
+   "matches_in_force": 23307,
+   "newer_than_in_force": 3562,
+   "not_in_registry": 2722,
+   "no_version_data": 2012,
+   "older_than_in_force": 1943
   },
-  "dated_entries": 3867,
-  "older_share_of_dated": 0.06982156710628394,
-  "docs": 369
+  "dated_entries": 28812,
+  "older_share_of_dated": 0.06743717895321394,
+  "docs": 2611
  },
  "pre_rfo_most_often_stale": [
   [
    "52.219-28",
-   49
-  ],
-  [
-   "52.222-19",
-   44
+   296
   ],
   [
    "52.222-50",
-   40
+   282
+  ],
+  [
+   "52.222-19",
+   258
   ],
   [
    "52.225-3",
-   33
-  ],
-  [
-   "52.219-8",
-   22
-  ],
-  [
-   "52.212-5",
-   18
+   199
   ],
   [
    "52.204-7",
-   18
+   165
   ],
   [
-   "52.222-36",
-   15
+   "52.219-8",
+   163
   ],
   [
-   "52.212-2",
-   14
+   "52.212-5",
+   98
   ],
   [
-   "52.209-6",
-   13
+   "52.212-4",
+   94
+  ],
+  [
+   "52.212-3",
+   89
+  ],
+  [
+   "52.212-1",
+   87
   ]
  ],
- "rfo_era_entries_citing_clauses_the_rfo_reserves": 1654
+ "rfo_era_entries_citing_clauses_the_rfo_reserves": 12897
 }

@@ -32,8 +32,8 @@
 
 ## Objective over-count by the status quo (no model, no annotator)
 
-Of 59,623 status-quo ledger entries, **8,710 (14.6%)** are clause numbers whose every mention is a checklist item with an empty box; 327 of 388 documents with a decided checklist are affected (median 31 per affected document). Lower bound.
+Of 423,328 status-quo ledger entries, **57,225 (13.5%)** are clause numbers whose every mention is a checklist item with an empty box; 2247 of 2648 documents with a decided checklist are affected (median 30 per affected document). Lower bound.
 
 ## Version currency (pre-RFO notices, eCFR is the authority)
 
-6,612 ledger entries cite a date: 5,926 (89.6%) match the version in force on the posting day, 566 (8.6%) cite an older version, 120 (1.8%) a newer one; 15,367 entries have no attachable date.
+48,345 ledger entries cite a date: 43,820 (90.6%) match the version in force on the posting day, 3,649 (7.5%) cite an older version, 876 (1.8%) a newer one; 106,111 entries have no attachable date.

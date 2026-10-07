@@ -13,8 +13,8 @@ items. 12 documents per stratum, at most 4 per department overall, at least 12 o
 ## Gold
 Labelled universe: distinct numbers whose mentions are **not all decided by the checkbox rule** (those are objective and reported
 separately). Three blind annotators, labels as words: BINDS, NOT, REFERENCED, UNDECIDED (docs/annotation_guidelines.md; letters are not
-used because documents print letters such as "R"): the coding agent, gpt-4o-mini, gpt-4.1-mini. Sheets show up to 4 contexts per number,
-each with the marked line, one line before and one after, and the two nearest headings. Primary gold: majority; **binding set = BINDS**;
+used because documents print letters such as "R"): the coding agent, gpt-4o-mini, gpt-4.1-mini. Sheets show up to 3 contexts per number,
+each with the marked line, one line before and one after (lines cut at 90 characters), and the two nearest headings. Primary gold: majority; **binding set = BINDS**;
 non-binding = NOT or REFERENCED (two of three), else undecided and excluded. Applicable set (BINDS or REFERENCED) is secondary. The agent
 labels first, without seeing predictions or judge output.
 
@@ -39,3 +39,6 @@ All six are reported whether or not they hold.
 ## Known limits stated in advance
 LLM annotators, not experts; numbers only (no alternates, dates, ranges); 36 documents with repeated templates; model frozen, so this
 round cannot show improvement over round 1, only generalisation to a better frame.
+
+## Amendment A1 (2026-10-07, before any round-2 label existed)
+Sheets changed from up to 4 contexts per number (105-character lines) to up to 3 contexts (90-character lines) to keep the labelling load reliable; nothing else changed. The frame (results/round2_docs_FROZEN.json) was frozen in commit 5448a6d and is untouched.

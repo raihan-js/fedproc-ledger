@@ -13,10 +13,10 @@ from fedproc_ledger.label.openai_chat import make_openai_chat, spent
 from fedproc_ledger.paths import RESULTS
 
 GUIDE = """You decide, for each clause number in a US federal solicitation or contract, whether the document BINDS it.
-B = binds: listed as incorporated by reference, its full text is included, it is a selected/checked item, or the text states that it applies/is included in this contract.
-N = does not bind: only cited or explained inside other clause text or narrative ("in accordance with FAR x"), a table of contents entry, an unselected/unchecked item, "not applicable", or not a real clause number (a fragment).
-R = referenced requirement: the narrative states the clause or provision applies or must be followed (for example "in accordance with FAR 52.204-7, registration is required") without listing or incorporating it.
-U = you cannot decide from the evidence shown.
+BINDS = the document binds the number: listed as incorporated by reference, its full text is included, it is a selected/checked item, or the text states that it applies/is included in this contract.
+NOT = does not bind: only cited or explained inside other clause text or narrative ("in accordance with FAR x"), a table of contents entry, an unselected/unchecked item, "not applicable", or not a real clause number (a fragment).
+REFERENCED = referenced requirement: the narrative states the clause or provision applies or must be followed (for example "in accordance with FAR 52.204-7, registration is required") without listing or incorporating it.
+UNDECIDED = you cannot decide from the evidence shown.
 Each number comes with up to three contexts (H = nearest heading; the number is marked >>> <<<). Answer with JSON only."""
 SCHEMA = {
     "type": "object",
@@ -25,7 +25,10 @@ SCHEMA = {
             "type": "array",
             "items": {
                 "type": "object",
-                "properties": {"k": {"type": "string"}, "v": {"type": "string", "enum": ["B", "N", "R", "U"]}},
+                "properties": {
+                    "k": {"type": "string"},
+                    "v": {"type": "string", "enum": ["BINDS", "NOT", "REFERENCED", "UNDECIDED"]},
+                },
                 "required": ["k", "v"],
             },
         }
@@ -65,14 +68,18 @@ def main(model: str, gold_file: str, tag: str) -> None:
             body = "\n\n".join(f"[{n}]\n{sh[n]}" for n in chunk)
             msgs = [
                 {"role": "system", "content": GUIDE},
-                {"role": "user", "content": body + '\n\nReturn {"verdicts":[{"k":<number>,"v":"B|N|R|U"}]}'},
+                {
+                    "role": "user",
+                    "content": body + '\n\nReturn {"verdicts":[{"k":<number>,"v":"BINDS|NOT|REFERENCED|UNDECIDED"}]}',
+                },
             ]
             key = P.Cache.key(model, msgs)
             text = cache.get(key)
             if text is None:
                 text = chat(model, msgs)
                 cache.put(key, text)
-            got = {e["k"]: e["v"] for e in json.loads(text).get("verdicts", [])}
+            WORD = {"BINDS": "B", "NOT": "N", "REFERENCED": "R", "UNDECIDED": "U"}
+            got = {e["k"]: WORD.get(e["v"], "U") for e in json.loads(text).get("verdicts", [])}
             pairs += [(labels[n], got.get(n, "U")) for n in chunk]
             judged.setdefault(doc, {}).update({n: got.get(n, "U") for n in chunk})
     dec = [(a, b) for a, b in pairs if a in "BN" and b in "BN"]

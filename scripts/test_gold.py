@@ -4,11 +4,16 @@ applicable gold: B (applicable) if >= 2 say B or R; N if >= 2 say N; else U."""
 
 import collections
 import json
+import sys
 from pathlib import Path
 
+TAG = (
+    sys.argv[1] if len(sys.argv) > 1 else "test"
+)  # test = original judge run; test_v2 = judges re-run with unambiguous label words (D-031)
+
 a = json.loads(Path("results/ledger_gold_test_agent.json").read_text())["gold"]
-j1 = json.loads(Path("results/ledger_gold_test_judge_gpt-4o-mini.json").read_text())["gold"]
-j2 = json.loads(Path("results/ledger_gold_test_judge_gpt-4.1-mini.json").read_text())["gold"]
+j1 = json.loads(Path(f"results/ledger_gold_{TAG}_judge_gpt-4o-mini.json").read_text())["gold"]
+j2 = json.loads(Path(f"results/ledger_gold_{TAG}_judge_gpt-4.1-mini.json").read_text())["gold"]
 out = {"binding": {}, "applicable": {}}
 stats = collections.Counter()
 for d in a:
@@ -24,6 +29,6 @@ for d in a:
         stats["applicable_" + app] += 1
 print(dict(stats))
 for k, g in out.items():
-    Path(f"results/ledger_gold_test_majority_{k}.json").write_text(
+    Path(f"results/ledger_gold_{TAG}_majority_{k}.json").write_text(
         json.dumps({"annotator": f"majority of three, {k} (see scripts/test_gold.py)", "gold": g})
     )

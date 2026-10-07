@@ -16,6 +16,8 @@
 
 - **Status 2026-10-07 (round 5 DONE, read D-038 and D-039):** the number-level stacker did not replicate its cross-validated gain on fresh documents (+0.004 over max-q); max-q stays the default, stacker optional (`FL_STACKER=1`). Round 5 against B0: +0.097 [+0.040, +0.158], positive for all three annotators; H1, H2, H3 (superior), H5 (no loss), H6, H7 hold, review-queue H4 fails (48% of errors in 17% of numbers). Two fresh tests in a row (rounds 4 and 5) passed superiority. Corpus empty-box share with v1.2: 13.8%. Rounds 2 to 5 are all development data now. Next: expert labels, VETR gold sample, R/applicable mode, queue ideas, release.
 
+- **Status 2026-10-07 (round 6 DONE, read D-040 and D-041):** owner (CTO) confirmed authority: HF/GitHub private for now, public later if outcomes are good; GovCon/sam.gov data allowed. Rules v1.3 (bare lists, alternative references) passed a fresh test with all six hypotheses (F1 0.914 vs 0.807, +0.107 [+0.057, +0.161], every annotator above zero). Rounds 4, 5, 6 all superior. Rounds 2 to 6 are development data now. Ideas: expert labels, VETR gold sample, spec-narrative documents (the main remaining error family), R mode, publication package.
+
 # Where we are (update after every step; read this first when resuming)
 
 - **Phases 0 to 4 are built. Checkpoint material for 1 to 4 is in `results/checkpoints.md` (regenerate with `uv run python scripts/checkpoint_summary.py`); the HTML reports are `data/reports/extract_report.html` and `data/reports/rules_report.html`. Waiting on the owner's review before Phase 5 (annotation).** Owner approved Checkpoint 0 and the plan inputs (D-012).

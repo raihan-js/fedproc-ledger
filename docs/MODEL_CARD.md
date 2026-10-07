@@ -22,6 +22,7 @@ A small (0.86 MB) classifier that decides, for each FAR/DFARS clause-number ment
 | 3, fresh test of rules v1.1 (30 docs), pre-registered | majority | 0.890 vs 0.778, +0.111 [+0.049, +0.181] | 84% vs 16% |
 | **4, fresh test of rules v1.2 (26 docs), pre-registered** | majority | **0.921 vs 0.780, +0.142 [+0.085, +0.210]** (positive for all three annotators) | **76% vs 10%** (recall 0.940 vs 0.877) |
 | 5, second fresh test (24 docs), pre-registered, stacker | majority | 0.926 vs 0.829, +0.097 [+0.040, +0.158] (positive for all three annotators; stacker = max-q within +0.004) | 78% vs 19% (recall 0.926) |
+| **6, fresh test of rules v1.3 (24 docs), pre-registered, all six hypotheses hold** | majority | **0.914 vs 0.807, +0.107 [+0.057, +0.161]** (interval above zero for all three annotators) | **73% vs 8%** (recall 0.939) |
 Without any annotator: 13.5% of status-quo entries over 6,472 documents (25.4% in checklist-heavy documents) are clauses whose own checklist box is empty.
 
 ## Known limits

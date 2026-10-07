@@ -163,3 +163,16 @@ Model minus B0, F1 difference per annotator:
 | model stacker q>=0.5 | 0.926 | 0.926 | 0.926 [0.876, 0.959] | 0.926 | 0.778 |
 
 Stacker minus B0: +0.097 [+0.040, +0.158] (positive on 3 of 3 annotators); stacker minus max-q: +0.004 [-0.003, +0.014] (no detectable gain, so max-q stays the default). H4 (review queue) FAILS: 16.7% of numbers hold 47.7% of errors. H7: 20.6% of B0 entries in M/L documents are empty-box clauses. H6: 60/60.
+
+## Round 6, fresh pre-registered test of rules v1.3 (D-041): 24 documents, 465 labelled numbers
+
+| system | precision | recall | F1 [95% CI] | F2 | specificity |
+|---|---|---|---|---|---|
+| all-candidates | 0.703 | 1.000 | 0.826 [0.719, 0.906] | 0.922 | 0.000 |
+| B0 (VETR) | 0.707 | 0.939 | 0.807 [0.701, 0.883] | 0.881 | 0.080 |
+| B0 minus empty-box clauses | 0.707 | 0.939 | 0.807 [0.701, 0.883] | 0.881 | 0.080 |
+| B1 rules | 0.947 | 0.440 | 0.601 [0.450, 0.720] | 0.493 | 0.942 |
+| model noisy_or q>=0.5 | 0.870 | 0.939 | 0.903 [0.816, 0.954] | 0.924 | 0.667 |
+| model noisy_or q>=0.7 | 0.909 | 0.887 | 0.898 [0.831, 0.944] | 0.891 | 0.790 |
+
+All six pre-registered hypotheses hold: model minus B0 +0.107 [+0.057, +0.161], positive for all three annotators; specificity 0.725, recall 0.939; objective empty-box share 22.7%; rule validity 60/60. Review queue (information): 32.9% of numbers hold 63.8% of errors.

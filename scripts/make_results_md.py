@@ -232,6 +232,21 @@ for s_ in ["B0 (VETR)", "B1 rules", "model max q>=0.5", "model stacker q>=0.5"]:
 out.append(
     f"\nStacker minus B0: {r5['H3']['diff']:+.3f} [{r5['H3']['ci'][0]:+.3f}, {r5['H3']['ci'][1]:+.3f}] (positive on {r5['H3']['positive_on']} of 3 annotators); stacker minus max-q: {r5['H5']['diff_vs_max']:+.3f} [{r5['H5']['ci'][0]:+.3f}, {r5['H5']['ci'][1]:+.3f}] (no detectable gain, so max-q stays the default). H4 (review queue) {'holds' if r5['H4']['holds'] else 'FAILS'}: {r5['H4']['queue_share']:.1%} of numbers hold {r5['H4']['share_of_errors_in_queue']:.1%} of errors. H7: {r5['H7']['share']:.1%} of B0 entries in M/L documents are empty-box clauses. H6: {r5['H6']['agreed']}/{r5['H6']['items']}."
 )
+
+r6 = load("round6_report.json")
+e6 = load("ledger_eval_round6_majority_binding.json")
+out.append(
+    "\n## Round 6, fresh pre-registered test of rules v1.3 (D-041): 24 documents, "
+    + str(e6["_meta"]["labelled"])
+    + " labelled numbers\n"
+)
+out.append(HEAD)
+for s_ in SYSTEMS:
+    if s_ in e6:
+        out.append(row(s_, e6[s_]))
+out.append(
+    f"\nAll six pre-registered hypotheses hold: model minus B0 {r6['H3']['diff']:+.3f} [{r6['H3']['ci'][0]:+.3f}, {r6['H3']['ci'][1]:+.3f}], positive for all three annotators; specificity {r6['H2']['model_specificity']:.3f}, recall {r6['H2']['model_recall']:.3f}; objective empty-box share {r6['H4']['share']:.1%}; rule validity {r6['H5']['agreed']}/{r6['H5']['items']}. Review queue (information): {r6['queue_info']['queue_share']:.1%} of numbers hold {r6['queue_info']['share_of_errors_in_queue']:.1%} of errors."
+)
 Path("docs/RESULTS.md").write_text("\n".join(out) + "\n")
 
 head = (
@@ -244,6 +259,7 @@ head = (
     f"- **Round 3 (fresh pre-registered test, rules v1.1, D-035):** F1 {e3['model max q>=0.5']['f']:.3f} vs {e3['B0 (VETR)']['f']:.3f} for the status quo ({r3['H3']['diff']:+.3f} [{r3['H3']['ci'][0]:+.3f}, {r3['H3']['ci'][1]:+.3f}], superiority criteria met), specificity {e3['model max q>=0.5']['specificity']:.0%} vs {e3['B0 (VETR)']['specificity']:.0%}, recall {e3['model max q>=0.5']['recall']:.3f} vs {e3['B0 (VETR)']['recall']:.3f}; H2 fails by recall, H4 fails (coverage {r3['H4']['coverage']:.2f}); H5 holds ({r3['H5']['share']:.1%}), H6 holds ({r3['H6']['agreed']}/{r3['H6']['items']}).\n"
     f"- **Round 4 (fresh pre-registered test, rules v1.2, D-037):** F1 {e4['model max q>=0.5']['f']:.3f} vs {e4['B0 (VETR)']['f']:.3f} for the status quo ({r4['H3']['diff']:+.3f} [{r4['H3']['ci'][0]:+.3f}, {r4['H3']['ci'][1]:+.3f}], positive for all three annotators), specificity {e4['model max q>=0.5']['specificity']:.0%} vs {e4['B0 (VETR)']['specificity']:.0%}, recall {e4['model max q>=0.5']['recall']:.3f} vs {e4['B0 (VETR)']['recall']:.3f}; H1, H2, H3, H5, H6 hold; H4 (review queue) narrowly fails ({r4['H4']['share_of_errors_in_queue']:.0%} of errors in the queue).\n"
     f"- **Round 5 (second fresh test, D-039):** stacker F1 {e5['model stacker q>=0.5']['f']:.3f} vs {e5['B0 (VETR)']['f']:.3f} for the status quo ({r5['H3']['diff']:+.3f} [{r5['H3']['ci'][0]:+.3f}, {r5['H3']['ci'][1]:+.3f}], positive for all three annotators), specificity {e5['model stacker q>=0.5']['specificity']:.0%} vs {e5['B0 (VETR)']['specificity']:.0%}, recall {e5['model stacker q>=0.5']['recall']:.3f}; the stacker is not better than max-q ({r5['H5']['diff_vs_max']:+.3f}), so max-q stays the default; review-queue H4 fails again.\n"
+    f"- **Round 6 (third fresh test in a row, rules v1.3, D-041): all six pre-registered hypotheses hold.** F1 {e6['model max q>=0.5']['f']:.3f} vs {e6['B0 (VETR)']['f']:.3f} ({r6['H3']['diff']:+.3f} [{r6['H3']['ci'][0]:+.3f}, {r6['H3']['ci'][1]:+.3f}], interval above zero for every annotator), specificity {e6['model max q>=0.5']['specificity']:.0%} vs {e6['B0 (VETR)']['specificity']:.0%}, recall {e6['model max q>=0.5']['recall']:.3f}.\n"
     f"- Pre-registered hypotheses as originally scored: H1 {'holds' if h1['holds'] else 'fails'}, H2 {'holds' if h2['holds'] else 'FAILS'}, H3 holds as non-inferiority only, H4 {'holds' if h4['holds'] else 'FAILS'}. Full tables: [`docs/RESULTS.md`](docs/RESULTS.md)."
 )
 rd = Path("README.md").read_text()

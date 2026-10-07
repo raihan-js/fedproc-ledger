@@ -25,6 +25,7 @@ resolved in this version.
   the pre-registered non-inferiority test FAILED (-0.103) because the LLM judges accepted unchecked boxes as binding; with corrected instructions
   +0.047. Annotator dependence is the main uncertainty: **the product gold sample in section 5 is required before any customer-visible use.**
 - **Round 5 (a second fresh test, D-039; 24 documents, 420 numbers):** +0.097 [+0.040, +0.158] F1 over the status quo with the stacker, positive for all three annotators, specificity 78% against 19%, recall 0.926; the stacker was no better than the simpler max-over-mentions rule (+0.004), which stays the default (`FL_STACKER=1` enables the optional stacker). Corpus-wide, 13.8% of the status-quo entries are empty-box clauses (rules v1.2).
+- **Round 6 (fresh, rules v1.3, D-041; 24 documents, 490 numbers): all six pre-registered hypotheses hold:** +0.107 [+0.057, +0.161] F1 over the status quo (interval above zero for every annotator), specificity 73% against 8%, recall 0.939. Three fresh tests in a row (rounds 4 to 6) give +0.10 to +0.14.
 - **Weak LLM labels did not help (D-034).** The review-queue target (q between 0.1 and 0.9 holds at least 60% of the errors) failed in rounds 4 (58%) and 5 (48%).
 - **Recommendation:** adopt the checkbox rule first (zero-risk, objective). Use the model for *ranking and flagging*, not for silently removing
   clauses: show every number with its tier and probability; route UNDETERMINED and low-margin entries to a person (on round 4, the queue of numbers with q between 0.1 and 0.9

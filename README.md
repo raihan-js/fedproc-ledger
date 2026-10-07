@@ -14,6 +14,7 @@ Which FAR/DFARS clauses actually bind a US federal solicitation, and how (incorp
 - **Round 3 (fresh pre-registered test, rules v1.1, D-035):** F1 0.890 vs 0.778 for the status quo (+0.111 [+0.049, +0.181], superiority criteria met), specificity 84% vs 16%, recall 0.874 vs 0.933; H2 fails by recall, H4 fails (coverage 0.30); H5 holds (31.0%), H6 holds (60/60).
 - **Round 4 (fresh pre-registered test, rules v1.2, D-037):** F1 0.921 vs 0.780 for the status quo (+0.142 [+0.085, +0.210], positive for all three annotators), specificity 76% vs 10%, recall 0.940 vs 0.877; H1, H2, H3, H5, H6 hold; H4 (review queue) narrowly fails (58% of errors in the queue).
 - **Round 5 (second fresh test, D-039):** stacker F1 0.926 vs 0.829 for the status quo (+0.097 [+0.040, +0.158], positive for all three annotators), specificity 78% vs 19%, recall 0.926; the stacker is not better than max-q (+0.004), so max-q stays the default; review-queue H4 fails again.
+- **Round 6 (third fresh test in a row, rules v1.3, D-041): all six pre-registered hypotheses hold.** F1 0.914 vs 0.807 (+0.107 [+0.057, +0.161], interval above zero for every annotator), specificity 72% vs 8%, recall 0.939.
 - Pre-registered hypotheses as originally scored: H1 holds, H2 FAILS, H3 holds as non-inferiority only, H4 FAILS. Full tables: [`docs/RESULTS.md`](docs/RESULTS.md).
 <!-- headline:end -->
 

@@ -11,7 +11,7 @@ TAG = (
     sys.argv[1] if len(sys.argv) > 1 else "test"
 )  # test = original judge run; test_v2 = judges re-run with unambiguous label words (D-031)
 
-AGENT_TAG = next((t for t in ("round5", "round4", "round3", "round2") if TAG.startswith(t)), "test")
+AGENT_TAG = next((t for t in ("round6", "round5", "round4", "round3", "round2") if TAG.startswith(t)), "test")
 a = json.loads(Path(f"results/ledger_gold_{AGENT_TAG}_agent.json").read_text())["gold"]
 j1 = json.loads(Path(f"results/ledger_gold_{TAG}_judge_gpt-4o-mini.json").read_text())["gold"]
 j2 = json.loads(Path(f"results/ledger_gold_{TAG}_judge_gpt-4.1-mini.json").read_text())["gold"]

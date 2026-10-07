@@ -42,7 +42,8 @@ resolved in this version.
       "tier": "BINDING | NOT_BINDING | UNDETERMINED",
       "q": 0.97,
       "decided_by": "model | box_rule | para_a_rule | text_rule",
-      "registry": {"status": "active|reserved|removed|rfo_only|unknown"},
+      "registry": {"status": "active|reserved|removed|rfo_only|unknown", "cited_date": "2021-11", "version_in_force": "2021-11",
+                   "currency": "matches|older|newer|no_date_cited|no_version_data|rfo_era_not_judged|unknown_posted_date"},
       "evidence": [{"page": 3, "line": 41, "role": "INCORPORATED_BY_REFERENCE", "p": 0.95, "source": "model", "text": "…"}]
     }
   ],
@@ -53,6 +54,9 @@ Rules: `q` is the **maximum** over mentions of the binding probability (calibrat
 `tier` = BINDING if `q >= 0.7`, NOT_BINDING if `q <= 0.3`, otherwise UNDETERMINED (a person decides); the thresholds are
 configuration, not constants. Box-rule entries have `q` 1.0 or 0.0. The model **never creates a clause number**: numbers come from
 regex candidates validated against the eCFR registry.
+
+Version currency is filled when the posting day is given (`--posted-date YYYY-MM-DD`, or the form field `posted_date`): the cited date against the eCFR version in force that
+day; notices posted on or after 2025-10-28 (RFO era) are not judged because agencies adopt the deviation at different times.
 
 Run it: `fl ledger FILE.pdf [--out ledger.json]` (about 2.5 s for a 42-page PDF) or `fl serve` then `curl -F file=@FILE.pdf localhost:8077/v1/ledger`
 (`serve/ledger.py`, `serve/app.py`; tests in `tests/test_ledger_service.py`). Scanned documents return `scanned: true` and no entries.

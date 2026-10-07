@@ -98,13 +98,14 @@ if __name__ == "__main__":
 def ledger(
     file: str = typer.Argument(..., help="PDF, DOCX, DOC or TXT solicitation"),
     out: str = typer.Option("", help="write the JSON here instead of stdout"),
+    posted_date: str = typer.Option("", help="YYYY-MM-DD posting day: enables the version-currency field"),
 ) -> None:
     """Clause ledger for one document (docs/INTEGRATION_CONTRACT.md)."""
     from pathlib import Path
 
     from fedproc_ledger.serve.ledger import ledger_for_file
 
-    text = json.dumps(ledger_for_file(Path(file)), indent=1, ensure_ascii=False)
+    text = json.dumps(ledger_for_file(Path(file), posted_date=posted_date or None), indent=1, ensure_ascii=False)
     if out:
         Path(out).write_text(text + "\n")
         typer.echo(f"wrote {out}")

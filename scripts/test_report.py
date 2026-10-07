@@ -2,6 +2,7 @@
 Primary gold: results/ledger_gold_test_majority_binding.json. The abstention threshold comes from the development set only."""
 
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -11,8 +12,10 @@ from fedproc_ledger.eval import metrics as M
 from fedproc_ledger.model.commands import ledger_for
 from fedproc_ledger.paths import PROCESSED
 
-res = {k: json.loads(Path(f"results/ledger_eval_{k}.json").read_text()) for k in ("test_majority_binding",)}
-r = res["test_majority_binding"]
+TAG = (
+    sys.argv[1] if len(sys.argv) > 1 else "test"
+)  # test = original judge run (D-028); test_v2 = corrected judges (D-031)
+r = json.loads(Path(f"results/ledger_eval_{TAG}_majority_binding.json").read_text())
 b0, b1, mod = r["B0 (VETR)"], r["B1 rules"], r["model noisy_or q>=0.5"]
 p_b1 = r["paired model noisy_or q>=0.5 vs B1 rules"]
 p_b0 = r["paired model noisy_or q>=0.5 vs B0 (VETR)"]
@@ -56,7 +59,7 @@ def number_probs(gold_path: str) -> tuple[np.ndarray, np.ndarray]:
 
 
 qd, yd = number_probs("results/ledger_gold_majority3.json")  # development
-qt, yt = number_probs("results/ledger_gold_test_majority_binding.json")  # test
+qt, yt = number_probs(f"results/ledger_gold_{TAG}_majority_binding.json")  # test
 c = M.choose_threshold(qd, yd, target=0.95)
 if c:
     conf = np.maximum(qt, 1 - qt)
@@ -74,6 +77,8 @@ if c:
     }
 else:
     h["H4"] = {"claim": "dev threshold", "holds": False, "note": "no threshold reached the dev target"}
-Path("results/test_report.json").write_text(json.dumps(h, indent=1, default=float))
+Path("results/test_report.json" if TAG == "test" else f"results/test_report_{TAG}.json").write_text(
+    json.dumps(h, indent=1, default=float)
+)
 for k, v in h.items():
     print(k, json.dumps(v, default=lambda x: round(float(x), 3)))

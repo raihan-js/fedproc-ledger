@@ -20,7 +20,7 @@ resolved in this version.
 - **Frozen test (D-028, 32 documents, 679 labelled numbers, majority of three LLM annotators, not human experts):** model F1
   0.912 [0.847, 0.956] against 0.891 [0.829, 0.935] for the status-quo regexes (difference +0.020 [-0.005, +0.046]: non-inferior,
   **not shown better**); recall 0.945 vs 0.963; share of non-binding numbers correctly left out 38% vs 4%. A rules-only baseline (B1) is
-  far worse (F1 0.560). Pre-registered hypotheses H2 and H4 **failed** (see D-028).
+  far worse (F1 0.560). Pre-registered hypotheses H2 and H4 **failed** as originally scored (D-028). After a post-hoc correction of a judge-protocol bug (D-031) the model's specificity is 73% against 8.5% and H2 holds, F1 0.962 vs 0.939 (lower bound +0.00003: no superiority claim), H4 still fails.
 - **Recommendation:** adopt the checkbox rule first (zero-risk, objective). Use the model for *ranking and flagging*, not for
   silently removing clauses: show every number, with its tier and probability.
 

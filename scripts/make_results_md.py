@@ -49,6 +49,27 @@ out.append(
 out.append(
     f"| H4 | {h4['claim']} | {'holds' if h4['holds'] else 'FAILS'}: coverage {h4['test_coverage']:.3f}, accuracy {h4['test_accuracy']:.3f} at t={h4['t_from_dev']:.3f} |"
 )
+rep2 = load("test_report_test_v2.json")
+t2 = load("ledger_eval_test_v2_majority_binding.json")
+out.append("\n## Corrected judges (post-hoc, D-031): label-letter collision removed, same frozen model\n")
+out.append(HEAD)
+for s_ in SYSTEMS:
+    if s_ in t2:
+        out.append(row(s_, t2[s_]))
+g1, g2, g3, g4 = rep2["H1"], rep2["H2"], rep2["H3"], rep2["H4"]
+out.append("\n| id | outcome on the corrected gold |\n|---|---|")
+out.append(
+    f"| H1 | {'holds' if g1['holds'] else 'FAILS'}: {g1['diff']:+.3f} [{g1['ci'][0]:+.3f}, {g1['ci'][1]:+.3f}] |"
+)
+out.append(
+    f"| H2 | {'holds' if g2['holds'] else 'FAILS'}: specificity {g2['model_specificity']:.3f}, recall {g2['model_recall']:.3f}, B0 specificity {g2['b0_specificity']:.3f} |"
+)
+out.append(
+    f"| H3 | non-inferior: {g3['non_inferior']}; lower bound {g3['ci'][0]:+.5f} (superiority not claimed, see D-031) |"
+)
+out.append(
+    f"| H4 | {'holds' if g4['holds'] else 'FAILS'}: coverage {g4['test_coverage']:.3f}, accuracy {g4['test_accuracy']:.3f} |"
+)
 out.append(
     "\n## The same predictions against each single annotator and the applicable set (model q>=0.5 vs B0, F1 difference)\n"
 )
@@ -82,10 +103,11 @@ out.append(
 Path("docs/RESULTS.md").write_text("\n".join(out) + "\n")
 
 head = (
-    f"- Frozen test (32 documents, {test['_meta']['labelled']} labelled numbers, LLM annotators): F1 {test['model noisy_or q>=0.5']['f']:.3f} for the model vs {test['B0 (VETR)']['f']:.3f} for the status-quo regexes "
+    f"- Frozen test (32 documents, {test['_meta']['labelled']} labelled numbers, LLM annotators), as pre-registered: F1 {test['model noisy_or q>=0.5']['f']:.3f} for the model vs {test['B0 (VETR)']['f']:.3f} for the status-quo regexes "
     f"(difference {h3['diff']:+.3f}, interval [{h3['ci'][0]:+.3f}, {h3['ci'][1]:+.3f}]: non-inferior, **not shown better**); specificity {test['model noisy_or q>=0.5']['specificity']:.0%} vs {test['B0 (VETR)']['specificity']:.0%}.\n"
+    f"- After correcting a label-letter collision in the judge protocol (post-hoc, D-031): F1 {t2['model noisy_or q>=0.5']['f']:.3f} vs {t2['B0 (VETR)']['f']:.3f} (lower bound {g3['ci'][0]:+.5f}, so no superiority claim), specificity {t2['model noisy_or q>=0.5']['specificity']:.0%} vs {t2['B0 (VETR)']['specificity']:.0%}; H2 {'holds' if g2['holds'] else 'fails'} on the corrected gold.\n"
     f"- Objective, annotator-free: **{obj['share_of_b0']:.1%}** of status-quo ledger entries are clauses whose own checklist box is empty ({obj['documents_where_b0_counts_unchecked_items']} of {obj['documents_with_a_decided_checklist']} documents with a decided checklist).\n"
-    f"- Pre-registered hypotheses: H1 {'holds' if h1['holds'] else 'fails'}, H2 {'holds' if h2['holds'] else 'FAILS'}, H3 holds as non-inferiority only, H4 {'holds' if h4['holds'] else 'FAILS'}. Full tables: [`docs/RESULTS.md`](docs/RESULTS.md)."
+    f"- Pre-registered hypotheses as originally scored: H1 {'holds' if h1['holds'] else 'fails'}, H2 {'holds' if h2['holds'] else 'FAILS'}, H3 holds as non-inferiority only, H4 {'holds' if h4['holds'] else 'FAILS'}. Full tables: [`docs/RESULTS.md`](docs/RESULTS.md)."
 )
 rd = Path("README.md").read_text()
 a, b = "<!-- headline:start -->", "<!-- headline:end -->"

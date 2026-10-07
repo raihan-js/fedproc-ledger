@@ -20,6 +20,24 @@
 | H3 | non-inferiority: lower interval bound of model - B0 above -0.03 (superiority only if above 0) | non-inferior: True; superior: False (+0.020 [-0.005, +0.046]) |
 | H4 | dev-chosen threshold: coverage >= 0.85 and accuracy >= 0.90 on test | FAILS: coverage 0.423, accuracy 0.913 at t=0.967 |
 
+## Corrected judges (post-hoc, D-031): label-letter collision removed, same frozen model
+
+| system | precision | recall | F1 [95% CI] | F2 | specificity |
+|---|---|---|---|---|---|
+| all-candidates | 0.911 | 1.000 | 0.954 [0.926, 0.973] | 0.981 | 0.000 |
+| B0 (VETR) | 0.915 | 0.964 | 0.939 [0.911, 0.959] | 0.954 | 0.085 |
+| B0 minus empty-box clauses | 0.915 | 0.964 | 0.939 [0.911, 0.959] | 0.954 | 0.085 |
+| B1 rules | 0.989 | 0.434 | 0.603 [0.419, 0.739] | 0.489 | 0.949 |
+| model noisy_or q>=0.5 | 0.973 | 0.950 | 0.962 [0.936, 0.980] | 0.955 | 0.729 |
+| model noisy_or q>=0.7 | 0.993 | 0.883 | 0.934 [0.880, 0.970] | 0.903 | 0.932 |
+
+| id | outcome on the corrected gold |
+|---|---|
+| H1 | holds: +0.358 [+0.228, +0.537] |
+| H2 | holds: specificity 0.729, recall 0.950, B0 specificity 0.085 |
+| H3 | non-inferior: True; lower bound +0.00003 (superiority not claimed, see D-031) |
+| H4 | FAILS: coverage 0.411, accuracy 0.993 |
+
 ## The same predictions against each single annotator and the applicable set (model q>=0.5 vs B0, F1 difference)
 
 | gold | n labelled (binding) | B0 F1 | model F1 | difference [95% CI] |

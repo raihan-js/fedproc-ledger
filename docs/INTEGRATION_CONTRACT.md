@@ -14,9 +14,9 @@ extractor flags them, no ledger is produced); clause ranges ("52.219-1 through 5
 resolved in this version.
 
 ## 2. Evidence for its usefulness (read D-023 to D-028 before deciding)
-- **Objective, annotator-free (D-026):** in 925 documents, 14.6% of the entries the VETR-style regexes would list (8,710 of 59,623)
-  are clause numbers whose every mention is a checklist item with an **empty** box; 327 of the 388 documents with a decided
-  checklist are affected (median 31 clauses). Lower bound; describes the ported regexes, not VETR's current ledger logic.
+- **Objective, annotator-free (D-026):** in 6,472 documents, 13.5% of the entries the VETR-style regexes would list (57,225 of 423,328)
+  are clause numbers whose every mention is a checklist item with an **empty** box; 2,247 of the 2,648 documents with a decided
+  checklist are affected (median 30 clauses). Lower bound; describes the ported regexes, not VETR's current ledger logic.
 - **Frozen test (D-028, 32 documents, 679 labelled numbers, majority of three LLM annotators, not human experts):** model F1
   0.912 [0.847, 0.956] against 0.891 [0.829, 0.935] for the status-quo regexes (difference +0.020 [-0.005, +0.046]: non-inferior,
   **not shown better**); recall 0.945 vs 0.963; share of non-binding numbers correctly left out 38% vs 4%. A rules-only baseline (B1) is

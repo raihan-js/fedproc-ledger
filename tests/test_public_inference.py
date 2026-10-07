@@ -1,9 +1,13 @@
-"""Parity: public numpy-only inference matches the sklearn RoleModel exactly."""
+"""Parity: public numpy-only inference matches the sklearn RoleModel exactly.
+
+Needs the research data files (git-ignored); skipped in CI, which runs with no data.
+"""
 
 import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 sys.path.insert(0, "public")
 from inference import LedgerScorer
@@ -12,7 +16,10 @@ from fedproc_ledger.label.commands import build_items
 from fedproc_ledger.model.classifier import RoleModel
 from fedproc_ledger.model.dataset import featurize_doc
 
+NEEDS = ["data/interim/round7_docs.txt", "data/models/role_model.pkl", "data/release/fedproc_ledger_v1.npz"]
 
+
+@pytest.mark.skipif(any(not Path(p).exists() for p in NEEDS), reason="needs research data files")
 def test_numpy_inference_matches_sklearn():
     docs = Path("data/interim/round7_docs.txt").read_text().split()[:4]
     model = RoleModel.load(Path("data/models/role_model.pkl"))

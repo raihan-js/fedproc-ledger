@@ -20,8 +20,13 @@ old_docs = pd.read_parquet("data/interim/documents.parquet").drop_duplicates("do
 used_sol = set(old_docs["solicitation_number"].astype(str))
 used_sol |= {
     s
-    for f in ("data/interim/round2_docs.txt", "data/interim/round3_docs.txt", "data/interim/round4_docs.txt",
-              "data/interim/round5_docs.txt", "data/interim/round6_docs.txt")
+    for f in (
+        "data/interim/round2_docs.txt",
+        "data/interim/round3_docs.txt",
+        "data/interim/round4_docs.txt",
+        "data/interim/round5_docs.txt",
+        "data/interim/round6_docs.txt",
+    )
     if Path(f).exists()
     for s in []  # round docs are all in old_docs; kept for explicitness
 }
@@ -37,9 +42,16 @@ for p in sorted((PROCESSED / "predictions").glob("*.parquet")):
     if n < 8 or n > 150:
         continue
     box = int((pred["source"] == "box_rule").sum())
-    rows.append({"doc": d, "n": n, "box": box, "dep": str(new_docs.loc[d, "department"]),
-                 "posted": str(new_docs.loc[d, "posted_date"])[:10],
-                 "sol": str(new_docs.loc[d, "solicitation_number"])})
+    rows.append(
+        {
+            "doc": d,
+            "n": n,
+            "box": box,
+            "dep": str(new_docs.loc[d, "department"]),
+            "posted": str(new_docs.loc[d, "posted_date"])[:10],
+            "sol": str(new_docs.loc[d, "solicitation_number"]),
+        }
+    )
 df = pd.DataFrame(rows).drop_duplicates("sol")
 rng = random.Random(SEED)
 strata = {

@@ -3,14 +3,14 @@ license: other
 library_name: scikit-learn
 tags: [federal-procurement, far, dfars, clause-extraction, text-classification]
 ---
-# fedproc-ledger role model (private research release, v0.1)
+# fedproc-ledger role model (research release, v1.0)
 
 A small (0.86 MB) classifier that decides, for each FAR/DFARS clause-number mention in a US federal solicitation, what role the mention plays: incorporated by reference, full text, selected checklist item, not selected, narrative, internal reference and so on. A per-document noisy-OR over mentions gives the probability that the document *binds* the clause. The model never generates clause numbers: numbers come from regex candidates validated against the eCFR registry. Checklist boxes are decided by rule, not by the model.
 
 - Weights: `role_model.pkl` (scikit-learn pickle; **load only from this repository**, pickles execute code). sha256 starts `9e9611a4…`, the hash frozen before the round-1 test run.
 - Inference: CPU only, about 115 ms per document including parsing; no GPU, no LLM, no network.
 - Rules: v1.4 (code in the repository; the weights file is unchanged since round 1).
-- Code: private repository `raihan-js/fedproc-ledger` (`fl model train|predict`).
+- Code: https://github.com/raihan-js/fedproc-ledger (`fl model train|predict`).
 
 ## Evidence (all from `results/*.json` in the code repository; LLM annotators, not legal experts)
 | round | gold | model F1 vs status-quo regexes (B0) | specificity model vs B0 |

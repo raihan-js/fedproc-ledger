@@ -11,7 +11,7 @@ A small (0.46 MB) classifier that decides, for each FAR/DFARS clause-number ment
 - Weights: `fedproc_ledger_v1.npz` (numpy archive — no pickle, safe to load). Exported from the frozen research weights (sha256 `9e9611a4…`, fixed before the first test round); numpy-only inference matches the training-time model to 1e-9 (parity-tested).
 - Inference: `inference.py` needs only numpy. CPU, milliseconds per document for the scorer; end-to-end latency is dominated by PDF extraction (about 115 ms per document in the research pipeline).
 - Rules: checkbox states, the unconditional paragraph (a) of FAR 52.212-5, inherited sub-item states, SF 1449 block 27, bare clause lists, exclusion vetoes (v1.4, in the research repository).
-- Research code (private while under review): `fl model train|predict` in the fedproc-ledger repository.
+- Research code: https://github.com/raihan-js/fedproc-ledger (`fl model train|predict`).
 
 ## Use
 

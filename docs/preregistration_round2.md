@@ -42,3 +42,6 @@ round cannot show improvement over round 1, only generalisation to a better fram
 
 ## Amendment A1 (2026-10-07, before any round-2 label existed)
 Sheets changed from up to 4 contexts per number (105-character lines) to up to 3 contexts (90-character lines) to keep the labelling load reliable; nothing else changed. The frame (results/round2_docs_FROZEN.json) was frozen in commit 5448a6d and is untouched.
+
+## Amendment A2 (2026-10-07, while labelling documents 1 to 4, before any round-2 judge run or any prediction was compared)
+Clarification of the label definition, no change to hypotheses or metrics: items of the unconditional paragraph (a) of FAR 52.212-5 ("(1) 52.203-19 ...", "(2) 52.204-23 ...") are mandatory under 52.212-5 and are labelled BINDS when 52.212-5 is incorporated or included; the roman-numeral flow-down list of paragraph (e) is not (NOT). Round-1 gold used the opposite reading for paragraph (a) items (INTERNAL); this is stated in D-032.

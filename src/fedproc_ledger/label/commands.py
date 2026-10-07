@@ -369,12 +369,14 @@ _TOC_HEAD = re.compile(r"table of contents|\bindex\b|contents", re.I)
 _APPLIES_STMT = re.compile(
     r"is\s+applicable\s+for\s+this\s+solicitation|applies\s+to\s+this\s+(?:solicitation|acquisition)", re.I
 )
+_REFER_TO = re.compile(r"\b(?:refer\s+to|comply\s+with)\s+(?:the\s+)?clauses?\s+(?:at\s+|in\s+)?(?:FAR\s*)?$", re.I)
 
 
 def text_rule_ids(doc_id: str) -> dict[str, str]:
     """Candidate id -> NOT_BINDING / BINDING for four unambiguous wordings (D-036): (1) "(Applies only if) the clause at FAR 52.x is
     included" (a conditional certificate, not binding by itself); (2) "... has the meaning provided in the clause at 52.x" (a
-    definition reference); (3) a line "FAR Clause 52.x, Title" followed within two lines by "is applicable for this solicitation"."""
+    definition reference); (3) a line "FAR Clause 52.x, Title" followed within two lines by "is applicable for this solicitation".
+    Plus (D-043): "Refer to clause 52.x ..." in spec narrative is a pointer, not an incorporation."""
     rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
     pg = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"]).sort_values("page")
     pages = {int(str(r.page)): str(r.text_layout).split("\n") for r in pg.itertuples()}
@@ -392,6 +394,9 @@ def text_rule_ids(doc_id: str) -> dict[str, str]:
         after = line[pos + len(str(c.raw)) :]
         alt_ref = bool(_ALT_REF.search(before) and _AS_APPLICABLE.match(after))
         if _COND.search(before) or _DEFINED.search(before) or _PARAREF.search(before) or alt_ref:
+            out[str(c.cand_id)] = "NOT_BINDING"
+        elif _REFER_TO.search(before):
+            # "Refer to clause 52.211-12 ..." in spec narrative: a pointer, not an incorporation (D-043)
             out[str(c.cand_id)] = "NOT_BINDING"
         elif _APPLIES_LABEL.match(line[:pos]) and _APPLIES_STMT.search(" ".join(lines[li : li + 3])):
             out[str(c.cand_id)] = "BINDING"
@@ -435,6 +440,41 @@ def bare_list_ids(doc_id: str) -> set[str]:
         and (int(str(c.page)), int(str(c.line_no))) in hit
         and str(c.line_text).find(str(c.raw)) <= 12
     }
+
+
+_EXCLUDED_AFTER = re.compile(
+    r"^\s*(?:is\s+(?:hereby\s+)?deleted|has\s+been\s+deleted|does\s+not\s+apply|"
+    r"is\s+not\s+applicable|is\s+inapplicable|is\s+not\s+incorporated|is\s+removed|was\s+deleted)\b",
+    re.I,
+)
+_EXCLUDED_BEFORE = re.compile(
+    r"\b(?:delete|deletes|deleted|remove|removes|removed)\s+(?:the\s+)?(?:FAR|DFARS\s+)?(?:clause|provision)(?:\s+at)?\s*$",
+    re.I,
+)
+
+
+def excluded_ids(doc_id: str) -> dict[str, str]:
+    """Candidate id -> EXCLUDED for explicit deletion/exclusion wordings (D-043): "CLAUSE 52.247-59 IS DELETED"
+    (amendment style, possibly several numbers per line), "52.x is deleted / does not apply / is not applicable",
+    "delete/remove (the) (FAR/DFARS) clause 52.x". An excluded mention vetoes its number in the ledger
+    (ledger_probabilities multiplies by prod(1 - e)); explicit exclusion overrides every other rule."""
+    rules = pd.read_parquet(PROCESSED / "rules" / f"{doc_id}.parquet")
+    pg = pd.read_parquet(PROCESSED / "pages" / f"{doc_id}.parquet", columns=["page", "text_layout"]).sort_values("page")
+    pages = {int(str(r.page)): str(r.text_layout).split("\n") for r in pg.itertuples()}
+    out = {}
+    for c in rules.itertuples():
+        if bool(c.from_range):
+            continue
+        lines = pages[int(str(c.page))]
+        li = int(str(c.line_no))
+        line = lines[li]
+        pos = line.find(str(c.raw))
+        if pos < 0:
+            continue
+        before, after = line[:pos], line[pos + len(str(c.raw)) :]
+        if _EXCLUDED_AFTER.match(after) or _EXCLUDED_BEFORE.search(before):
+            out[str(c.cand_id)] = "EXCLUDED"
+    return out
 
 
 @label_app.command()

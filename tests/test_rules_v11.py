@@ -160,3 +160,38 @@ def test_bare_list_needs_four_lines_and_no_leaders(tmp_path, monkeypatch):
         else {}
     )
     assert ids2 and LC.bare_list_ids("d") == set()
+
+
+def test_excluded_ids_amendment_deletes(tmp_path, monkeypatch):
+    # cut from round-6 doc c284e3 (SF 30 amendment): three clauses deleted in one block
+    lines = [
+        "N00104-26-Q-NB18  AMEND:  0001        PAGE   2  OF   3",
+        "PART I - THE SCHEDULE // SECTION F // DELIVERIES OR PERFORMANCE",
+        "CLAUSE 52.247-59 IS DELETED // CLAUSE 52.247-61 IS DELETED // CLAUSE 52.247-65 IS DELETED",
+    ]
+    ids = _make(tmp_path, monkeypatch, lines, [(2, "52.247-59"), (2, "52.247-61"), (2, "52.247-65")])
+    assert set(ids[c] for c in LC.excluded_ids("d")) == {"52.247-59", "52.247-61", "52.247-65"}
+
+
+def test_excluded_ids_wordings(tmp_path, monkeypatch):
+    lines = [
+        "52.212-5 is hereby deleted from this solicitation.",
+        "FAR 52.219-14 does not apply to this acquisition.",
+        "52.222-41 is not applicable to commercial services.",
+        "Delete the clause at 52.204-25 in its entirety.",
+        "52.212-4, Contract Terms and Conditions (Nov 2021).",
+    ]
+    nums = [(0, "52.212-5"), (1, "52.219-14"), (2, "52.222-41"), (3, "52.204-25"), (4, "52.212-4")]
+    ids = _make(tmp_path, monkeypatch, lines, nums)
+    assert set(ids[c] for c in LC.excluded_ids("d")) == {"52.212-5", "52.219-14", "52.222-41", "52.204-25"}
+
+
+def test_refer_to_clause_is_narrative(tmp_path, monkeypatch):
+    # cut from round-6 doc 2ee6d4 (construction spec): pointers, not incorporations
+    lines = [
+        "Refer to clause 52.211-12 LIQUIDATED DAMAGES in Section 00 70 00 for the amount.",
+        "Comply with the clause at FAR 52.236-21 for specifications and drawings.",
+    ]
+    ids = _make(tmp_path, monkeypatch, lines, [(0, "52.211-12"), (1, "52.236-21")])
+    got = {ids[c]: v for c, v in LC.text_rule_ids("d").items()}
+    assert got == {"52.211-12": "NOT_BINDING", "52.236-21": "NOT_BINDING"}

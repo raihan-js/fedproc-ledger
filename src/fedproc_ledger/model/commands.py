@@ -15,6 +15,7 @@ from fedproc_ledger.eval import metrics as M
 from fedproc_ledger.label.commands import (
     bare_list_ids,
     build_items,
+    excluded_ids,
     inherited_ids,
     para_a_ids,
     slice_a_ids,
@@ -65,6 +66,7 @@ def predict_doc(model: C.RoleModel, doc_id: str) -> pd.DataFrame:
     para_a = para_a_ids(doc_id)
     text_rules = text_rule_ids(doc_id)
     bare = bare_list_ids(doc_id)
+    excluded = excluded_ids(doc_id)
     for k, v in inherited_ids(doc_id).items():
         truth.setdefault(k, v)
     p = model.proba([r["feat"] for r in rows], [r["context"] for r in rows])
@@ -73,7 +75,10 @@ def predict_doc(model: C.RoleModel, doc_id: str) -> pd.DataFrame:
     for r, pr, bi, ei in zip(rows, p, b, e, strict=True):
         role = model.classes[int(pr.argmax())]
         src = "model"
-        if r["id"] in truth:  # checklist item line with a known box glyph: decided by rule
+        if r["id"] in excluded:  # explicit deletion/exclusion vetoes the number (D-043)
+            role, src = "EXPLICITLY_EXCLUDED", "excluded_rule"
+            bi, ei = 0.0, 1.0
+        elif r["id"] in truth:  # checklist item line with a known box glyph: decided by rule
             role, src = truth[r["id"]], "box_rule"
             bi, ei = float(role == "CHECKLIST_SELECTED"), 0.0
         elif r["id"] in para_a:  # unconditional paragraph (a) of 52.212-5: binding (amendment A2)

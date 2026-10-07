@@ -17,18 +17,17 @@ resolved in this version.
 - **Objective, annotator-free:** in 6,472 documents, 13.5% of the entries the VETR-style regexes would list (57,225 of 423,328) are clause
   numbers whose every mention is a checklist item with an **empty** box; in checklist-heavy documents 25.4% (round 2) and 31.0% (round 3).
   The checkbox rule agreed with a reader on 100 of 100 random items (40 + 60). Lower bound; describes the ported regexes, not VETR's current logic.
-- **Round 3, a fresh pre-registered test (D-035; 30 new documents, 595 numbers, majority of the coding agent and two LLM judges, no human
-  experts):** F1 0.890 against 0.778 for the status-quo regexes (+0.111 [+0.049, +0.181]; the superiority criteria were met), specificity 84%
-  against 16%, **recall 0.874 against 0.933** (the cost). The difference is positive for the agent (+0.140) and gpt-4.1-mini (+0.064), about zero
-  for gpt-4o-mini. Per stratum: small documents +0.08, medium +0.05, large +0.22 F1.
+- **Round 4, the first fresh pre-registered test of the shipped rules v1.2 (D-037; 26 new documents, 557 numbers, majority of the coding agent
+  and two LLM judges, no human experts):** F1 0.921 against 0.780 for the status-quo regexes (+0.142 [+0.085, +0.210], positive for all three
+  annotators), specificity 76% against 10%, recall 0.940 against 0.877. Gains are large in checklist-heavy documents (+0.33 F1) and small in short
+  documents without checklists (+0.03). Round 3 (rules v1.1, D-035) gave +0.111 with recall 0.874 against 0.933: the recall cost was removed by v1.2.
 - **Earlier rounds:** round 1 (D-028, D-031): non-inferior, +0.020 original and +0.023 after a post-hoc protocol correction; round 2 (D-032, D-033):
   the pre-registered non-inferiority test FAILED (-0.103) because the LLM judges accepted unchecked boxes as binding; with corrected instructions
   +0.047. Annotator dependence is the main uncertainty: **the product gold sample in section 5 is required before any customer-visible use.**
-- **Since round 3 (development, not evidence):** rules v1.2 (D-036) fix the clean errors found in rounds 2 and 3; a fresh round 4 is needed before any
-  claim about them. Weak LLM labels did not help (D-034).
+- **Weak LLM labels did not help (D-034).** The review-queue target (q between 0.1 and 0.9 holds at least 60% of the errors) narrowly failed in round 4.
 - **Recommendation:** adopt the checkbox rule first (zero-risk, objective). Use the model for *ranking and flagging*, not for silently removing
-  clauses: show every number with its tier and probability; route UNDETERMINED and low-margin entries to a person (on round 3, a review queue of
-  numbers with q between 0.1 and 0.9 is about 39% of the numbers and holds 68% of the majority-gold errors and all agent-gold errors).
+  clauses: show every number with its tier and probability; route UNDETERMINED and low-margin entries to a person (on round 4, the queue of numbers with q between 0.1 and 0.9
+  is 32% of the labelled numbers and holds 58% of the majority-gold errors).
 
 ## 3. Interface (sidecar service; the model never runs inside PHP)
 `POST /v1/ledger` with `{"document": <bytes or text_layout pages>, "posted_date": "YYYY-MM-DD"}` returns:

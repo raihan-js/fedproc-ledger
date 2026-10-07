@@ -9,6 +9,7 @@ A small (0.86 MB) classifier that decides, for each FAR/DFARS clause-number ment
 
 - Weights: `role_model.pkl` (scikit-learn pickle; **load only from this repository**, pickles execute code). sha256 starts `9e9611a4…`, the hash frozen before the round-1 test run.
 - Inference: CPU only, about 115 ms per document including parsing; no GPU, no LLM, no network.
+- Rules: v1.2 (code in the repository; the weights file is unchanged since round 1).
 - Code: private repository `raihan-js/fedproc-ledger` (`fl model train|predict`).
 
 ## Evidence (all from `results/*.json` in the code repository; LLM annotators, not legal experts)
@@ -18,6 +19,8 @@ A small (0.86 MB) classifier that decides, for each FAR/DFARS clause-number ment
 | 1, corrected judge protocol (post-hoc) | same, word labels | 0.962 vs 0.939, +0.0227 [+0.00003, +0.0459] | 73% vs 8.5% |
 | 2, checklist-heavy frame (36 docs), pre-registered | majority | 0.815 vs 0.918, **-0.103 [-0.185, -0.036]: H3 fails** | 68% vs 20% |
 | 2, post-hoc judges told the checkbox convention | majority | 0.891 vs 0.844, +0.047 [-0.000, +0.096] | 78% vs 6% |
+| 3, fresh test of rules v1.1 (30 docs), pre-registered | majority | 0.890 vs 0.778, +0.111 [+0.049, +0.181] | 84% vs 16% |
+| **4, fresh test of rules v1.2 (26 docs), pre-registered** | majority | **0.921 vs 0.780, +0.142 [+0.085, +0.210]** (positive for all three annotators) | **76% vs 10%** (recall 0.940 vs 0.877) |
 Without any annotator: 13.5% of status-quo entries over 6,472 documents (25.4% in checklist-heavy documents) are clauses whose own checklist box is empty.
 
 ## Known limits

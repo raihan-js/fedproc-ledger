@@ -1,0 +1,71 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs,graphicx,hyperref,amsmath,array}
+\usepackage[numbers]{natbib}
+\title{Which Federal Clauses Actually Bind?\\ A Rules-plus-Small-Model Clause Ledger and a Pre-registered Audit of Regular-Expression Extraction}
+\author{Raihan Sikder\\ VETR \\ \small [affiliation and contact to be confirmed before submission]}
+\date{Draft for arXiv, October 2026. Code and data release: see Section~\ref{sec:release}.}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Compliance tools for US federal contracting commonly build a ``clause ledger'' by finding FAR and DFARS clause numbers in a solicitation with regular expressions. We ask how well that status quo answers the question a contracting team actually has: which of the clauses \emph{bind} the contract? Without any annotator, we find that 13.8\% of the entries such regexes produce over 14{,}540 extracted solicitation documents (58{,}294 of 423{,}328) are clauses whose every mention is a checklist item with an empty box, and 25--31\% in checklist-heavy documents. We then build a rules layer (checkbox states, the unconditional paragraph (a) of FAR 52.212-5, inherited sub-item states, SF~1449 block 27, a few unambiguous wordings, bare clause lists) and a 0.86\,MB mention-role classifier, and evaluate against the status quo in six pre-registered rounds on documents not used in any earlier round. Labels come from a coding agent and two OpenAI models, not human experts. The first two rounds, with a labelling protocol that had a defect, did not show an advantage and one pre-registered hypothesis failed; after the rules were extended on development documents, three consecutive fresh rounds show higher F1 than the status quo (+0.14, +0.09, +0.11; 95\% intervals above zero), specificity of 72--79\% against 8--19\%, and recall at or above the status quo's in two of three rounds. We report negative results (weakly labelled retraining, a number-level stacker, the failed rounds), an annotator-agreement ceiling (pairwise annotator agreement 75--82\%), and the main remaining error family. We release the model, derived data and code under a private-to-public staged plan.
+\end{abstract}
+
+\section{Introduction}
+A US federal solicitation names its clauses in many ways: incorporated by reference, full text, checklists with marked boxes (FAR 52.212-5, agency checklists), bare lists, narrative citations, definitions inside other clauses, table-of-contents entries and construction specifications that cite clauses in running text. Regular expressions find clause numbers but not how each is used. The costs are asymmetric and product specific: a missed binding clause is a compliance risk; a false inclusion is review noise. We study the \emph{ledger} task (which numbers bind a given document) and the \emph{mention} task (the role of each occurrence).
+
+Our contributions: (i) an annotator-free audit of the status-quo regex ledger on 14{,}540 documents; (ii) a small, fast system (rules plus a 0.86\,MB logistic-regression role model, about 115\,ms per document on CPU) with a single-document service; (iii) an evaluation that is explicit about what failed: pre-registered rounds, frozen artefacts, test documents disjoint across rounds, and a record of every post-hoc change; (iv) negative results and an annotator-agreement ceiling that bound what can be claimed.
+
+\section{Data and task}
+\paragraph{Corpus.} 4{,}755 solicitation notices from a federal-contracting API (posted 2024-10 to 2026-09) with their attachments (PDF, DOCX, DOC, TXT), 14{,}540 extracted documents, 6{,}606 with clause candidates. Candidate numbers come from regexes validated against a registry of 2{,}509 eCFR title-48 sections (version history, reserved and removed status, the 2025-10-28 FAR overhaul model deviation, and 47 DoD deviation memos); the model never generates a clause number. A layout-aware extractor keeps checkbox states (glyphs, form widgets, typed forms such as \texttt{\_\_X\_\_ (43)} and \texttt{[X]}).
+\paragraph{Ledger gold.} For each sampled clause number a blind annotator answers: BINDS (incorporated by reference, full text included, a selected checklist item, or stated as applying), NOT, REFERENCED (a narrative requirement without incorporation), or UNDECIDED. The \emph{binding set} is BINDS versus NOT/REFERENCED, undecided excluded. Annotators: the coding agent (hand labels from evidence sheets, before seeing any prediction), gpt-4o-mini and gpt-4.1-mini (instructions that state the checkbox convention and FAR 52.212-5(a)). The primary gold is the majority of the three. \textbf{No human expert annotated any item.}
+\paragraph{Labelled universe.} Numbers that have at least one mention no rule decides. Rule-decided numbers (checkbox items etc.) are objective and reported separately.
+
+\section{Method}
+\paragraph{Status quo (B0).} A port of the production regexes, shown equal to the production PHP on 403 cases. \textbf{B1} is a section-aware rules baseline.
+\paragraph{Rules layer (v1.3).} (1) Checkbox state of an item line (glyph, widget, typed form). (2) The unconditional paragraph (a) of FAR 52.212-5 is binding. (3) A sub-item whose marker was lost inherits its parent line's state. (4) SF 1449 blocks 27a/27b by their leading glyph. (5) Wordings that are not incorporation by themselves: ``applies only if the clause at\ldots is included'', ``has the meaning provided in the clause at\ldots'', a paragraph reference, ``or FAR x, as applicable''; and ``FAR Clause x\ldots is applicable for this solicitation'' as binding. (6) Bare lists of at least four clause numbers with titles, outside a table of contents.
+\paragraph{Role model.} One-vs-rest logistic regression over about 60 structural/wording features plus character TF-IDF of the context, temperature scaling (development ECE 0.06), trained on 2{,}663 mentions from 79 documents (mostly rule-labelled checkbox items). A number's probability is the maximum over its mentions; it binds at $q\ge0.5$. The weights have not changed since the first test.
+\paragraph{Service.} \texttt{fl ledger FILE} returns the clause ledger for one document (tier, probability, evidence lines, registry status, optional version currency) in about 2.5\,s for a 42-page PDF on CPU.
+
+\section{Evaluation protocol}
+Each round fixes in writing, before any label, the frame (sampling script and seed, sha256 of the document list), the primary configuration and the numeric hypotheses; artefacts are frozen by hash; documents and solicitation numbers are disjoint from training, development and all earlier rounds. Metrics: binding-set F1 over the labelled universe, micro over documents, cluster bootstrap over documents (10{,}000 resamples), paired bootstrap for differences. Rounds 2 to 6 (and the corrections described below) are \emph{development data} for any change made after they were read; only a later round is a test of that change.
+
+\section{Results}
+\paragraph{Annotator-free audit.} Of 423{,}328 status-quo entries, 58{,}294 (13.8\%) are numbers all of whose mentions are checklist items with an empty box, in 2{,}390 of 3{,}029 documents with a decided checklist (median 30 per affected document). In checklist-heavy documents the share is 20.6--31.0\% across rounds. The rule that reads these boxes agreed with a reader on 100 of 100 random items in rounds 3 to 6 combined with 240 of 240 over four rounds (60 per round).
+\paragraph{What failed.} Round 1 (32 documents, as pre-registered) showed non-inferiority only (+0.020 [$-0.005$, +0.046]); the hypotheses on specificity and on abstention failed, and after the test we found a label-letter collision in the judge prompt (the letter R occurs in documents) and corrected it post hoc. Round 2 (36 documents, checklist-heavy) failed its non-inferiority hypothesis ($-0.103$ [$-0.185$, $-0.036$]) because the two OpenAI judges accepted unchecked boxes as binding (Cohen $\kappa$ 0.05 and 0.21 against the agent); with instructions stating the checkbox convention (post hoc) the difference was +0.047 [$-0.000$, +0.096].
+\paragraph{Fresh tests.} After reading the errors of rounds 2 and 3 the rules were extended (v1.2), and after rounds 4 and 5 again (v1.3); each version was then tested on documents never read before.
+\begin{table}[h]\centering\small
+\input{tab_fresh.tex}
+\caption{Majority-gold results of the four tests of the rules layer on fresh documents (model: max over mentions, $q\ge0.5$; B0: status-quo regexes). $\Delta$F1 with a 95\% cluster-bootstrap interval. Round 3 tested v1.1 and had a recall cost; rounds 4 to 6 tested v1.2/v1.3.}
+\end{table}
+\begin{figure}[h]\centering
+\includegraphics[width=0.75\linewidth]{fig_forest.pdf}
+\caption{F1 difference (model minus status quo) per test and annotator, with 95\% cluster-bootstrap intervals.}
+\end{figure}
+In rounds 4 and 5 every annotator's difference is positive; in round 6 every interval is above zero; in round 3 the judge intervals include zero. Gains concentrate in checklist-heavy documents (large stratum, round 4: +0.33 F1) and are small in short documents without checklists (+0.03).
+\paragraph{Ceiling.} Annotators agree with each other on 75--82\% of binding-set items ($\kappa$ 0.47--0.56, Table~\ref{tab:ceiling}). The model agrees with the agent on 95\% ($\kappa$ 0.88; the agent also wrote the rules), with gpt-4o-mini on 80\% and with gpt-4.1-mini on 73\%. On items where the other two annotators agree, the model matches their consensus in 95--96\% of cases when judged against the judges' consensus and 87\% against the judges' consensus for the agent's items, versus 81--89\% for the annotators themselves. A score of 0.98 on all criteria is therefore not attainable against these labels without fitting to annotator-specific conventions.
+\begin{table}[h]\centering\small
+\input{tab_ceiling.tex}
+\caption{Pairwise agreement on binding-set labels pooled over rounds 3 to 6.}\label{tab:ceiling}
+\end{table}
+\paragraph{Negative results.} (a) Retraining on 2{,}404 weak labels where two OpenAI voters agreed scored below the rule-only version on development data in all three variants. (b) A number-level stacker (logistic regression over mention probabilities, trained on the agent's labels of rounds 2 to 4) had cross-validated AUC 0.982 against 0.949 for max-q but gave $+0.004$ [$-0.003$, +0.014] F1 on a fresh round, so max-q remains the default. (c) A calibrated review queue (probability in (0.1, 0.9)) caught 58\%, 48\% and 64\% of the errors in three rounds (targets were 60\%).
+\paragraph{Remaining errors.} Construction specifications that cite clauses in running text (clean errors of rounds 4 and 5 are dominated by two documents), clause lists without markers, and documents whose checkbox markers were lost in extraction (labelled UNDECIDED).
+
+\section{Limitations}
+(1) No human expert labels; the judge instructions derive from the agent's conventions, so the annotators are not independent readers of the format. (2) The agent that labelled also wrote the rules; rounds 2 to 6 are not independent of rule design except through freshness of documents. (3) 24--36 documents per round with recurring federal templates; the rounds are not independent draws of the template population. (4) Numbers only; alternates, dates and ranges are not in the gold. (5) A federal-contracting API sample from 2024-10 to 2026-09; one scanned-document share ($\approx$3\%) is not processed. (6) Not legal advice; the model must not remove clauses silently.
+
+\section{Release, ethics and reproducibility}\label{sec:release}
+Documents are public SAM.gov attachments. Extraction redacts personal-data patterns. The release contains derived tables and short snippets, not documents. Every number is generated from \texttt{results/*.json} by scripts in the repository; decisions are logged (D-001 to D-04x). The weights file is a scikit-learn pickle (load only from the official repository). No Qwen or other non-US model was used. Planned release: model card, dataset card, code and results under a staged plan (private first, public after the owner's review).
+
+\begin{thebibliography}{9}
+\bibitem{cohen1960} J.~Cohen. A coefficient of agreement for nominal scales. \emph{Educational and Psychological Measurement}, 20(1):37--46, 1960.
+\bibitem{efron1993} B.~Efron and R.~J. Tibshirani. \emph{An Introduction to the Bootstrap}. Chapman \& Hall, 1993.
+\bibitem{guo2017} C.~Guo, G.~Pleiss, Y.~Sun, K.~Q. Weinberger. On calibration of modern neural networks. In \emph{ICML}, 2017.
+\bibitem{nosek2018} B.~A. Nosek, C.~R. Ebersole, A.~C. DeHaven, D.~T. Mellor. The preregistration revolution. \emph{PNAS}, 115(11):2600--2606, 2018.
+\bibitem{mitchell2019} M.~Mitchell et al. Model cards for model reporting. In \emph{FAT*}, 2019.
+\bibitem{gebru2021} T.~Gebru et al. Datasheets for datasets. \emph{Communications of the ACM}, 64(12):86--92, 2021.
+\bibitem{far} Federal Acquisition Regulation, 48 CFR Chapter 1; electronic Code of Federal Regulations, \url{https://www.ecfr.gov}.
+\end{thebibliography}
+\end{document}

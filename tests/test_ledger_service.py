@@ -4,9 +4,12 @@ import json
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 
-from fedproc_ledger.model.commands import MODEL
+pytest.importorskip("fastapi")  # the service extra is not part of the CI install
+pytest.importorskip("multipart")
+from fastapi.testclient import TestClient  # noqa: E402
+
+from fedproc_ledger.model.commands import MODEL  # noqa: E402
 
 pytestmark = pytest.mark.skipif(not Path(MODEL).exists(), reason="data/models/role_model.pkl not built")
 

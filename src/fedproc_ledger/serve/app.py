@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
@@ -13,13 +14,13 @@ app = FastAPI(title="fedproc-ledger", version="0.2")
 _ALLOWED = {".pdf", ".docx", ".doc", ".txt"}
 
 
-@app.get("/healthz")
+@app.get("/healthz")  # type: ignore[untyped-decorator,unused-ignore]
 def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/v1/ledger")
-def ledger(file: UploadFile = File(...), posted_date: str | None = Form(None)) -> dict:  # noqa: B008
+@app.post("/v1/ledger")  # type: ignore[untyped-decorator,unused-ignore]
+def ledger(file: UploadFile = File(...), posted_date: str | None = Form(None)) -> dict[str, Any]:  # noqa: B008
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in _ALLOWED:
         raise HTTPException(415, f"unsupported type {suffix or '(none)'}; use one of {sorted(_ALLOWED)}")

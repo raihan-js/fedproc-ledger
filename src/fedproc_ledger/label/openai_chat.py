@@ -24,6 +24,7 @@ PRICES: dict[str, tuple[float, float]] = {  # model -> (input, output) USD per 1
     "gpt-4.1-nano": (0.10, 0.40),
     "gpt-4.1-mini": (0.40, 1.60),
     "gpt-4o": (2.50, 10.00),
+    "gpt-4.1": (2.00, 8.00),
 }
 DEFAULT_CAP = 6.0  # owner credit was USD 6.89 on 2026-10-07; the rest is a buffer for stale prices
 SAFETY = 1.5  # estimated costs are multiplied by this before they are compared with the cap

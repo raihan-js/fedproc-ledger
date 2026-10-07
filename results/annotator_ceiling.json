@@ -1,0 +1,54 @@
+{
+ "numbers": 2062,
+ "pairs": {
+  "agent~g4o": {
+   "n": 1958,
+   "accuracy": 0.8212461695607763,
+   "kappa": 0.5571658615136876
+  },
+  "agent~g41": {
+   "n": 1807,
+   "accuracy": 0.7598229109020476,
+   "kappa": 0.4914058102222348
+  },
+  "g4o~g41": {
+   "n": 1799,
+   "accuracy": 0.7520844913841023,
+   "kappa": 0.46748583685973844
+  }
+ },
+ "model_vs": {
+  "agent": {
+   "n": 2018,
+   "accuracy": 0.9499504459861249,
+   "kappa": 0.8767349624492137
+  },
+  "g4o": {
+   "n": 1981,
+   "accuracy": 0.8046441191317516,
+   "kappa": 0.5121860120628888
+  },
+  "g41": {
+   "n": 1821,
+   "accuracy": 0.729818780889621,
+   "kappa": 0.42578620705567466
+  }
+ },
+ "against_agreeing_pair": {
+  "agent": {
+   "n_items_where_other_two_agree": 1346,
+   "annotator_accuracy": 0.8922734026745914,
+   "model_accuracy": 0.8655274888558693
+  },
+  "g4o": {
+   "n_items_where_other_two_agree": 1358,
+   "annotator_accuracy": 0.8843888070692194,
+   "model_accuracy": 0.9477172312223858
+  },
+  "g41": {
+   "n_items_where_other_two_agree": 1483,
+   "annotator_accuracy": 0.8098449089683075,
+   "model_accuracy": 0.959541469993257
+  }
+ }
+}

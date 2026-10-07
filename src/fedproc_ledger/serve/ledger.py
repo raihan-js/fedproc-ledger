@@ -27,12 +27,12 @@ RFO = "2025-10-28"
 _MODEL: C.RoleModel | None = None
 
 
-def _versions() -> pd.DataFrame | None:
+def _versions() -> Any:
     path = PROCESSED / "registry.parquet"
     return pd.read_parquet(path).set_index("number") if path.exists() else None
 
 
-def _in_force(reg: pd.DataFrame, number: str, day: str) -> str | None:
+def _in_force(reg: Any, number: str, day: str) -> str | None:
     if number not in reg.index:
         return None
     for v in reg.loc[number, "versions"]:
@@ -42,7 +42,7 @@ def _in_force(reg: pd.DataFrame, number: str, day: str) -> str | None:
     return None
 
 
-def _currency(reg: pd.DataFrame | None, number: str, cited: str | None, day: str | None) -> dict[str, Any]:
+def _currency(reg: Any, number: str, cited: str | None, day: str | None) -> dict[str, Any]:
     """Cited date against the version in force on the posting day (eCFR history); RFO-era notices are not judged."""
     out: dict[str, Any] = {"cited_date": cited, "version_in_force": None, "currency": "unknown_posted_date"}
     if not day or reg is None:
@@ -80,8 +80,8 @@ def ledger_for_file(path: Path, hi: float = HI, lo: float = LO, posted_date: str
         pd.DataFrame([page_row(doc_id, p) for p in pages]).to_parquet(shard, index=False)
         stats = run_document(doc_id, load_registry())
         registry = load_registry() or {}
-        pred = predict_doc(_model(), doc_id)
-        cand = pd.read_parquet(rules) if rules.exists() else pd.DataFrame()
+        pred: Any = predict_doc(_model(), doc_id)
+        cand: Any = pd.read_parquet(rules) if rules.exists() else pd.DataFrame()
     finally:
         for f in (shard, rules):
             f.unlink(missing_ok=True)
@@ -89,12 +89,12 @@ def ledger_for_file(path: Path, hi: float = HI, lo: float = LO, posted_date: str
     warnings = ["no text layer: scanned document, no ledger produced"] if scanned else []
     entries: list[dict[str, Any]] = []
     if len(pred) and not scanned:
-        where = cand.set_index("cand_id")[["page", "line_no"]] if len(cand) else pd.DataFrame()
+        where: Any = cand.set_index("cand_id")[["page", "line_no"]] if len(cand) else pd.DataFrame()
         probs = ledger_for(pred, "max")
         if (
             STACKER.exists()
         ):  # number-level stacker over the mention probabilities (D-038); rule-only numbers keep their rule value
-            nf = number_features(pred)
+            nf: Any = number_features(pred)
             sq = dict(zip(nf.index, Stacker.load().proba(nf), strict=True))
             probs = {(n, a): (float(sq[n]) if nf.loc[n, "n_model"] > 0 else q) for (n, a), q in probs.items()}
         reg_versions = _versions() if posted_date else None

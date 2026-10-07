@@ -176,3 +176,16 @@ Stacker minus B0: +0.097 [+0.040, +0.158] (positive on 3 of 3 annotators); stack
 | model noisy_or q>=0.7 | 0.909 | 0.887 | 0.898 [0.831, 0.944] | 0.891 | 0.790 |
 
 All six pre-registered hypotheses hold: model minus B0 +0.107 [+0.057, +0.161], positive for all three annotators; specificity 0.725, recall 0.939; objective empty-box share 22.7%; rule validity 60/60. Review queue (information): 32.9% of numbers hold 63.8% of errors.
+
+## Round 7, fresh pre-registered test of rules v1.4 on the temporal hold-out (D-044): 27 documents posted after the last acquisition day, 485 labelled numbers
+
+| system | precision | recall | F1 [95% CI] | F2 | specificity |
+|---|---|---|---|---|---|
+| all-candidates | 0.701 | 1.000 | 0.824 [0.728, 0.896] | 0.921 | 0.000 |
+| B0 (VETR) | 0.715 | 0.924 | 0.806 [0.711, 0.878] | 0.873 | 0.138 |
+| B0 minus empty-box clauses | 0.715 | 0.924 | 0.806 [0.711, 0.878] | 0.873 | 0.138 |
+| B1 rules | 0.901 | 0.506 | 0.648 [0.507, 0.769] | 0.554 | 0.869 |
+| model noisy_or q>=0.5 | 0.873 | 0.906 | 0.889 [0.818, 0.938] | 0.899 | 0.690 |
+| model noisy_or q>=0.7 | 0.903 | 0.879 | 0.891 [0.827, 0.936] | 0.884 | 0.779 |
+
+All six pre-registered hypotheses hold (fourth fresh round in a row): model minus B0 +0.084 [+0.028, +0.143], positive for all three annotators; specificity 0.703, recall 0.903; objective empty-box share 22.9%; rule validity 60/60. Review queue (information): 27.0% of numbers hold 52.6% of errors.

@@ -75,6 +75,9 @@ def predict_doc(model: C.RoleModel, doc_id: str) -> pd.DataFrame:
                 "exclusion_prob": float(ei),
                 "source": src,
                 "confidence": float(max(bi, 1 - bi)),
+                **{f"p_{c}": float(x) for c, x in zip(model.classes, pr, strict=True)},
+                "line_text": r["line_text"],
+                "box_marker": r["box_marker"],
                 "b1": r["b1"],
                 "context": r["context"],
             }
